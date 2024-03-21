@@ -4,7 +4,7 @@
     "os-info"       : "winX64",
     "tmpDir"        : "%temp%" ,
     "verbose"       : false,
-    "nm3"           :"D:\\bin\\nm34.exe",
+    "nm3"           :"",
     "ffmpeg"        :"",
     "mp4decrypt"    :""
 }
