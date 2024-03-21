@@ -1,0 +1,10 @@
+{
+    "cloudfront_id" : "d1d34p8vz63oiq",
+    "patched"       : false,
+    "os-info"       : "winX64",
+    "tmpDir"        : "%temp%" ,
+    "verbose"       : false,
+    "nm3"           :"D:\\bin\\nm34.exe",
+    "ffmpeg"        :"",
+    "mp4decrypt"    :""
+}
