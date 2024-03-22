@@ -51,7 +51,7 @@ class DL:
         url = self.buildUrl(id)
 
         # Download the audio file using the id
-        code = shell(f'{nm3Path} {url} --save-dir {directory} {"--tmp-dir"+tmpDir if not tmpDir == "/*auto*/" else "" } --save-name {name}  -sa best',r'^Aud')
+        code = shell(f'{nm3Path} {url} --save-dir {directory} {"--tmp-dir "+tmpDir if not tmpDir == "/*auto*/" else "" } --save-name {name}  -sa best',r'^Aud')
 
         if code == 0:
             return True
@@ -72,7 +72,7 @@ class DL:
         url = self.buildUrl(id)
 
         # Download the video file using the id
-        code = shell(f'{nm3Path} {url} --save-dir {directory} {"--tmp-dir"+tmpDir if not tmpDir == "/*auto*/" else "" } --save-name {name}  -sv best',r'^Vid')
+        code = shell(f'{nm3Path} {url} --save-dir {directory} {"--tmp-dir "+tmpDir if not tmpDir == "/*auto*/" else "" } --save-name {name}  -sv best',r'^Vid')
 
         if code == 0:
             return True

@@ -1,14 +1,23 @@
 from basicUtils import BasicUtils
 from glv import Global
 from cleanup import Clean
+import os
 class Main:
-    def __init__(self,id,name=None,directory="./",tmpDir="/*auto*/",nm3Path='nm3',ffmpeg="ffmpeg",verbose=True):
+    def __init__(self,id,name=None,directory="./",tmpDir="/*auto*/",nm3Path='nm3',ffmpeg="ffmpeg",mp4d="mp4decrypt",verbose=True):
         self.id = id
         self.name = name if name else id
         self.directory = directory
-        self.tmpDir = tmpDir
+        self.tmpDir = BasicUtils.abspath(tmpDir) if tmpDir != '/*auto*/' else BasicUtils.abspath('./tmp/')
+        # craete tmp directory if it does not exist
+        try:
+            if not os.path.exists(self.tmpDir):
+                os.makedirs(self.tmpDir)
+        except:
+            Global.errprint("Could not create tmp directory")
+            exit(-1)
         self.nm3Path = BasicUtils.abspath(nm3Path) if nm3Path != 'nm3' else 'nm3'
         self.ffmpeg = BasicUtils.abspath(ffmpeg) if ffmpeg != 'ffmpeg' else 'ffmpeg'
+        self.mp4d = BasicUtils.abspath(mp4d) if mp4d != 'mp4decrypt' else 'mp4decrypt'
         self.verbose = verbose
 
         if self.verbose:
@@ -19,6 +28,7 @@ class Main:
             Global.dprint(f"TmpDir: {self.tmpDir}")
             Global.dprint(f"Nm3Path: {self.nm3Path}")
             Global.dprint(f"FFmpeg: {self.ffmpeg}")
+            Global.dprint(f"MP4Decrypt: {self.mp4d}")
             Global.hr()
     
     def process(self):
@@ -37,8 +47,8 @@ class Main:
         import decrypt
         decrypt = decrypt.Decrypt()
 
-        decrypt.decryptAudio(self.directory,f'{self.name}-enc',key)
-        decrypt.decryptVideo(self.directory,f'{self.name}-enc',key)
+        decrypt.decryptAudio(self.directory,f'{self.name}-enc',key,mp4d=self.mp4d,verbose=self.verbose)
+        decrypt.decryptVideo(self.directory,f'{self.name}-enc',key,mp4d=self.mp4d,verbose=self.verbose)
 
         # 3. Merging Files
         import merge
