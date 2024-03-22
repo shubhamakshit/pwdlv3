@@ -4,7 +4,7 @@ from keyUtils import base64_to_hex
 from glv import Global
 import error
 
-def getKey(id, verbose=True):
+def getKey(id, verbose=True,ip="localhost",port=8191):
     """
     Retrieves the encryption keys for a given ID.
 
@@ -21,7 +21,7 @@ def getKey(id, verbose=True):
     if verbose:
         Global.sprint(f'id -> {id}')
 
-    url = "http://localhost:8191/v1"
+    url = f"http://{ip}:{port}/v1"
     headers = {"Content-Type": "application/json"}
     data = {
         "cmd": "request.get",

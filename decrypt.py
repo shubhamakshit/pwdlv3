@@ -13,8 +13,13 @@ class Decrypt:
         if code == 0:
             Global.dprint("Audio Decrypted Successfully")
         else:
-            error.errorList["couldNotDecryptAudio"]["func"]()
-            exit(error.errorList["couldNotDecryptAudio"]["code"])
+            if code == 1:
+                code = shell(f'mp4decrypt --key 1:{key} {path}/{name}.en.m4a {path}/audio.mp4 ')
+                if code == 0:
+                    Global.dprint("Audio Decrypted Successfully")
+                else:
+                    error.errorList["couldNotDecryptAudio"]["func"]()
+                    exit(error.errorList["couldNotDecryptAudio"]["code"])
         Global.hr()
 
     def decryptVideo(self,path,name,key,verbose=True):

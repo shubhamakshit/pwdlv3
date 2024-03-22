@@ -6,6 +6,7 @@ from os2 import SysFunc
 import os
 from main import Main
 from checkup import CheckState
+
 prefs = {}
 glv = Global()
 os2 = SysFunc()
