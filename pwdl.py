@@ -16,11 +16,7 @@ EXECUTABLES = ['ffmpeg','mp4decrypt','nm3']
 
 def main():
     
-    global prefs
     
-    # check if all dependencies are installed
-    state = CheckState().checkup(EXECUTABLES)
-    prefs = state['prefs']
 
 
     parser = argparse.ArgumentParser(description='PhysicsWallah M3u8 parser.')
@@ -34,7 +30,12 @@ def main():
     # user_input is given prefernce i.e if --verbose is true it will override
     # however if --verbose is false but prefs['verbose'] is true 
     glv.vout = args.verbose
+    global prefs
     
+    # check if all dependencies are installed
+    state = CheckState().checkup(EXECUTABLES,verbose=glv.vout)
+    prefs = state['prefs']
+
     if not glv.vout and prefs['verbose'] : glv.vout = prefs['verbose']
 
     
@@ -62,6 +63,7 @@ def main():
              directory=OUT_DIRECTORY,
              ffmpeg=state['ffmpeg'],
              nm3Path=state['nm3'],
+             mp4d=state['mp4decrypt'],
              verbose=glv.vout).process()
     # in case neither is used 
     else:

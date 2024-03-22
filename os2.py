@@ -1,5 +1,7 @@
 import platform
 import os
+import error
+from process import shell
 # 0 - linux
 # 1 - windows
 # 2 - mac (currently not supported)
@@ -9,6 +11,7 @@ class SysFunc:
         if os == -1:
             raise Exception("UnsupportedOS")
         self.os = os
+
     
     def clear(self):
         if self.os == 0:
@@ -20,10 +23,24 @@ class SysFunc:
     
 
     def which(self,program):
+
         if self.os == 0:
-            return os.system(f"which {program}")
+            if shell('which',stderr="",stdout="") != 256:
+                error.errorList["dependencyNotFound"]["func"]('which')
+                exit(error.errorList["dependencyNotFound"]["code"])
+            else:
+                self.whichPresent = True
+
+            return shell(f"which {program}",stderr="",stdout="")
+        
         elif self.os == 1:
-            return os.system(f"where {program}")
+
+            if shell('where',stderr="",stdout="") != 2:
+                error.errorList["dependencyNotFound"]["func"]('where')
+                exit(error.errorList["dependencyNotFound"]["code"])
+            else:
+                self.whichPresent = True
+            return shell(f"where {program}" , stderr="",stdout="")
         else:
             raise Exception("UnsupportedOS")
         
