@@ -50,5 +50,9 @@ errorList = {
         "code": 29,
         "func": lambda: Global.errprint("Could not decrypt audio. Exiting...")
     },
+    "couldNotDecryptVideo": {
+        "code": 30,
+        "func": lambda: Global.errprint("Could not decrypt video. Exiting...")
+    },
 }
 

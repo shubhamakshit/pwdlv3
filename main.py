@@ -53,7 +53,7 @@ class Main:
         # 3. Merging Files
         import merge
         merge = merge.Merge()
-        merge.ffmpegMerge(f"{self.directory}/video.mp4",f"{self.directory}/audio.mp4",f"{self.directory}/{self.name}.mp4",self.ffmpeg)
+        merge.ffmpegMerge(f"{self.directory}/Video.mp4",f"{self.directory}/Audio.mp4",f"{self.directory}/{self.name}.mp4",self.ffmpeg)
 
         # 4. Cleanup
         clean = Clean()
