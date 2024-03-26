@@ -1,8 +1,9 @@
 {
+    "flare_url"     : "localhost:8191",
     "cloudfront_id" : "d1d34p8vz63oiq",
     "patched"       : false,
-    "os-info"       : "winX64",
-    "tmpDir"        : "%temp%" ,
+    "os-info"       : "linux",
+    "tmpDir"        : "/tmp" ,
     "verbose"       : false,
     "nm3"           :"$script/bin/nm3",
     "ffmpeg"        :"",
