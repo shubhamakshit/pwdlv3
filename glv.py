@@ -52,7 +52,8 @@ class Global:
 
     @staticmethod
     def hr():
-        """Fills the entire terminal with = (one row only)."""
-        columns, _ = shutil.get_terminal_size()
-        print("=" * columns)
+        # """Fills the entire terminal with = (one row only)."""
+        # columns, _ = shutil.get_terminal_size()
+        # print("=" * columns)
+        pass
     

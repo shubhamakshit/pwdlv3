@@ -1,0 +1,159 @@
+<style>
+    .container {
+        margin-top: 20px;
+    }
+
+    #output,
+    #output>span {
+        font-family: monospace !important;
+    }
+
+    #output>span {
+        font-weight: bolder;
+    }
+</style>
+{% extends 'base.html' %}
+
+{% block header %}
+<h1>{% block title %}PW VIDEO Download{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<div class="container">
+    <p>Welcome to the Dev Home page!</p>
+</div>
+<form class="container">
+
+    <div class="container">
+        <div class="row text-center">
+            <div class="col">
+                <div class="mb-3">
+                    <label for="video-name" class="form-label">Name of Video:</label>
+                    <input type="text" class="form-control" id="video-name" name="video-name">
+                </div>
+            </div>
+            <div class="col">
+                <div class="mb-3">
+                    <label for="video-id" class="form-label">ID of Video:</label>
+                    <input type="text" class="form-control" id="video-id" name="video-id">
+                </div>
+            </div>
+        </div>
+        <style>
+            @media (max-width: 576px) {
+                .row.text-center>.col {
+                    flex-basis: 100%;
+                    max-width: 100%;
+                    margin-bottom: 10px;
+                }
+            }
+        </style>
+        <div class="mb-3">
+            <label for="output" class="form-label">Output:</label>
+            <div class="form-control" id="output" name="output" style="height: 200px; overflow-y: auto;"></div>
+        </div>
+    </div>
+    
+    <button class="btn btn-primary" onclick="download(event)">Download</button>
+</form>
+{% include 'console.html' %}
+<script>
+
+    // set up uuid which is uniiqe for each user(or each browser)
+    var uuid = localStorage.getItem('uuid');
+
+    // set up dlId which is unique for each download
+    var dlId = generateUUID();
+
+    // if uuid is not set, generate a new one and store it in the local storage
+    if (!uuid) {
+        uuid = generateUUID();
+        localStorage.setItem('uuid', uuid);
+    }
+
+    // Scroll to the bottom of the div
+    function scrollToBottom() {
+        var outputDiv = document.getElementById('output');
+        outputDiv.scrollTop = outputDiv.scrollHeight;
+    }
+
+    // Generate a UUID
+    function generateUUID() {
+        var dt = new Date().getTime();
+        var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+            var r = (dt + Math.random() * 16) % 16 | 0;
+            dt = Math.floor(dt / 16);
+            return (c == 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+        });
+        return uuid;
+    }
+
+    var socket = io(); // Initialize the socket variable
+
+    // When the socket is connected, emit the join event to the server
+    socket.on('connect', function () {
+        console.log('Connected to server');
+        socket.emit('join', {
+            'uuid': uuid
+        });
+    });
+
+    // recieve the dl_status event from the server (in case of unfished download)
+    socket.on(`dl_status-${uuid}`, function (data) {
+
+        // Disable the input fields
+        $('#video-name').attr('readonly', '');
+        $('#video-id').attr('readonly', '');
+
+        // set the video name and id to the values received from the server
+        $('#video-name').val(data['name']);
+        $('#video-id').val(data['id']);
+
+        // set the dlId to the value received from the server
+        dlId = data['dlId'];
+
+        console.log("dl_status received:");
+        console.log(data);
+    });
+
+    // on recieving the dl_done event from the server (ie when the download is done)
+    socket.on(`dl_done-${uuid}`, function (data) {
+        console.log(data);
+
+        // reset the input fields
+        $('#video-name').val(''); $('#video-id').val('');
+        $('#video-name').attr('readonly', false); $('#video-id').attr('readonly', false);
+        $('#output').html(``);
+        var dl_url = `/download/${uuid}*${data['name']}*${dlId}`;
+        var win = window.open(dl_url, '_blank');
+        if (win) {
+            //Browser has allowed it to be opened
+            dlId = generateUUID();
+        } else {
+            //Browser has blocked it
+            alert('Please allow popups for this website');
+        }
+
+    });
+
+
+    socket.on(`message-${uuid}`, function (data) {
+        // every time a message is received, append it to the div
+        // every key value pair in the data object is appended to the div in separate line
+        for (const [key, value] of Object.entries(data)) {
+            $('#console').append(`${key}: ${value}<br>`);
+            $('#console').get(0).scrollIntoView({ behavior: 'smooth', block: 'end', inline: 'nearest' }); // Scroll to the bottom of the div
+        }
+    });
+
+    socket.on(`stdout-${uuid}`, function (data) {
+        console.log(data);
+        $('#output').append(`<br>${data.output}`);
+        $('#output').get(0).scrollIntoView({ behavior: 'smooth', block: 'end', inline: 'nearest' }); // Scroll to the bottom of the div
+
+    });
+
+</script>
+{% include 'download.js.html' %}
+{% endblock %}

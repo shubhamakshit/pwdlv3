@@ -1,0 +1,60 @@
+<style>
+    .console {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 50px;
+        border-top: 1px solid #ddd;
+        padding: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        cursor: pointer;
+    }
+    
+    .console-content {
+        display: none;
+        overflow-y: auto; /* Add scroll functionality */
+    }
+    
+    .console.open .console-content {
+        display: block;
+        padding: 1%;
+        padding-left: 3%;
+        position: fixed;
+        bottom: 50px;
+        left: 0;
+        width: 100%;
+        height: calc(20vh);
+        background-color: black;
+        font-family: monospace;
+        color: yellow;
+    }
+</style>
+<div class="console">
+    Console
+    <div class="console-content" id="console">
+        <!-- Add your console content here -->
+    </div>
+</div>
+</style>
+
+<script>
+    $('.console').click(toggleConsole); // Add a click event listener to the console
+    $('.console-content').click(stopPropagation); // Add a click event listener to the console content
+    function toggleConsole() {
+        var consoleElement = document.querySelector('.console');
+        console.log(consoleElement);
+        consoleElement.classList.toggle('open');
+    }
+    
+    function scrollToBottom() {
+        var consoleElement = document.getElementById('console');
+        consoleElement.scrollTop = consoleElement.scrollHeight;
+    }
+    
+    function stopPropagation(event) {
+        event.stopPropagation(); // Stop the event propagation
+    }
+</script>

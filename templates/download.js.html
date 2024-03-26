@@ -1,0 +1,46 @@
+<script>
+    function download(event)
+    {   
+        
+        event.preventDefault(); // Prevent the default form submission behavior
+        //check if the video name or id is empty and swal alert accordingly
+        var videoName = $('#video-name').val();
+        var videoId = $('#video-id').val();
+
+        
+
+        // Check if the video name and id are empty
+        if (videoName == '' || videoId == '') {
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'Please enter the video name and id!',
+            });
+        
+            return;
+        }
+
+        // check if video id is a valid uuid4 or not
+        var uuid4Pattern = new RegExp('^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$');
+        if (!uuid4Pattern.test(videoId)) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'Please enter a valid video id!',
+            });
+            return;
+        }
+
+        // Disable the input fields
+        $('#video-name').attr('readonly','');
+        $('#video-id').attr('readonly','');
+
+        // Emit the download event to the server
+        socket.emit('download', {
+            'uuid': uuid,
+            'name': videoName,
+            'id': videoId,
+            'dlId':dlId
+        });
+    }
+</script>
