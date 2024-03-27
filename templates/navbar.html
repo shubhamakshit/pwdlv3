@@ -6,11 +6,11 @@
       </button>
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-          <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="#">Home</a>
+          <li class="nav-item ">
+            <a class="nav-link {% if active_page == 'home' %}active{% endif %}" aria-current="page" href="/">Home</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="#">Downloader</a>
+            <a class="nav-link {% if active_page == 'downloader' %}active{% endif %}" href="/download">Downloader</a>
           </li>
         </ul>
       </div>
