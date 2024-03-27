@@ -21,22 +21,28 @@
 {% block content %}
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <div class="container">
-    <p>Welcome to the Dev Home page!</p>
+    <p>Dont Worry if the progress bar seems a bit whacky</p>
+</div>
+<div class="progress" role="progressbar" aria-label="Animated striped example" aria-valuenow="75" aria-valuemin="0"
+    aria-valuemax="100">
+    <div class="progress-bar progress-bar-striped progress-bar-animated dl_progress" style="width: 0%;"></div>
 </div>
 <form class="container">
 
-    <div class="container">
-        <div class="row text-center">
-            <div class="col">
-                <div class="mb-3">
-                    <label for="video-name" class="form-label">Name of Video:</label>
-                    <input type="text" class="form-control" id="video-name" name="video-name">
+    <div class="container ">
+        <div class="form-keeper">
+            <div class="row text-center">
+                <div class="col">
+                    <div class="mb-3">
+                        <label for="video-name" class="form-label">Name of Video:</label>
+                        <input type="text" class="form-control" id="video-name" name="video-name">
+                    </div>
                 </div>
-            </div>
-            <div class="col">
-                <div class="mb-3">
-                    <label for="video-id" class="form-label">ID of Video:</label>
-                    <input type="text" class="form-control" id="video-id" name="video-id">
+                <div class="col">
+                    <div class="mb-3">
+                        <label for="video-id" class="form-label">ID of Video:</label>
+                        <input type="text" class="form-control" id="video-id" name="video-id">
+                    </div>
                 </div>
             </div>
         </div>
@@ -49,17 +55,35 @@
                 }
             }
         </style>
-        <div class="mb-3">
+         <div class="row">
+            <div class="col-md-6 d-grid gap-2">
+                <button type="button" class="btn btn-danger btn-sm btn-block" onclick="delRows()" id="rowAdd">Delete</button>
+            </div>
+            <div class="col-md-6 d-grid gap-2">
+                <button type="button" class="btn btn-success btn-sm btn-block" onclick="addRows()" id="rowAdd">Add Rows</button>
+            </div>
+        </div>
+        <hr>
+        <div class="mb-3" style="margin-top: 1%;">
             <label for="output" class="form-label">Output:</label>
             <div class="form-control" id="output" name="output" style="height: 200px; overflow-y: auto;"></div>
         </div>
     </div>
-    
-    <button class="btn btn-primary" onclick="download(event)">Download</button>
-</form>
-{% include 'console.html' %}
-<script>
 
+    <div class="d-grid gap-2">
+        <button class="btn btn-primary" onclick="download(event)">Download</button>
+    </div>
+
+</form>
+<div style="height: 50px;width: 100%;"></div>
+{% include 'console.html' %}
+{% include 'toast.html' %}
+<script>
+    var progress = 0;
+    var total = 0;
+    var count = 1;
+    var started = false;
+    var init = 0;
     // set up uuid which is uniiqe for each user(or each browser)
     var uuid = localStorage.getItem('uuid');
 
@@ -103,12 +127,12 @@
     socket.on(`dl_status-${uuid}`, function (data) {
 
         // Disable the input fields
-        $('#video-name').attr('readonly', '');
-        $('#video-id').attr('readonly', '');
-
-        // set the video name and id to the values received from the server
-        $('#video-name').val(data['name']);
-        $('#video-id').val(data['id']);
+        $('input#video-name').each(function () {
+            $(this).attr('readonly', '');
+        });
+        $('input#video-id').each(function () {
+            $(this).attr('readonly', '');
+        });
 
         // set the dlId to the value received from the server
         dlId = data['dlId'];
@@ -121,19 +145,24 @@
     socket.on(`dl_done-${uuid}`, function (data) {
         console.log(data);
 
+        $('.progress-bar').css('width', '');
+
         // reset the input fields
-        $('#video-name').val(''); $('#video-id').val('');
-        $('#video-name').attr('readonly', false); $('#video-id').attr('readonly', false);
+        $('input#video-name').each(function () {
+            $(this).val('');
+            $(this).attr('readonly', false);
+        });
+        $('input#video-id').each(function () {
+            $(this).val('');
+            $(this).attr('readonly', false);
+        });
+
+        $('.progress-bar').css('width', '0%');
         $('#output').html(``);
-        var dl_url = `/download/${uuid}*${data['name']}*${dlId}`;
+
+        var dl_url = `/download/${uuid}*${data['dlId']}`;
         var win = window.open(dl_url, '_blank');
-        if (win) {
-            //Browser has allowed it to be opened
-            dlId = generateUUID();
-        } else {
-            //Browser has blocked it
-            alert('Please allow popups for this website');
-        }
+
 
     });
 
@@ -149,10 +178,176 @@
 
     socket.on(`stdout-${uuid}`, function (data) {
         console.log(data);
+
         $('#output').append(`<br>${data.output}`);
+        // check if data.output has Aud or Vid 
+        // if it does store it in a boolean variable
+
+        // check if data.output has 'Aud' or 'Vid' in it
+        const hasAudOrVid = /(^(Aud\s|Vid\s)|Downloading)/.test(data.output);
+
+        const dlAudioOrVideoRegex = /^<span style="color: yellow;">Downloading\s+(Audio|Video)\...$$/
+
+
+        let percentage = extractPercentage(data.output) / (2 * total);
+
+
+        if ((dlAudioOrVideoRegex.test(data.output) && started && percentage == 0)  || ( started && percentage == 0 && count == total+1) ) {
+            init += (100 / (2 * total));
+            count++;
+        }
+        progress = init + percentage;
+
+        if (count == 1 && percentage == 0) {
+            started = true;
+        }
+
+
+        console.log(`Progress: ${progress}`);
+        $('.dl_progress').css('width', `${progress}%`);
+
         $('#output').get(0).scrollIntoView({ behavior: 'smooth', block: 'end', inline: 'nearest' }); // Scroll to the bottom of the div
 
     });
+
+    socket.on(`file_being_processed-${uuid}`, function (data) {
+        $('#output').html(``);
+        showToast(`Processing file: ${data.name}`);
+    });
+
+
+    function swalAlertEmptyNameOrId() {
+        Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: 'Please enter the video name and id!',
+        });
+
+        return;
+    }
+
+    function swalAlertInvalidId(videoId) {
+        var uuid4Pattern = new RegExp('^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$');
+        if (!uuid4Pattern.test(videoId)) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'Please enter a valid video id!',
+            });
+            return false;
+        }
+        return true;
+    }
+
+    function addRows() {
+        var appendData = `
+        <div class="row text-center">
+            <div class="col">
+                <div class="mb-3">
+                    <input type="text" class="form-control" id="video-name" name="video-name">
+                </div>
+            </div>
+            <div class="col">
+                <div class="mb-3">
+                    <input type="text" class="form-control" id="video-id" name="video-id">
+                </div>
+            </div>
+        </div>
+        `;
+        $('.form-keeper').append(appendData);
+
+    }
+    function delRows() {
+        var count = 0;
+        $('input#video-name').each(function () {
+            count++;
+        });
+        if (count == 1) {
+            swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'You cannot delete all rows!',
+            });
+            return;
+        }
+        $('.form-keeper').children().last().remove();
+    }
+
+    function getData() {
+        var dl = [];
+        var errorOccurred = false;
+
+        $('input#video-name').each(function () {
+            var name = $(this).val();
+            if (name.length == 0) {
+                swalAlertEmptyNameOrId();
+                errorOccurred = true;
+                return false; // Exit the each loop
+            }
+            dl.push([name]);
+        });
+
+        var count = 0;
+
+        $('input#video-id').each(function () {
+            if (errorOccurred) return false; // Exit the each loop
+            var id = $(this).val();
+            if (id.length == 0) {
+                swalAlertEmptyNameOrId();
+                errorOccurred = true;
+                return false; // Exit the each loop
+            } else if (!swalAlertInvalidId(id)) {
+                errorOccurred = true;
+                return false; // Exit the each loop
+            }
+            // GET json from /check/video/<id> and check if it is valid
+            // if not valid, show a swal alert
+            validity = $.ajax({
+                url: `/check/video/${id}`,
+                type: 'GET',
+                async: false,
+            });
+
+            if (!( validity['status'] == 200 && validity['responseText'] == 'True'))
+            {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: 'The ID you have entered is invalid!(Not Found on PW website)',
+                });
+                errorOccurred = true;
+                return false; // Exit the each loop
+            }
+            dl[count++].push(id);
+        });
+
+        if (errorOccurred) return -1;
+
+        return dl;
+    }
+
+    function extractPercentage(text) {
+        // Define the pattern to match the percentage
+        var pattern = /(Aud|Vid).*?(\d{1,3})%/;
+
+        // Search for the pattern in the text
+        var match = text.match(pattern);
+
+        // If a match is found, return the percentage
+        if (match) {
+            return parseInt(match[2]);
+        } else {
+            return null;
+        }
+    }
+
+    // Function to show the toast with dynamic content
+    function showToast(content) {
+        $('.toast-body').html(content);
+        $('.toast').toast('show');
+    }
+
+
 
 </script>
 {% include 'download.js.html' %}
