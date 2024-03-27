@@ -82,7 +82,7 @@ def downloadVideo(data):
             'dlId': dlId
         }
 
-        p = subprocess.Popen(['python','pwdl.py','--id',id,'--name',f'{name}-{dlId}','--dir',f'{DL_DIR}/{uuid}'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
+        p = subprocess.Popen(['python','pwdl.py','--id',id,'--name',f'{name}-{dlId}','--dir',f'{DL_DIR}/{uuid}'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         
         for line in iter(p.stdout.readline, b''):
             decoded_line = line.decode().strip()
