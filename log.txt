@@ -208,3 +208,12 @@ New client e8a21912-cd77-4fd3-9ec1-484513a76225 connected
 New client e8a21912-cd77-4fd3-9ec1-484513a76225 connected
 New client e8a21912-cd77-4fd3-9ec1-484513a76225 connected
 New client e8a21912-cd77-4fd3-9ec1-484513a76225 connected
+New client e8a21912-cd77-4fd3-9ec1-484513a76225 connected
+New client b0884991-1b9d-4929-8b8d-03818424d060 connected
+Client b0884991-1b9d-4929-8b8d-03818424d060 completed download with dlId 24d599a3-8abc-47ea-9a9e-6f8714eeaa32
+Client: {'b0884991-1b9d-4929-8b8d-03818424d060': {'socket': 'r_DUFOySbWXFbMPyAAAF', 'downloads': {'E16': {'name': 'E16', 'id': 'cc3a4e73-6fc5-407b-8425-dad775c62b4f', 'status': 'done', 'dlId': '24d599a3-8abc-47ea-9a9e-6f8714eeaa32'}}}}
+Client sbdbskjd completed download with dlId sdjbsjd
+Client: {}
+New client b0884991-1b9d-4929-8b8d-03818424d060 connected
+Client b0884991-1b9d-4929-8b8d-03818424d060 completed download with dlId b3e14250-3714-4092-9ab9-b32b16f0141a
+Client: {'b0884991-1b9d-4929-8b8d-03818424d060': {'socket': 'Rl382GTdlLYLddFlAAAD', 'downloads': {'BasicMaths': {'name': 'BasicMaths', 'id': 'ca900aa8-28d0-4e8e-9278-e4c182ecbbb2', 'status': 'done', 'dlId': 'b3e14250-3714-4092-9ab9-b32b16f0141a'}}}}
