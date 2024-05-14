@@ -6,9 +6,11 @@ This is a Python script that parses M3u8 files. It uses the argparse library to 
 
 The script requires the following executables to be available in the PATH or the user should provide the path to the executables:
 
-- ffmpeg
-- mp4decrypt
-- nm3
+- [ffmpeg](https://ffmpeg.org/download.html)
+- [mp4decrypt](https://www.bento4.com/downloads/)
+- [nm3](https://github.com/nilaoda/N_m3u8DL-RE) (renamed to nm3 in the script)
+
+The script also requires the following Python libraries (which are listed in the `requirements.txt` file
 
 
 - `requests`: A library for making HTTP requests. It abstracts the complexities of making requests behind a simple API, allowing you to send HTTP/1.1 requests.
