@@ -1,5 +1,8 @@
-from colorama import Fore, Style
+from colorama import Fore, Style, init
 import shutil
+
+# Initialize colorama
+init()
 
 class Global:
 
@@ -63,5 +66,3 @@ class Global:
         """Fills the entire terminal with = (one row only)."""
         columns, _ = shutil.get_terminal_size()
         print("-" * columns)
-
-    
