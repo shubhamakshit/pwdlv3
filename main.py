@@ -1,9 +1,20 @@
+import error
 from basicUtils import BasicUtils
 from glv import Global
 from cleanup import Clean
 import os
 class Main:
-    def __init__(self,id,name=None,directory="./",tmpDir="/*auto*/",nm3Path='nm3',ffmpeg="ffmpeg",mp4d="mp4decrypt",flare_url='http://localhost:8191/v1',verbose=True,suppress_exit=False):
+    def __init__(self,
+                 id,
+                 name=None,
+                 directory="./",
+                 tmpDir="/*auto*/",
+                 nm3Path='nm3',
+                 ffmpeg="ffmpeg",
+                 mp4d="mp4decrypt",
+                 flare_url='http://localhost:8191/v1'
+                 ,verbose=True,suppress_exit=False):
+
         self.id = id
         self.name = name if name else id
         self.directory = directory
@@ -18,6 +29,7 @@ class Main:
         self.nm3Path = BasicUtils.abspath(nm3Path) if nm3Path != 'nm3' else 'nm3'
         self.ffmpeg = BasicUtils.abspath(ffmpeg) if ffmpeg != 'ffmpeg' else 'ffmpeg'
         self.mp4d = BasicUtils.abspath(mp4d) if mp4d != 'mp4decrypt' else 'mp4decrypt'
+        self.flare_url = flare_url
         self.verbose = verbose
         self.suppress_exit = suppress_exit
 
@@ -30,6 +42,7 @@ class Main:
             Global.dprint(f"Nm3Path: {self.nm3Path}")
             Global.dprint(f"FFmpeg: {self.ffmpeg}")
             Global.dprint(f"MP4Decrypt: {self.mp4d}")
+            Global.dprint(f"Flare URL: {self.flare_url}")
             Global.hr()
     
     def process(self):
@@ -43,7 +56,7 @@ class Main:
 
         # 2. Decrypting Files
         import key
-        key = key.getKey(self.id,self.verbose)
+        key = key.getKey(self.id,self.verbose,self.flare_url)
 
         import decrypt
         decrypt = decrypt.Decrypt()

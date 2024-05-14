@@ -22,6 +22,12 @@ def getKey(id, verbose=True,flare_url='http://localhost:8191/v1',retries=2):
         if verbose:
             Global.sprint(f'id -> {id}')
 
+        if verbose:
+            Global.sprint("Sending request to the server")
+            Global.dprint("Hardcoded URL: request.get -> http://studyrays.site/drmplayer.php?v=https://d1d34p8vz63oiq"
+                          ".cloudfront.net/{id}/master.mpd")
+
+        # Send a POST request to the server to get the encryption keys
         url = f"{flare_url}"
         headers = {"Content-Type": "application/json"}
         data = {
