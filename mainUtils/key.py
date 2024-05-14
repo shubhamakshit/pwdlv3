@@ -1,7 +1,7 @@
 import requests
 import json
-from keyUtils import base64_to_hex
-from glv import Global
+from utils.keyUtils import base64_to_hex
+from utils.glv import Global
 import error
 
 def getKey(id, verbose=True,flare_url='http://localhost:8191/v1',retries=2):

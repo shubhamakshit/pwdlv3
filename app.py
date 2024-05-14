@@ -5,7 +5,7 @@ import subprocess
 import sys
 import io
 import os
-from basicUtils import BasicUtils
+from utils.basicUtils import BasicUtils
 import logger
 
 # Set PYTHONUNBUFFERED environment variable
@@ -164,7 +164,7 @@ def download_video(uuid, name, dlId):
 
 @app.route('/check/video/<id>',methods=['GET'])
 def checkStatus(id):
-    from key import getKey
+    from mainUtils.key import getKey
     if getKey(id):
         return "True"
     return "False"
