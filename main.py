@@ -3,7 +3,7 @@ from glv import Global
 from cleanup import Clean
 import os
 class Main:
-    def __init__(self,id,name=None,directory="./",tmpDir="/*auto*/",nm3Path='nm3',ffmpeg="ffmpeg",mp4d="mp4decrypt",verbose=True):
+    def __init__(self,id,name=None,directory="./",tmpDir="/*auto*/",nm3Path='nm3',ffmpeg="ffmpeg",mp4d="mp4decrypt",flare_url='http://localhost:8191/v1',verbose=True,suppress_exit=False):
         self.id = id
         self.name = name if name else id
         self.directory = directory
@@ -19,6 +19,7 @@ class Main:
         self.ffmpeg = BasicUtils.abspath(ffmpeg) if ffmpeg != 'ffmpeg' else 'ffmpeg'
         self.mp4d = BasicUtils.abspath(mp4d) if mp4d != 'mp4decrypt' else 'mp4decrypt'
         self.verbose = verbose
+        self.suppress_exit = suppress_exit
 
         if self.verbose:
             Global.hr()
@@ -47,13 +48,13 @@ class Main:
         import decrypt
         decrypt = decrypt.Decrypt()
 
-        decrypt.decryptAudio(self.directory,f'{self.name}-enc',key,mp4d=self.mp4d,verbose=self.verbose)
-        decrypt.decryptVideo(self.directory,f'{self.name}-enc',key,mp4d=self.mp4d,verbose=self.verbose)
+        decrypt.decryptAudio(self.directory,f'{self.name}-enc',key,mp4d=self.mp4d,outfile=self.name,verbose=self.verbose,suppress_exit=self.suppress_exit)
+        decrypt.decryptVideo(self.directory,f'{self.name}-enc',key,mp4d=self.mp4d,outfile=self.name,verbose=self.verbose,suppress_exit=self.suppress_exit)
 
         # 3. Merging Files
         import merge
         merge = merge.Merge()
-        merge.ffmpegMerge(f"{self.directory}/Video.mp4",f"{self.directory}/Audio.mp4",f"{self.directory}/{self.name}.mp4",self.ffmpeg)
+        merge.ffmpegMerge(f"{self.directory}/{self.name}-Video.mp4",f"{self.directory}/{self.name}-Audio.mp4",f"{self.directory}/{self.name}.mp4",ffmpeg_path=self.ffmpeg,verbose=self.verbose)
 
         # 4. Cleanup
         clean = Clean()

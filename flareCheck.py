@@ -1,8 +1,8 @@
 import requests
 
-def checkFlare(flareUrl="localhost:8191"):
+def checkFlare(flareUrl="http://localhost:8191/v1"):
     
-    url = f"http://{flareUrl}/v1"
+    url = f"{flareUrl}"
     headers = {"Content-Type": "application/json"}
     data = {
         "cmd": "request.get",

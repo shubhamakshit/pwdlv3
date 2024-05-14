@@ -14,8 +14,8 @@ class Clean:
         audio_enc = f"{path}/{file}-enc.m4a" if os.path.exists(f"{path}/{file}-enc.m4a") else f"{path}/{file}-enc.en.m4a"
         video_enc = f"{path}/{file}-enc.mp4"
 
-        audio = f"{path}/Audio.mp4"
-        video = f"{path}/Video.mp4"
+        audio = f"{path}/{file}-Audio.mp4"
+        video = f"{path}/{file}-Video.mp4"
 
         if verbose:
             Global.hr()
