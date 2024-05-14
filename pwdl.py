@@ -52,18 +52,24 @@ def main():
         prefs['tmpDir'] = './tmp/'
 
 
-
+    # setting verbose output
     if not glv.vout and prefs['verbose'] : glv.vout = prefs['verbose']
 
 
-    if glv.vout: glv.dprint(f"Tmp Dir is: {SysFunc.modify_path(prefs['tmpDir'])}")
+    # setting up tmp directory
+    if glv.vout: Global.hr(); glv.dprint(f"Tmp Dir is: {SysFunc.modify_path(prefs['tmpDir'])}")
 
-
-  
     # setting up output directory
     if args.dir: OUT_DIRECTORY = os.path.abspath(os.path.expandvars(args.dir))
     else: OUT_DIRECTORY = './'
-    if glv.vout: glv.dprint(f'Output Directory: {OUT_DIRECTORY}')
+    if glv.vout: Global.hr(); glv.dprint(f'Output Directory: {OUT_DIRECTORY}')
+
+
+    # setting up hr
+    if not 'hr' in prefs: Global.disable_hr = False
+    elif not prefs['hr']: Global.disable_hr = True
+    if glv.vout: Global.hr(); glv.dprint(f"Horizontal Rule: {not Global.disable_hr}")
+
 
 
 

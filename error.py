@@ -66,5 +66,9 @@ errorList = {
         "code": 31,
         "func": lambda: Global.errprint("Method is patched. Exiting...")
     },
+    "couldNotExtractKey": {
+        "code": 32,
+        "func": lambda: Global.errprint("Could not extract key. Exiting...")
+    },
 }
 

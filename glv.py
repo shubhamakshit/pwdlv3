@@ -2,6 +2,9 @@ from colorama import Fore, Style
 import shutil
 
 class Global:
+
+    disable_hr = False
+
     def __init__(self, vout=True, outDir="./"):
         self.outDir = outDir
         self.vout = vout
@@ -52,8 +55,13 @@ class Global:
 
     @staticmethod
     def hr():
+
+        # Disable horizontal rule if set
+        if Global.disable_hr:
+            return
+
         """Fills the entire terminal with = (one row only)."""
         columns, _ = shutil.get_terminal_size()
         print("-" * columns)
-        pass
+
     
