@@ -1,10 +1,10 @@
 {
-    "flare_url"     : "localhost:8191",
+    "flare_url"     : "http://localhost:8191/v1",
     "cloudfront_id" : "d1d34p8vz63oiq",
     "patched"       : false,
     "os-info"       : "winX64",
     "tmpDir"        : "%temp%" ,
-    "verbose"       : false,
+    "verbose"       : true,
     "nm3"           :"$script/bin/nm3.exe",
     "ffmpeg"        :"",
     "mp4decrypt"    :"$script/bin/mp4decrypt.exe"

@@ -1,7 +1,9 @@
 import subprocess
 import re
 import sys
-def shell(command,filter=None,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,universal_newlines=True):
+
+
+def shell(command, filter=None, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True):
     import os
 
     # Set PYTHONUNBUFFERED environment variable

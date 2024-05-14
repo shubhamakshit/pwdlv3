@@ -13,23 +13,35 @@ class CheckState:
     def checkup(self,executable,verbose=True):
 
         state = {}
-        
+        default_json = __file__.replace(__name__ + '.py', '') + 'defaults.json'
         # check if defaults.json exists
         # and if it does, load the preferences
         if verbose: Global.hr();Global.dprint("Checking for default settings...")
-        if not os.path.exists('defaults.json'):
+
+        if verbose: Global.hr();Global.dprint(f"Checking at {default_json}")
+        if verbose: Global.errprint('Warning!\nHard Coded \'defaults.json\' location to $script/default.json ')
+
+        if not os.path.exists(default_json):
             error.errorList["defaultsNotFound"]["func"]()
             exit(error.errorList["defaultsNotFound"]["code"])
+
         if verbose: Global.sprint("Default settings found."); Global.hr()
         
         # load the preferences
         from userPrefs import PreferencesLoader
-        prefs = PreferencesLoader(verbose=verbose).prefs
+        prefs = PreferencesLoader(file_name=default_json,verbose=verbose).prefs
+
+        # check if method is patched (currently via userPrefs.py)
+        if 'patched' in prefs:
+            if prefs['patched']:
+                error.errorList["methodPatched"]["func"]()
+                exit(error.errorList["methodPatched"]["code"])
 
         if verbose: Global.hr(); Global.dprint("Checking for Flare...")
         # default url is localhost:8191
         # however user can change it in the preferences file
-        if not checkFlare(prefs['flare_url'] if 'flare_url' in prefs else 'localhost:8191'):
+        if verbose: Global.dprint(f"Checking at {prefs['flare_url'] if 'flare_url' in prefs else 'http://localhost:8191/v1'}")
+        if not checkFlare(prefs['flare_url'] if 'flare_url' in prefs else 'http://localhost:8191/v1'):
             error.errorList["flareNotStarted"]["func"]()
             exit(error.errorList["flareNotStarted"]["code"])
 

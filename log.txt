@@ -217,3 +217,8 @@ Client: {}
 New client b0884991-1b9d-4929-8b8d-03818424d060 connected
 Client b0884991-1b9d-4929-8b8d-03818424d060 completed download with dlId b3e14250-3714-4092-9ab9-b32b16f0141a
 Client: {'b0884991-1b9d-4929-8b8d-03818424d060': {'socket': 'Rl382GTdlLYLddFlAAAD', 'downloads': {'BasicMaths': {'name': 'BasicMaths', 'id': 'ca900aa8-28d0-4e8e-9278-e4c182ecbbb2', 'status': 'done', 'dlId': 'b3e14250-3714-4092-9ab9-b32b16f0141a'}}}}
+New client f36e7a8e-f901-4e94-a338-dfd5961371e5 connected
+New client f36e7a8e-f901-4e94-a338-dfd5961371e5 connected
+New client 26297866-4e59-45da-8a47-f93bc74e96ac connected
+New client 26297866-4e59-45da-8a47-f93bc74e96ac connected
+New client 26297866-4e59-45da-8a47-f93bc74e96ac connected

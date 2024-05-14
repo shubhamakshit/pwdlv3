@@ -1,4 +1,6 @@
 import argparse
+
+from error import errorList
 from glv import Global
 import sys
 from userPrefs import PreferencesLoader
@@ -14,6 +16,8 @@ EXECUTABLES = ['ffmpeg','mp4decrypt','nm3']
 
         
 
+
+
 def main():
     
     
@@ -25,20 +29,34 @@ def main():
     parser.add_argument('--name', type=str, help='Name for the output file. Incompatible with --csv-file.   Must be used with --url')
     parser.add_argument('--dir', type=str, help='Output Directory')
     parser.add_argument('--verbose',action='store_true',help='Verbose Output')
+    parser.add_argument('--version', action='version', version='%(prog)s 1.0')
+    parser.add_argument('--simulate', action='store_true', help='Simulate the download process. No files will be downloaded.)')
     args = parser.parse_args()
 
     # user_input is given prefernce i.e if --verbose is true it will override
     # however if --verbose is false but prefs['verbose'] is true 
     glv.vout = args.verbose
+
     global prefs
     
     # check if all dependencies are installed
     state = CheckState().checkup(EXECUTABLES,verbose=glv.vout)
     prefs = state['prefs']
 
+    # checking for tmpDir
+    if 'tmpDir' in prefs:
+        tmpDir = SysFunc.modify_path(prefs['tmpDir'])
+        if not os.path.exists(tmpDir):
+            os.makedirs(tmpDir)
+    else:
+        prefs['tmpDir'] = './tmp/'
+
+
+
     if not glv.vout and prefs['verbose'] : glv.vout = prefs['verbose']
 
-    
+
+    if glv.vout: glv.dprint(f"Tmp Dir is: {SysFunc.modify_path(prefs['tmpDir'])}")
 
 
   
@@ -47,6 +65,8 @@ def main():
     else: OUT_DIRECTORY = './'
     if glv.vout: glv.dprint(f'Output Directory: {OUT_DIRECTORY}')
 
+
+
     #if both csv file and (url or name) is provided then -> exit with error code 3
     if args.csv_file and ( args.id or args.name):
         print("Both csv file and id (or name) is provided. Unable to decide. Aborting! ...")
@@ -54,17 +74,66 @@ def main():
 
     # handle in case --csv-file is provided
     if args.csv_file:
-        print(args.csv_file)
+
+        # simulation mode
+        if args.simulate:
+            print("Simulating the download csv process. No files will be downloaded.")
+            print("File to be processed: ",args.csv_file)
+            exit(0)
+
+        # exiting in case the CSV File is not found
+        if not os.path.exists(args.csv_file):
+            errorList['csvFileNotFound']['func'](args.csv_file)
+            sys.exit(errorList['csvFileNotFound']['code'])
+
+        with open(args.csv_file, 'r') as f:
+            for line in f:
+                name, id = line.strip().split(',')
+
+                # adding support for csv file with partial errors
+                try:
+                    Main(id=id,
+                         name=name,
+                         directory=OUT_DIRECTORY,
+                         ffmpeg=state['ffmpeg'],
+                         nm3Path=state['nm3'],
+                         mp4d=state['mp4decrypt'],
+                         tmpDir=prefs['tmpDir'],
+                         verbose=glv.vout,
+                         suppress_exit=True # suppress exit in case of error (as multiple files are being processed)
+                         ).process()
+
+                except Exception as e:
+                    errorList['dowloadFailed']['func'](name, id)
+
+
 
     # handle in case key and name is given 
     elif args.id and args.name:
-        Main(id=args.id,
-             name=args.name,
-             directory=OUT_DIRECTORY,
-             ffmpeg=state['ffmpeg'],
-             nm3Path=state['nm3'],
-             mp4d=state['mp4decrypt'],
-             verbose=glv.vout).process()
+
+        # simulation mode
+        if args.simulate:
+            print("Simulating the download process. No files will be downloaded.")
+            print("Id to be processed: ",args.id)
+            print("Name to be processed: ",args.name)
+            exit(0)
+
+        try:
+
+            Main(id=args.id,
+                 name=args.name,
+                 directory=OUT_DIRECTORY,
+                 ffmpeg=state['ffmpeg'],
+                 nm3Path=state['nm3'],
+                 mp4d=state['mp4decrypt'],
+                 tmpDir=prefs['tmpDir'],
+                 verbose=glv.vout).process()
+
+        except Exception as e:
+
+            errorList['dowloadFailed']['func'](args.name, args.id)
+            sys.exit(errorList['dowloadFailed']['code'])
+
     # in case neither is used 
     else:
         exit(1)

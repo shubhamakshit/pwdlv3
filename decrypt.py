@@ -6,7 +6,9 @@ import os
 
 class Decrypt:
 
-    def decrypt(self,path,name,key,mp4d="mp4decrypt",out="None",verbose=True):
+    def decrypt(self,path,name,key,mp4d="mp4decrypt",out="None",outfile="",verbose=True,suppress_exit=False):
+        
+        Global.hr()
 
         # making path absolute if not already absolute
         path = BasicUtils.abspath(path)
@@ -22,7 +24,7 @@ class Decrypt:
         # i.e if out is Audio then extension is 'm4a' else 'mp4'
         extension = "m4a" if out == "Audio" else "mp4"
 
-        decrypt_command = f'{mp4d} --key 1:{key} {path}/{name}.{extension} {path}/{out}.mp4'
+        decrypt_command = f'{mp4d} --key 1:{key} {path}/{name}.{extension} {path}/{"" if not outfile else outfile+"-" }{out}.mp4'
 
         if verbose: Global.dprint(f"{out} Decryption Started..."); Global.dprint(f'{decrypt_command}')
 
@@ -38,14 +40,15 @@ class Decrypt:
 
             # if decryption failed then print error message and exit
             error.errorList[f"couldNotDecrypt{out}"]["func"]()
-            exit(error.errorList[f"couldNotDecrypt{out}"]["code"])
+            if not suppress_exit:
+                exit(error.errorList[f"couldNotDecrypt{out}"]["code"])
 
-        Global.hr()
+        
 
     # decrypts audio
-    def decryptAudio(self,path,name,key,mp4d="mp4decrypt",verbose=True):
-        self.decrypt(path,name,key,mp4d,"Audio",verbose)
+    def decryptAudio(self,path,name,key,mp4d="mp4decrypt",outfile='None',verbose=True,suppress_exit=False):
+        self.decrypt(path,name,key,mp4d,"Audio",outfile,verbose,suppress_exit=suppress_exit)
 
     # decrypts video
-    def decryptVideo(self,path,name,key,mp4d="mp4decrypt",verbose=True):
-        self.decrypt(path,name,key,mp4d,"Video",verbose)
+    def decryptVideo(self,path,name,key,mp4d="mp4decrypt",outfile='None',verbose=True,suppress_exit=False):
+        self.decrypt(path,name,key,mp4d,"Video",outfile,verbose,suppress_exit=suppress_exit)

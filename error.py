@@ -18,6 +18,14 @@ errorList = {
         "code": 3,
         "func": lambda x=None: Global.errprint(f"{'Dependency' if x == None else x } not found in default settings. Exiting..."),
     },
+    "csvFileNotFound": {
+        "code": 4,
+        "func": lambda fileName: Global.errprint(f"CSV file {fileName} not found. Exiting..."),
+    },
+    "dowloadFailed": {
+        "code": 5,
+        "func": lambda name, id: Global.errprint(f"Download failed for {name} with id {id}. Exiting..."),
+    },
     "cantLoadFile": {
         "code": 22,
         "func": lambda fileName: Global.errprint(f"Can't load file {fileName}"),
@@ -53,6 +61,10 @@ errorList = {
     "couldNotDecryptVideo": {
         "code": 30,
         "func": lambda: Global.errprint("Could not decrypt video. Exiting...")
+    },
+    "methodPatched": {
+        "code": 31,
+        "func": lambda: Global.errprint("Method is patched. Exiting...")
     },
 }
 
