@@ -1,7 +1,6 @@
-import error
-from basicUtils import BasicUtils
-from glv import Global
-from cleanup import Clean
+from utils.basicUtils import BasicUtils
+from utils.glv import Global
+from mainUtils.cleanup import Clean
 import os
 
 
@@ -74,20 +73,24 @@ class Main:
         """
         Main processing function to handle downloading, decrypting, merging, and cleanup of files.
         """
+
+        from mainUtils import dl
+        from mainUtils import key
+        from mainUtils import decrypt
+        from mainUtils import merge
+
         if self.verbose:
             Global.dprint("Starting Main Process... for ID: " + self.id)
 
         # 1. Downloading Files
-        import dl
+
         dl = dl.DL()
         audio, video = dl.downloadAudioAndVideo(self.id, f'{self.name}-enc', self.directory, self.tmpDir, self.nm3Path,
                                                 self.ffmpeg, self.verbose)
 
         # 2. Decrypting Files
-        import key
         key = key.getKey(self.id, self.verbose, self.flare_url)
 
-        import decrypt
         decrypt = decrypt.Decrypt()
 
         decrypt.decryptAudio(self.directory, f'{self.name}-enc', key, mp4d=self.mp4d, outfile=self.name,
@@ -96,7 +99,7 @@ class Main:
                              verbose=self.verbose, suppress_exit=self.suppress_exit)
 
         # 3. Merging Files
-        import merge
+
         merge = merge.Merge()
         merge.ffmpegMerge(f"{self.directory}/{self.name}-Video.mp4", f"{self.directory}/{self.name}-Audio.mp4",
                           f"{self.directory}/{self.name}.mp4", ffmpeg_path=self.ffmpeg, verbose=self.verbose)

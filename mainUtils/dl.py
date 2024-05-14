@@ -1,7 +1,7 @@
 import error
-from process import shell
-from glv import Global
-from basicUtils import BasicUtils
+from utils.process import shell
+from utils.glv import Global
+from utils.basicUtils import BasicUtils
 class DL:
 
     def buildUrl(self,id):

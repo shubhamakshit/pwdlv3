@@ -1,13 +1,11 @@
 import argparse
-
 from error import errorList
-from glv import Global
+from utils.glv import Global
 import sys
-from userPrefs import PreferencesLoader
-from os2 import SysFunc
+from utils.os2 import SysFunc
 import os
 from main import Main
-from checkup import CheckState
+from startup.checkup import CheckState
 
 # global variables
 prefs = {}
@@ -149,7 +147,7 @@ def main():
                  verbose=glv.vout).process()
 
         except Exception as e:
-            
+
             errorList['downloadFailed']['func'](args.name, args.id)
             sys.exit(errorList['downloadFailed']['code'])
 

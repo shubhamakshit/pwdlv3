@@ -1,6 +1,6 @@
-from glv import Global
-from process import shell
-from basicUtils import BasicUtils
+from utils.glv import Global
+from utils.process import shell
+from utils.basicUtils import BasicUtils
 import error 
 import os
 
