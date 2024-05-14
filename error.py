@@ -22,7 +22,7 @@ errorList = {
         "code": 4,
         "func": lambda fileName: Global.errprint(f"CSV file {fileName} not found. Exiting..."),
     },
-    "dowloadFailed": {
+    "downloadFailed": {
         "code": 5,
         "func": lambda name, id: Global.errprint(f"Download failed for {name} with id {id}. Exiting..."),
     },

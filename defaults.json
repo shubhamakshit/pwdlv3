@@ -7,5 +7,6 @@
     "verbose"       : true,
     "nm3"           :"$script/bin/nm3.exe",
     "ffmpeg"        :"",
+    "hr"            : false,
     "mp4decrypt"    :"$script/bin/mp4decrypt.exe"
 }
