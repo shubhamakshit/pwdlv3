@@ -10,7 +10,7 @@ class PreferencesLoader:
 
         # defining some variables that can be used in the preferences file 
         self.vars = {
-            "$script" : BasicUtils.abspath(os.path.dirname(__file__)),
+            "$script" : BasicUtils.abspath(os.path.dirname(__file__)+'/..'),
             "$home"   : os.path.expanduser("~"),
         }
 
