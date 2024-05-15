@@ -12,8 +12,9 @@ class CheckState:
     def checkup(self,executable,verbose=True):
 
         state = {}
-        print(__file__)
-        default_json = __file__.replace(__name__ + '.py', '') + 'defaults.json'
+        # set script path to ../startup
+        Global.script_path = os.path.abspath(os.path.join(os.path.dirname(__file__),'..'))
+        default_json = os.path.join(Global.script_path,'defaults.json')
         # check if defaults.json exists
         # and if it does, load the preferences
         if verbose: Global.hr();Global.dprint("Checking for default settings...")
