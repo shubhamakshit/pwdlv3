@@ -12,6 +12,7 @@ class CheckState:
     def checkup(self,executable,verbose=True):
 
         state = {}
+        print(__file__)
         default_json = __file__.replace(__name__ + '.py', '') + 'defaults.json'
         # check if defaults.json exists
         # and if it does, load the preferences
