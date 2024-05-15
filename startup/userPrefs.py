@@ -10,7 +10,12 @@ class PreferencesLoader:
 
         # defining some variables that can be used in the preferences file 
         self.vars = {
-            "$script" : BasicUtils.abspath(os.path.dirname(__file__)+'/..'),
+
+            # $script is the path to the folder containing the pwdl.py file
+            # Since the userPrefs.py is in the startup folder,
+            # we need to go one level up however we make the exception that if the pwdl.py is in the same folder as
+            # the startup folder, we don't need to go one level up
+            "$script" : BasicUtils.abspath(os.path.dirname(__file__)+ ('/..' if not os.path.exists(os.path.dirname(__file__) + '../pwdl.py') else '')),
             "$home"   : os.path.expanduser("~"),
         }
 
