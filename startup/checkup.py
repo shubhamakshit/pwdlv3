@@ -17,7 +17,7 @@ class CheckState:
         # this is the path to the folder containing the pwdl.py file
         # since the checkup.py is in the startup folder, we need to go one level up
         if verbose: Global.hr();Global.dprint("Setting script path...")
-        if verbose: Global.errprint('Warning! Hard Coded \'script_path\' location to $script/../startup')
+        if verbose: Global.errprint('Warning! Hard Coded \'script_path\' location to __file__/../startup')
 
         Global.script_path = os.path.abspath(os.path.join(os.path.dirname(__file__),'..'))
         default_json = os.path.join(Global.script_path,'defaults.json')
