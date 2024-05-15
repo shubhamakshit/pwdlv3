@@ -1,6 +1,6 @@
 import error
 import os
-from os2 import SysFunc
+from utils.os2 import SysFunc
 from startup.flareCheck import checkFlare
 from utils.glv import Global
 
