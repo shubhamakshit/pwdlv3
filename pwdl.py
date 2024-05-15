@@ -2,7 +2,7 @@ import argparse
 from error import errorList
 from utils.glv import Global
 import sys
-from utils.os2 import SysFunc
+from os2 import SysFunc
 import os
 from main import Main
 from startup.checkup import CheckState
