@@ -23,7 +23,7 @@ class Main:
     """
 
     def __init__(self, id, name=None, directory="./", tmpDir="/*auto*/", nm3Path='nm3', ffmpeg="ffmpeg",
-                 mp4d="mp4decrypt", flare_url='http://localhost:8191/v1', verbose=True, suppress_exit=False):
+                 mp4d="mp4decrypt", verbose=True, suppress_exit=False):
         """
         Initialize the Main class with the given parameters.
 
@@ -35,7 +35,7 @@ class Main:
             nm3Path (str, optional): Path to the NM3 binary. Defaults to 'nm3'.
             ffmpeg (str, optional): Path to the ffmpeg binary. Defaults to 'ffmpeg'.
             mp4d (str, optional): Path to the mp4decrypt binary. Defaults to 'mp4decrypt'.
-            flare_url (str, optional): URL for the flare service. Defaults to 'http://localhost:8191/v1'.
+            # flare_url (str, optional): URL for the flare service. Defaults to 'http://localhost:8191/v1'.
             verbose (bool, optional): Flag for verbose output. Defaults to True.
             suppress_exit (bool, optional): Flag to suppress exit on error. Defaults to False.
         """
@@ -53,7 +53,7 @@ class Main:
         self.nm3Path = BasicUtils.abspath(nm3Path) if nm3Path != 'nm3' else 'nm3'
         self.ffmpeg = BasicUtils.abspath(ffmpeg) if ffmpeg != 'ffmpeg' else 'ffmpeg'
         self.mp4d = BasicUtils.abspath(mp4d) if mp4d != 'mp4decrypt' else 'mp4decrypt'
-        self.flare_url = flare_url
+        # self.flare_url = flare_url
         self.verbose = verbose
         self.suppress_exit = suppress_exit
 
@@ -66,7 +66,7 @@ class Main:
             Global.dprint(f"Nm3Path: {self.nm3Path}")
             Global.dprint(f"FFmpeg: {self.ffmpeg}")
             Global.dprint(f"MP4Decrypt: {self.mp4d}")
-            Global.dprint(f"Flare URL: {self.flare_url}")
+            # Global.dprint(f"Flare URL: {self.flare_url}")
             Global.hr()
 
     def process(self):
@@ -89,7 +89,10 @@ class Main:
                                                 self.ffmpeg, self.verbose)
 
         # 2. Decrypting Files
-        key = key.getKey(self.id, self.verbose, self.flare_url)
+
+        Global.sprint("Please wait while we decrypt the files...\nFetching key may take some time.")
+
+        key = key.getKey(self.id, self.verbose)
 
         decrypt = decrypt.Decrypt()
 
