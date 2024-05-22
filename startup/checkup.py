@@ -45,15 +45,16 @@ class CheckState:
                 error.errorList["methodPatched"]["func"]()
                 exit(error.errorList["methodPatched"]["code"])
 
-        if verbose: Global.hr(); Global.dprint("Checking for Flare...")
+        # FLare no longer required
+        # if verbose: Global.hr(); Global.dprint("Checking for Flare...")
         # default url is localhost:8191
         # however user can change it in the preferences file
-        if verbose: Global.dprint(f"Checking at {prefs['flare_url'] if 'flare_url' in prefs else 'http://localhost:8191/v1'}")
-        if not checkFlare(prefs['flare_url'] if 'flare_url' in prefs else 'http://localhost:8191/v1'):
-            error.errorList["flareNotStarted"]["func"]()
-            exit(error.errorList["flareNotStarted"]["code"])
-
-        if verbose: Global.sprint("Flare is running."); Global.hr()
+        # if verbose: Global.dprint(f"Checking at {prefs['flare_url'] if 'flare_url' in prefs else 'http://localhost:8191/v1'}")
+        # if not checkFlare(prefs['flare_url'] if 'flare_url' in prefs else 'http://localhost:8191/v1'):
+        #     error.errorList["flareNotStarted"]["func"]()
+        #     exit(error.errorList["flareNotStarted"]["code"])
+        #
+        # if verbose: Global.sprint("Flare is running."); Global.hr()
 
         os2 = SysFunc()
 

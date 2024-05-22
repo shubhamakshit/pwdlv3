@@ -26,7 +26,7 @@ def main():
     parser.add_argument('--id', type=str,
                         help='PhysicsWallh Video Id for single usage. Incompatible with --csv-file.   Must be used with --name')
     parser.add_argument('--name', type=str,
-                        help='Name for the output file. Incompatible with --csv-file.   Must be used with --url')
+                        help='Name for the output file. Incompatible with --csv-file.   Must be used with --id')
     parser.add_argument('--dir', type=str, help='Output Directory')
     parser.add_argument('--verbose', action='store_true', help='Verbose Output')
     parser.add_argument('--version', action='version', version='%(prog)s 1.0')
@@ -84,7 +84,7 @@ def main():
 
     # starting the main process
 
-    #if both csv file and (url or name) is provided then -> exit with error code 3
+    #if both csv file and (id or name) is provided then -> exit with error code 3
     if args.csv_file and (args.id or args.name):
         print("Both csv file and id (or name) is provided. Unable to decide. Aborting! ...")
         sys.exit(3)
