@@ -9,4 +9,4 @@ if errorlevel 1 (
 )
 
 REM Run the Python script with the provided arguments
-python C:\Users\Akshit\pwdlv3\pwdl.py %*
+python "%~dp0pwdl.py" %*
