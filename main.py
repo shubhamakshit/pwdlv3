@@ -74,7 +74,7 @@ class Main:
         Main processing function to handle downloading, decrypting, merging, and cleanup of files.
         """
 
-        from mainUtils import dl
+        from mainUtils.dl import DL
         from mainUtils import key
         from mainUtils import decrypt
         from mainUtils import merge
@@ -84,7 +84,7 @@ class Main:
 
         # 1. Downloading Files
 
-        dl = dl.DL()
+        dl = DL()
         audio, video = dl.downloadAudioAndVideo(self.id, f'{self.name}-enc', self.directory, self.tmpDir, self.nm3Path,
                                                 self.ffmpeg, self.verbose)
 

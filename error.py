@@ -26,6 +26,10 @@ errorList = {
         "code": 5,
         "func": lambda name, id: Global.errprint(f"Download failed for {name} with id {id}. Exiting..."),
     },
+    "couldNotMakeDir":{
+        "code": 6,
+        "func": lambda dirName: Global.errprint(f"Could not make directory {dirName}. Exiting..."),
+    },
     "cantLoadFile": {
         "code": 22,
         "func": lambda fileName: Global.errprint(f"Can't load file {fileName}"),

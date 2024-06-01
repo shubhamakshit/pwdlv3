@@ -14,7 +14,9 @@ os2 = SysFunc()
 
 # hardcoding the list of executables required for the script to run
 # should be available in the PATH or the user should provide the path to the executables
-EXECUTABLES = ['ffmpeg', 'mp4decrypt', 'nm3']
+EXECUTABLES = glv.EXECUTABLES
+
+
 
 
 def main():
@@ -24,7 +26,8 @@ def main():
 
     parser.add_argument('--csv-file', type=str, help='Input csv file. Legacy Support too.')
     parser.add_argument('--id', type=str,
-                        help='PhysicsWallh Video Id for single usage. Incompatible with --csv-file.   Must be used with --name')
+                        help='PhysicsWallh Video Id for single usage. Incompatible with --csv-file.   Must be used '
+                             'with --name')
     parser.add_argument('--name', type=str,
                         help='Name for the output file. Incompatible with --csv-file.   Must be used with --id')
     parser.add_argument('--dir', type=str, help='Output Directory')
@@ -46,37 +49,16 @@ def main():
     prefs = state['prefs']
 
     # --------------------------------------------------------------------------------------------------------------------------------------
-
-    # loading user preferences from the defaults.json file
-
     # setting verbose output
+    # gives preference to user input
     if not glv.vout and prefs['verbose']: glv.vout = prefs['verbose']
 
-    # checking for tmpDir
-    if 'tmpDir' in prefs:
-        tmpDir = SysFunc.modify_path(prefs['tmpDir'])
-        if not os.path.exists(tmpDir):
-            os.makedirs(tmpDir)
-    else:
-        prefs['tmpDir'] = './tmp/'
+    verbose = glv.vout
 
-    # setting up tmp directory
-    if glv.vout: Global.hr(); glv.dprint(f"Tmp Dir is: {SysFunc.modify_path(prefs['tmpDir'])}")
-
-    # setting up output directory
-    if args.dir:
-        OUT_DIRECTORY = os.path.abspath(os.path.expandvars(args.dir))
-    else:
-        OUT_DIRECTORY = './'
-    if glv.vout: Global.hr(); glv.dprint(f'Output Directory: {OUT_DIRECTORY}')
-
-    # setting up hr
-    if not 'hr' in prefs:
-        Global.disable_hr = False
-    elif not prefs['hr']:
-        Global.disable_hr = True
-
-    if glv.vout: Global.hr(); glv.dprint(f"Horizontal Rule: {not Global.disable_hr}")
+    OUT_DIRECTORY = prefs['dir']
+    if verbose: Global.hr(); glv.dprint(f"Tmp Dir is: {SysFunc.modify_path(prefs['tmpDir'])}")
+    if verbose: Global.hr(); glv.dprint(f'Output Directory: {OUT_DIRECTORY}')
+    if verbose: Global.hr(); glv.dprint(f"Horizontal Rule: {not Global.disable_hr}")
 
     # --------------------------------------------------------------------------------------------------------------------------------------
     # end of loading user preferences
@@ -116,7 +98,7 @@ def main():
                          nm3Path=state['nm3'],
                          mp4d=state['mp4decrypt'],
                          tmpDir=prefs['tmpDir'],
-                         verbose=glv.vout,
+                         verbose=verbose,
                          suppress_exit=True  # suppress exit in case of error (as multiple files are being processed)
                          ).process()
 
@@ -144,10 +126,9 @@ def main():
                  nm3Path=state['nm3'],
                  mp4d=state['mp4decrypt'],
                  tmpDir=prefs['tmpDir'],
-                 verbose=glv.vout).process()
+                 verbose=verbose).process()
 
         except Exception as e:
-
             errorList['downloadFailed']['func'](args.name, args.id)
             sys.exit(errorList['downloadFailed']['code'])
 
