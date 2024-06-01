@@ -7,6 +7,7 @@ init()
 class Global:
 
     disable_hr = False
+    EXECUTABLES = ['ffmpeg', 'mp4decrypt', 'nm3']
 
     def __init__(self, vout=True, outDir="./"):
         self.outDir = outDir

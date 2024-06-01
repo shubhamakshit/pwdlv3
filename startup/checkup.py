@@ -9,6 +9,44 @@ class CheckState:
     def __init__(self) -> None:
         pass
 
+    def post_checkup(self,prefs,verbose=True):
+
+        """
+            Post Checkup Function
+            1. Setting up the tmpDir
+            2. Setting up the output directory
+            3. Setting up the horizontal rule
+        """
+
+        # setting up prefs
+        if 'tmpDir' in prefs:
+            tmpDir = SysFunc.modify_path(prefs['tmpDir'])
+            if not os.path.exists(tmpDir):
+                try:
+                    os.makedirs(tmpDir)
+                except OSError as exc: # Guard against failure
+                    errorList["couldNotMakeDir"]['func'](tmpDir)
+                    Global.errprint("Failed to create TmpDir")
+                    Global.errprint("Falling Back to Default")
+        else:
+            tmpDir = './tmp/'
+
+        # setting up directory for pwdl
+        if "dir" in prefs:
+            OUT_DIRECTORY = os.path.abspath(os.path.expandvars(prefs['dir']))
+        else:
+            OUT_DIRECTORY = './'
+
+        # setting up hr (horizontal rule)
+        if not 'hr' in prefs:
+            Global.disable_hr = False
+        elif not prefs['hr']:
+            Global.disable_hr = True
+
+        prefs['tmpDir'] = tmpDir
+        prefs['dir'] = OUT_DIRECTORY
+
+
     def checkup(self,executable,verbose=True):
 
         state = {}
@@ -108,6 +146,7 @@ class CheckState:
                 if verbose: Global.hr()
         
         state['prefs'] = prefs
+        self.post_checkup(prefs,verbose)
         
 
         return state

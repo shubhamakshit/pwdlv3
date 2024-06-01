@@ -31,6 +31,7 @@ class DL:
 
         # command to download the file
         command = f'{nm3Path} {url} --save-dir {directory} {"--tmp-dir "+tmpDir if not tmpDir == "/*auto*/" else "" } --save-name {name}  -s{identifier} best'
+        if verbose: Global.sprint(f"Command to download: {command}")
 
         # Download the audio file using the id
         code = shell(f'{command}',filter)
