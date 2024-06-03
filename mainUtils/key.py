@@ -7,15 +7,13 @@ from utils.glv import Global
 import error
 
 
-def log_info(id, verbose, attempt):
+def log_info(id, verbose, attempt=0):
     if verbose:
-        Global.dprint("Starting the script for key extraction" + f" Retry: {attempt}" if attempt > 0 else "")
-    if verbose:
+        Global.dprint("Starting the script for key extraction" +( f" Retry: {attempt}" if attempt > 0 else ""))
         Global.sprint(f'id -> {id}')
-    if verbose:
         Global.sprint("Sending request to the server")
-        Global.dprint("Hardcoded URL: request.get -> http://studyrays.site/drmplayer.php?v=https://d1d34p8vz63oiq"
-                      ".cloudfront.net/{id}/master.mpd")
+        Global.dprint(f"Hardcoded URL: request.get -> http://studyrays.site/drmplayer.php?v=https://d1d34p8vz63oiq"
+                      f".cloudfront.net/{id}/master.mpd")
 
 
 def send_request(id):
@@ -77,7 +75,6 @@ def getKey(id, verbose=True,retries=2):
         log_info(id, verbose, attempt)
 
         response = send_request(id)
-
         html = parse_response(response)
 
         key = extract_key(html)
