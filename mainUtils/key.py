@@ -2,6 +2,7 @@ import requests
 import re
 import base64
 from mainUtils.dl import DL
+import json
 from utils.glv import Global
 
 TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MTgxNjE5OTAuOTc3LCJkYXRhIjp7Il9pZCI6IjY0MzE3NTQyNDBlOTc5MDAxODAwMjAyYiIsInVzZXJuYW1lIjoiOTQ3MjUwNzEwMCIsImZpcnN0TmFtZSI6IkFrc2hpdCBTaHViaGFtIiwibGFzdE5hbWUiOiIiLCJvcmdhbml6YXRpb24iOnsiX2lkIjoiNWViMzkzZWU5NWZhYjc0NjhhNzlkMTg5Iiwid2Vic2l0ZSI6InBoeXNpY3N3YWxsYWguY29tIiwibmFtZSI6IlBoeXNpY3N3YWxsYWgifSwiZW1haWwiOiJha3NoaXRzaHViaGFtbWFzQGdtYWlsLmNvbSIsInJvbGVzIjpbIjViMjdiZDk2NTg0MmY5NTBhNzc4YzZlZiJdLCJjb3VudHJ5R3JvdXAiOiJJTiIsInR5cGUiOiJVU0VSIn0sImlhdCI6MTcxNzU1NzE5MH0.784n5z-sDxhNgZrG23oPmwPqh2qaj05MwHmr3bg3TRY"
@@ -109,7 +110,9 @@ def extract_kid_from_mpd(url):
 
 def getKey(id,verbose=True):
 
-    if verbose: Global.hr(); Global.dprint("Beginning to get the key for the video... & Audio :) ")
+    Global.hr();
+
+    if verbose: Global.dprint("Beginning to get the key for the video... & Audio :) ")
     if verbose: Global.dprint(f"ID: {id}"); Global.dprint("Building the URL to get the key...")
 
     try:
@@ -135,7 +138,7 @@ def getKey(id,verbose=True):
 
         if verbose: Global.dprint("Getting the headers...")
         headers = getHeaders()
-        if verbose: Global.sprint(f"Headers: {headers}")
+        if verbose: Global.sprint(f"Headers: {json.dumps(headers, indent=4)}")
 
         if verbose: Global.dprint("Making a request to the server to get the license (key)...")
         # make a request to the server to get the license(key)
@@ -150,6 +153,7 @@ def getKey(id,verbose=True):
                     key = get_key_final(response.json()['data']['otp'], TOKEN)
                     if verbose: Global.sprint(f"Key: {key}")
 
+                    Global.hr()
                     return key
         else:
             Global.errprint("Could not get the key from the server. Exiting...")

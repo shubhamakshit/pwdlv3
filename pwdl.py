@@ -39,7 +39,7 @@ def main():
     args = parser.parse_args()
 
     # user_input is given preference i.e if --verbose is true it will override
-    # however if --verbose is false but prefs['verbose'] is true 
+    # however if --verbose is false but prefs['verbose'] is true
     glv.vout = args.verbose
 
     global prefs
@@ -107,7 +107,7 @@ def main():
 
 
 
-    # handle in case key and name is given 
+    # handle in case key and name is given
     elif args.id and args.name:
 
         # simulation mode
@@ -132,7 +132,7 @@ def main():
             errorList['downloadFailed']['func'](args.name, args.id)
             sys.exit(errorList['downloadFailed']['code'])
 
-    # in case neither is used 
+    # in case neither is used
     else:
         exit(1)
 
