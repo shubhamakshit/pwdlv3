@@ -4,7 +4,7 @@ from mainLogic.utils.glv import Global
 import sys
 from mainLogic.utils.os2 import SysFunc
 import os
-from main import Main
+from mainLogic.main import Main
 from beta.shellLogic import shell
 from mainLogic.startup.checkup import CheckState
 
