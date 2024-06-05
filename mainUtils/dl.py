@@ -4,7 +4,8 @@ from utils.glv import Global
 from utils.basicUtils import BasicUtils
 class DL:
 
-    def buildUrl(self,id):
+    @staticmethod
+    def buildUrl(id):
         if id == None:
             error.errorList["idNotProvided"]["func"]()
             exit(error.errorList["idNotProvided"]["code"])
@@ -19,7 +20,7 @@ class DL:
         if name == None: name = id
         
 
-        url = self.buildUrl(id)
+        url = DL.buildUrl(id)
 
         # setting identifier and filter based on type
 
