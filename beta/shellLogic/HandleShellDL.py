@@ -1,4 +1,4 @@
-from mainLogic.dl import DL
+from mainLogic.big4.dl import DL
 from mainLogic.startup.checkup import CheckState
 from mainLogic.utils.glv import Global
 from mainLogic.main import Main

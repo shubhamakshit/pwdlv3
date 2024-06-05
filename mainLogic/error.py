@@ -1,4 +1,4 @@
-from utils.glv import Global
+from mainLogic.utils.glv import Global
 
 errorList = {
     "noError": {

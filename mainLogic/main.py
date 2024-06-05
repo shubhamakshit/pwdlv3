@@ -1,6 +1,6 @@
 from mainLogic.utils.basicUtils import BasicUtils
 from mainLogic.utils.glv import Global
-from mainLogic.cleanup import Clean
+from mainLogic.big4.cleanup import Clean
 import os
 
 
@@ -57,27 +57,15 @@ class Main:
         self.verbose = verbose
         self.suppress_exit = suppress_exit
 
-        # if self.verbose:
-        #     Global.hr()
-        #     Global.dprint(f"ID: {self.id}")
-        #     Global.dprint(f"Name: {self.name}")
-        #     Global.dprint(f"Directory: {self.directory}")
-        #     Global.dprint(f"TmpDir: {self.tmpDir}")
-        #     Global.dprint(f"Nm3Path: {self.nm3Path}")
-        #     Global.dprint(f"FFmpeg: {self.ffmpeg}")
-        #     Global.dprint(f"MP4Decrypt: {self.mp4d}")
-        #     # Global.dprint(f"Flare URL: {self.flare_url}")
-        #     Global.hr()
-
     def process(self):
         """
         Main processing function to handle downloading, decrypting, merging, and cleanup of files.
         """
 
-        from mainLogic.dl import DL
-        from mainLogic import key
-        from mainLogic import decrypt
-        from mainLogic import merge
+        from mainLogic.big4.dl import DL
+        from mainLogic.big4.decrypt import key
+        from mainLogic.big4 import decrypt
+        from mainLogic.big4 import merge
 
         if self.verbose:
             Global.dprint("Starting Main Process... for ID: " + self.id)
