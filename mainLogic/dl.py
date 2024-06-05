@@ -1,7 +1,7 @@
-import error
-from utils.process import shell
-from utils.glv import Global
-from utils.basicUtils import BasicUtils
+from mainLogic import error
+from mainLogic.utils.process import shell
+from mainLogic.utils.glv import Global
+from mainLogic.utils.basicUtils import BasicUtils
 class DL:
 
     @staticmethod

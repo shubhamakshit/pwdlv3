@@ -1,5 +1,5 @@
-from mainUtils.key import getKey
-from shellLogic import simpleParser
+from mainLogic.key import getKey
+from beta.shellLogic import simpleParser
 
 
 class HandleKeyAndAvailiblity:
@@ -31,4 +31,4 @@ class HandleKeyAndAvailiblity:
             print("Please provide a key to check")
 
     def parseAndRun(self,command,args=[]):
-        simpleParser.parseAndRun(self.commandList,command,args)
+        simpleParser.parseAndRun(self.commandList, command, args)

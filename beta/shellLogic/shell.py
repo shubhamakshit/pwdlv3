@@ -1,10 +1,8 @@
 from prompt_toolkit import PromptSession
-from prompt_toolkit.completion import WordCompleter
-from utils.glv import Global
-from startup.checkup import CheckState
+from mainLogic.utils.glv import Global
+from mainLogic.startup.checkup import CheckState
 import json
-from utils.os2 import SysFunc
-from shellLogic import logicError
+from mainLogic.utils.os2 import SysFunc
 
 glv = Global()
 EXECUTABLES = glv.EXECUTABLES
@@ -28,7 +26,7 @@ def main():
     #commands = ['show_prefs', 'exit']
     #completer = WordCompleter(commands, ignore_case=True)
 
-    from shellLogic import logic
+    from beta.shellLogic import logic
 
     # Command-line interface loop
     while True:

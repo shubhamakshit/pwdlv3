@@ -1,8 +1,6 @@
-import re
 import sys
-from shellLogic import logicError
-from shellLogic import simpleParser
-from utils.os2 import SysFunc
+from beta.shellLogic import simpleParser
+from mainLogic.utils.os2 import SysFunc
 
 os2 = SysFunc()
 
@@ -40,4 +38,4 @@ class HandleBasicCMDUtils:
         #         self.commandList[key]["func"]()
         #         return
         # raise logicError.commandNotFound(command)
-        simpleParser.parseAndRun(self.commandList,command,args)
+        simpleParser.parseAndRun(self.commandList, command, args)

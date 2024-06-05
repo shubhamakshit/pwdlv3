@@ -1,11 +1,12 @@
 import argparse
-from error import errorList
-from utils.glv import Global
+from mainLogic.error import errorList
+from mainLogic.utils.glv import Global
 import sys
-from utils.os2 import SysFunc
+from mainLogic.utils.os2 import SysFunc
 import os
 from main import Main
-from startup.checkup import CheckState
+from beta.shellLogic import shell
+from mainLogic.startup.checkup import CheckState
 
 # global variables
 prefs = {}
@@ -32,11 +33,16 @@ def main():
                         help='Name for the output file. Incompatible with --csv-file.   Must be used with --id')
     parser.add_argument('--dir', type=str, help='Output Directory')
     parser.add_argument('--verbose', action='store_true', help='Verbose Output')
+    parser.add_argument('--shell',action='store_true',help='Start the shell')
     parser.add_argument('--version', action='version', version='%(prog)s 1.0')
     parser.add_argument('--simulate', action='store_true',
                         help='Simulate the download process. No files will be downloaded.)')
 
     args = parser.parse_args()
+
+    if args.shell:
+        shell.main()
+
 
     # user_input is given preference i.e if --verbose is true it will override
     # however if --verbose is false but prefs['verbose'] is true

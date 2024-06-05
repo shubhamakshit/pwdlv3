@@ -63,6 +63,10 @@ User preferences can be loaded from a `defaults.json` file. These preferences in
 
 The script includes a simulation mode, which can be enabled with the `--simulate` flag. In this mode, the script will print the files that would be processed, but no files will be downloaded.
 
+## Shell Mode
+
+Still in beta
+
 ## Error Codes
 
 
@@ -75,7 +79,6 @@ The script includes a simulation mode, which can be enabled with the `--simulate
 | csvFileNotFound                  | 4          | CSV file {fileName} not found. Exiting...             |
 | downloadFailed                   | 5          | Download failed for {name} with id {id}. Exiting...   |
 | cantLoadFile                     | 22         | Can't load file {fileName}                            |
-| flareNotStarted                  | 23         | Flare is not started. Start the flare server first.   |
 | requestFailedDueToUnknownReason  | 24         | Request failed due to unknown reason. Status Code: {status_code} |
 | keyExtractionFailed              | 25         | Key extraction failed for id -> {id}. Exiting...      |
 | keyNotProvided                   | 26         | Key not provided. Exiting...                          |
