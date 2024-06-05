@@ -1,10 +1,8 @@
-import argparse
-import shlex
-from mainUtils.dl import DL
-from startup.checkup import CheckState
-from utils.glv import Global
+from mainLogic.dl import DL
+from mainLogic.startup.checkup import CheckState
+from mainLogic.utils.glv import Global
 from main import Main
-from shellLogic import simpleParser
+from beta.shellLogic import simpleParser
 
 
 class HandleShellDL:
@@ -60,5 +58,5 @@ class HandleShellDL:
 
 
     def parseAndRun(self,command,args=[]):
-        simpleParser.parseAndRun(self.commandList,command,args)
+        simpleParser.parseAndRun(self.commandList, command, args)
 

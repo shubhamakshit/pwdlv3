@@ -1,8 +1,7 @@
-from mainUtils.key import getKey
-from utils.os2 import SysFunc
-from shellLogic.HandleBasicCMDUtils import HandleBasicCMDUtils
-from shellLogic.HandleKeyAndAvailiblity import HandleKeyAndAvailiblity
-from shellLogic.HandleShellDL import HandleShellDL
+from mainLogic.utils.os2 import SysFunc
+from beta.shellLogic.HandleBasicCMDUtils import HandleBasicCMDUtils
+from beta.shellLogic.HandleKeyAndAvailiblity import HandleKeyAndAvailiblity
+from beta.shellLogic.HandleShellDL import HandleShellDL
 
 os2 = SysFunc()
 f1 = HandleBasicCMDUtils()

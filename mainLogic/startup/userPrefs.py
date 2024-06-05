@@ -1,7 +1,7 @@
 import json
-import error
+from mainLogic import error
 import os
-from utils.basicUtils import BasicUtils
+from mainLogic.utils.basicUtils import BasicUtils
 
 class PreferencesLoader:
     def __init__(self, file_name='defaults.json', verbose=True):

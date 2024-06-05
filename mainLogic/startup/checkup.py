@@ -1,8 +1,7 @@
-import error
+from mainLogic import error
 import os
-from utils.os2 import SysFunc
-from startup.flareCheck import checkFlare
-from utils.glv import Global
+from mainLogic.utils.os2 import SysFunc
+from mainLogic.utils.glv import Global
 
 class CheckState:
 
@@ -74,7 +73,7 @@ class CheckState:
         if verbose: Global.sprint("Default settings found."); Global.hr()
         
         # load the preferences
-        from startup.userPrefs import PreferencesLoader
+        from mainLogic.startup.userPrefs import PreferencesLoader
         prefs = PreferencesLoader(file_name=default_json,verbose=verbose).prefs
 
         # check if method is patched (currently via userPrefs.py)

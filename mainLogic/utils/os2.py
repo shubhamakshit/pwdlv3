@@ -1,7 +1,7 @@
 import platform
 import os
-import error
-from utils.process import shell
+from mainLogic import error
+from mainLogic.utils.process import shell
 # 0 - linux
 # 1 - windows
 # 2 - mac (currently not supported)

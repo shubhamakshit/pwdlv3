@@ -1,6 +1,6 @@
-from utils.basicUtils import BasicUtils
-from utils.glv import Global
-from mainUtils.cleanup import Clean
+from mainLogic.utils.basicUtils import BasicUtils
+from mainLogic.utils.glv import Global
+from mainLogic.cleanup import Clean
 import os
 
 
@@ -74,10 +74,10 @@ class Main:
         Main processing function to handle downloading, decrypting, merging, and cleanup of files.
         """
 
-        from mainUtils.dl import DL
-        from mainUtils import key
-        from mainUtils import decrypt
-        from mainUtils import merge
+        from mainLogic.dl import DL
+        from mainLogic import key
+        from mainLogic import decrypt
+        from mainLogic import merge
 
         if self.verbose:
             Global.dprint("Starting Main Process... for ID: " + self.id)

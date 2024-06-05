@@ -35,7 +35,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 if ! grep -q "alias pwdl" ~/.bashrc
 then
     # Add alias to ~/.bashrc
-    echo "alias pwdl='$SCRIPT_DIR/pwdl.py'" >> ~/.bashrc
+    echo "alias pwdl='python3 $SCRIPT_DIR/pwdl.py'" >> ~/.bashrc
 fi
 
 # Source ~/.bashrc to make the alias available in the current session

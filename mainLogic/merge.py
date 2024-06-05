@@ -1,5 +1,5 @@
-from utils.process import shell
-from utils.glv import Global
+from mainLogic.utils.process import shell
+from mainLogic.utils.glv import Global
 class Merge:
     def ffmpegMerge(self,input1,input2,output,ffmpeg_path="ffmpeg",verbose=False):
 

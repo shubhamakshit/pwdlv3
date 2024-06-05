@@ -1,7 +1,7 @@
-from utils.glv import Global
-from utils.process import shell
-from utils.basicUtils import BasicUtils
-import error 
+from mainLogic.utils.glv import Global
+from mainLogic.utils.process import shell
+from mainLogic.utils.basicUtils import BasicUtils
+from mainLogic import error
 import os
 
 class Decrypt:

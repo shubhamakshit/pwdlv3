@@ -1,5 +1,5 @@
 import os
-from utils.glv import Global
+from mainLogic.utils.glv import Global
 class Clean:
 
     def removeFile(self,file,verbose):
