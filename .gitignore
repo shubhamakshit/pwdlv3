@@ -186,3 +186,5 @@ pyrightconfig.json
 pwdlv3.lnk
 *.mp4
 /bin/Logs/
+*.m4s
+/tmp

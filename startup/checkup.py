@@ -25,7 +25,7 @@ class CheckState:
                 try:
                     os.makedirs(tmpDir)
                 except OSError as exc: # Guard against failure
-                    errorList["couldNotMakeDir"]['func'](tmpDir)
+                    error.errorList["couldNotMakeDir"]['func'](tmpDir)
                     Global.errprint("Failed to create TmpDir")
                     Global.errprint("Falling Back to Default")
         else:

@@ -1,7 +1,7 @@
 import re
 import sys
 from shellLogic import logicError
-
+from shellLogic import simpleParser
 from utils.os2 import SysFunc
 
 os2 = SysFunc()
@@ -27,19 +27,17 @@ class HandleBasicCMDUtils:
                 },
         }
 
-    def cls(self):
+    def cls(self,args=[]):
         os2.clear()
+        if args: print(args)
 
-    def exit_shell(self):
+    def exit_shell(self,args=[]):
         sys.exit(10)
 
-    def parseAndRun(self, command):
-        for key in self.commandList:
-            if re.match(self.commandList[key]["regex"], command):
-                self.commandList[key]["func"]()
-                return
-        raise logicError.commandNotFound(command)
-
-
-test = HandleBasicCMDUtils()
-test.parseAndRun("23")
+    def parseAndRun(self, command,args=[]):
+        # for key in self.commandList:
+        #     if re.match(self.commandList[key]["regex"], command):
+        #         self.commandList[key]["func"]()
+        #         return
+        # raise logicError.commandNotFound(command)
+        simpleParser.parseAndRun(self.commandList,command,args)

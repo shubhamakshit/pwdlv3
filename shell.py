@@ -4,6 +4,7 @@ from utils.glv import Global
 from startup.checkup import CheckState
 import json
 from utils.os2 import SysFunc
+from shellLogic import logicError
 
 glv = Global()
 EXECUTABLES = glv.EXECUTABLES
@@ -34,18 +35,14 @@ def main():
         try:
             user_input = session.prompt('|pwdl> ',)
 
-            for command in logic.commands:
+            # just in case the user hits enter without typing anything
+            if not user_input: continue
 
-                if user_input.startswith(command):
-                    # Check if user input matches a command (with arguments)
-                    if user_input == command:
-                        logic.commands[command]['func']()
-                        break
-                    else:
-                        # Check if user input matches a command (with arguments)
-                        args = user_input.split(' ')[1:]
-                        logic.commands[command]['func'](*args)
-                        break
+            command = user_input.split()[0]
+            args = user_input.split()[1:]
+            if not args: args = []
+
+            logic.execute(command, args)
 
         except KeyboardInterrupt:
             continue
