@@ -1,7 +1,7 @@
 import requests
 import re
 import base64
-from mainLogic.dl import DL
+from mainLogic.big4.dl import DL
 import json
 from mainLogic.utils.glv import Global
 

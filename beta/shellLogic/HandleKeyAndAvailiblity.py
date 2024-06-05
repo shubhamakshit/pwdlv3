@@ -1,4 +1,4 @@
-from mainLogic.key import getKey
+from mainLogic.big4.decrypt.key import getKey
 from beta.shellLogic import simpleParser
 
 
