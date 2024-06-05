@@ -57,17 +57,17 @@ class Main:
         self.verbose = verbose
         self.suppress_exit = suppress_exit
 
-        if self.verbose:
-            Global.hr()
-            Global.dprint(f"ID: {self.id}")
-            Global.dprint(f"Name: {self.name}")
-            Global.dprint(f"Directory: {self.directory}")
-            Global.dprint(f"TmpDir: {self.tmpDir}")
-            Global.dprint(f"Nm3Path: {self.nm3Path}")
-            Global.dprint(f"FFmpeg: {self.ffmpeg}")
-            Global.dprint(f"MP4Decrypt: {self.mp4d}")
-            # Global.dprint(f"Flare URL: {self.flare_url}")
-            Global.hr()
+        # if self.verbose:
+        #     Global.hr()
+        #     Global.dprint(f"ID: {self.id}")
+        #     Global.dprint(f"Name: {self.name}")
+        #     Global.dprint(f"Directory: {self.directory}")
+        #     Global.dprint(f"TmpDir: {self.tmpDir}")
+        #     Global.dprint(f"Nm3Path: {self.nm3Path}")
+        #     Global.dprint(f"FFmpeg: {self.ffmpeg}")
+        #     Global.dprint(f"MP4Decrypt: {self.mp4d}")
+        #     # Global.dprint(f"Flare URL: {self.flare_url}")
+        #     Global.hr()
 
     def process(self):
         """

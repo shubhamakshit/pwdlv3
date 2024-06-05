@@ -185,3 +185,4 @@ pyrightconfig.json
 # End of https://www.toptal.com/developers/gitignore/api/python
 pwdlv3.lnk
 *.mp4
+/bin/Logs/
