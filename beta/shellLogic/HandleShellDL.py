@@ -1,7 +1,7 @@
 from mainLogic.dl import DL
 from mainLogic.startup.checkup import CheckState
 from mainLogic.utils.glv import Global
-from main import Main
+from mainLogic.main import Main
 from beta.shellLogic import simpleParser
 
 
