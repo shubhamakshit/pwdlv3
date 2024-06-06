@@ -1,3 +1,5 @@
+import re
+
 from mainLogic import error
 from mainLogic.utils.process import shell
 from mainLogic.utils.glv import Global
@@ -44,7 +46,9 @@ class DL:
         # Download the audio file using the id
         code = shell(f'{command}',
                      filter=filter,
-                     progress_callback=progress_callback)
+                     progress_callback=progress_callback,
+                     handleProgress=self.handleDownloadProgress,
+                     )
 
         if code == 0:
             return True
@@ -101,6 +105,13 @@ class DL:
                      verbose,
                      progress_callback=progress_callback)
 
+        if progress_callback:
+            progress_callback({
+                "progress": 80,
+                "str": "download-completed",
+                "next": "decryption"
+            })
+
         # return the paths of the downloaded files
         return [f"{directory}/{name}.mp4",f"{directory}/{name}.m4a"]
     
@@ -127,4 +138,38 @@ class DL:
                       verbose=verbose,
                       progress_callback=progress_callback)
         
+
+    def handleDownloadProgress(self,output):
+
+
+        progress = {
+            "str": output,
+            "dl-progress": 0,
+            "progress": 0,
+            "next": "Aud"
+        }
+
+        # formats the output to get the progress
+        pattern = re.compile(r"[0-9][0-9][0-9]?%")
+        progress_percent = pattern.findall(output)
+
+        if progress_percent:
+
+            progress["dl-progress"] = int(progress_percent[0].replace("%",""))
+
+            if "Aud" in output:
+                progress["progress"] = progress["dl-progress"] * 0.4
+                progress["next"] = "Vid"
+
+            if "Vid" in output:
+                progress["progress"] = progress["dl-progress"] * 0.4 + 40
+                progress["next"] = "decryption"
+
+
+        return progress
+
+
+
+
+
 

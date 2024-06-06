@@ -91,11 +91,28 @@ class Main:
         decrypt.decryptVideo(self.directory, f'{self.name}-enc', key, mp4d=self.mp4d, outfile=self.name,
                              verbose=self.verbose, suppress_exit=self.suppress_exit)
 
+        # Call the progress callback for decryption completion
+        if self.progress_callback:
+            self.progress_callback({
+                "progress": 90,
+                "str": "decryption-completed",
+                "next": "merging"
+            })
+
         # 3. Merging Files
 
         merge = merge.Merge()
         merge.ffmpegMerge(f"{self.directory}/{self.name}-Video.mp4", f"{self.directory}/{self.name}-Audio.mp4",
                           f"{self.directory}/{self.name}.mp4", ffmpeg_path=self.ffmpeg, verbose=self.verbose)
+
+        # Call the progress callback for merge completion
+        if self.progress_callback:
+            self.progress_callback({
+                "progress": 100,
+                "str": "merge-completed",
+                "next": "cleanup"
+            })
+
 
         # 4. Cleanup
         clean = Clean()

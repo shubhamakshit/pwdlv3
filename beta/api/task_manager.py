@@ -3,6 +3,13 @@ import time
 import uuid
 
 class TaskManager:
+
+    def handle_completion (self, task_id):
+        print(f"Task {task_id} completed")
+        self.tasks[task_id]['status'] = 'completed'
+
+    on_task_complete = handle_completion
+
     def __init__(self):
         self.tasks = {}
         self.lock = threading.Lock()
@@ -17,7 +24,7 @@ class TaskManager:
 
     def _run_task(self, task_id, target, *args):
         try:
-            target(*args, progress_callback=lambda progress: self._update_progress(task_id, progress))
+            target(task_id,*args, progress_callback=lambda progress: self._update_progress(task_id, progress))
             with self.lock:
                 self.tasks[task_id]['status'] = 'completed'
         except Exception as e:
