@@ -51,8 +51,9 @@ def main():
     global prefs
 
     # check if all dependencies are installed
-    state = CheckState().checkup(EXECUTABLES, verbose=glv.vout)
+    state = CheckState().checkup(EXECUTABLES, directory=args.dir,verbose=glv.vout)
     prefs = state['prefs']
+
 
     # --------------------------------------------------------------------------------------------------------------------------------------
     # setting verbose output

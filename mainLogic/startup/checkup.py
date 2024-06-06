@@ -17,6 +17,8 @@ class CheckState:
             3. Setting up the horizontal rule
         """
 
+        OUT_DIRECTORY = ""
+
         # setting up prefs
         if 'tmpDir' in prefs:
             tmpDir = SysFunc.modify_path(prefs['tmpDir'])
@@ -32,7 +34,16 @@ class CheckState:
 
         # setting up directory for pwdl
         if "dir" in prefs:
-            OUT_DIRECTORY = os.path.abspath(os.path.expandvars(prefs['dir']))
+            try: OUT_DIRECTORY = os.path.abspath(os.path.expandvars(prefs['dir']))
+
+            # if the user provides a non-string value for the directory or dir is not found
+            except TypeError: OUT_DIRECTORY = './'
+
+            # if the directory is not found
+            except Exception as e:
+                Global.errprint(f"Error: {e}")
+                Global.errprint("Falling back to default")
+                OUT_DIRECTORY = './'
         else:
             OUT_DIRECTORY = './'
 
@@ -46,7 +57,7 @@ class CheckState:
         prefs['dir'] = OUT_DIRECTORY
 
 
-    def checkup(self,executable,verbose=True):
+    def checkup(self,executable,directory="./",verbose=True):
 
         state = {}
 
@@ -145,6 +156,7 @@ class CheckState:
                 if verbose: Global.hr()
         
         state['prefs'] = prefs
+        prefs['dir'] = directory
         self.post_checkup(prefs,verbose)
         
 

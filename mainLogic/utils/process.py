@@ -3,7 +3,7 @@ import re
 import sys
 
 
-def shell(command, filter=None, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True):
+def shell(command, filter=None, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True, progress_callback=None):
     import os
 
     # Set PYTHONUNBUFFERED environment variable
@@ -19,6 +19,9 @@ def shell(command, filter=None, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
         if output == '' and process.poll() is not None:
             break
         if output and filter is not None and re.search(filter, output):
+
+            # call the progress callback with the filtered output
+            if progress_callback: progress_callback(output)
             print(output.strip())
 
     # Wait for the process to complete and get the return code
