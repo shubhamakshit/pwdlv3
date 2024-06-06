@@ -59,6 +59,9 @@ def get_file(task_id,name):
     return send_file( f"{file}", as_attachment=True), 200
 
 
+@app.route('/', methods=['GET'])
+def index():
+    return jsonify({'message': 'Hello, World!'}), 200
 
 if __name__ == '__main__':
     app.run(debug=True)
