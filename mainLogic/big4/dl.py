@@ -12,7 +12,14 @@ class DL:
 
         return f"https://d1d34p8vz63oiq.cloudfront.net/{id}/master.mpd"
     
-    def download(self,id,name=None,type="",directory="./",tmpDir="/*auto*/",nm3Path='nm3',ffmpeg='ffmpeg',verbose=True):
+    def download(self,id,name=None,
+                 type="",
+                 directory="./",
+                 tmpDir="/*auto*/",
+                 nm3Path='nm3',
+                 ffmpeg='ffmpeg',
+                 verbose=True,
+                 progress_callback=None):
         if id == None:
             error.errorList["idNotProvided"]["func"]()
             exit(error.errorList["idNotProvided"]["code"])
@@ -35,7 +42,9 @@ class DL:
         if verbose: Global.sprint(f"Command to download: {command}")
 
         # Download the audio file using the id
-        code = shell(f'{command}',filter)
+        code = shell(f'{command}',
+                     filter=filter,
+                     progress_callback=progress_callback)
 
         if code == 0:
             return True
@@ -43,7 +52,15 @@ class DL:
             error.errorList[f"couldNotDownload{type}"]["func"]()
             exit(error.errorList[f"couldNotDownload{type}"]["code"])
 
-    def downloadAudioAndVideo(self,id,name=None,directory="./",tmpDir="/*auto*/",nm3Path='nm3',ffmpeg='ffmpeg',verbose=True):
+    def downloadAudioAndVideo(self,
+                              id,
+                              name=None,
+                              directory="./",
+                              tmpDir="/*auto*/",
+                              nm3Path='nm3',
+                              ffmpeg='ffmpeg',
+                              verbose=True,
+                              progress_callback=None):
         if id == None:
             error.errorList["idNotProvided"]["func"]()
             exit(error.errorList["idNotProvided"]["code"])
@@ -66,11 +83,23 @@ class DL:
 
         # section to download audio 
         Global.hr(); Global.dprint("Downloading Audio..."); Global.hr()
-        self.dlAudio(id,name,directory,tmpDir,nm3Path,verbose)
+        self.dlAudio(id,
+                     name,
+                     directory,
+                     tmpDir,
+                     nm3Path,
+                     verbose,
+                     progress_callback=progress_callback)
 
         # section to download video
         Global.hr(); Global.dprint("Downloading Video..."); Global.hr()
-        self.dlVideo(id,name,directory,tmpDir,nm3Path,verbose)
+        self.dlVideo(id,
+                     name,
+                     directory,
+                     tmpDir,
+                     nm3Path,
+                     verbose,
+                     progress_callback=progress_callback)
 
         # return the paths of the downloaded files
         return [f"{directory}/{name}.mp4",f"{directory}/{name}.m4a"]
@@ -78,10 +107,24 @@ class DL:
 
 
     
-    def dlAudio(self,id,name=None,directory="./",tmpDir="/*auto*/",nm3Path='nm3',verbose=True):
-        self.download(id,name,"Audio",directory,tmpDir,nm3Path,verbose=verbose)
+    def dlAudio(self,id,name=None,directory="./",tmpDir="/*auto*/",nm3Path='nm3',verbose=True,progress_callback=None):
+        self.download(id,
+                      name,
+                      "Audio",
+                      directory,
+                      tmpDir,
+                      nm3Path,
+                      verbose=verbose,
+                      progress_callback=progress_callback)
         
-    def dlVideo(self,id,name=None,directory="./",tmpDir="/*auto*/",nm3Path='nm3',verbose=True):
-        self.download(id,name,"Video",directory,tmpDir,nm3Path,verbose=verbose)
+    def dlVideo(self,id,name=None,directory="./",tmpDir="/*auto*/",nm3Path='nm3',verbose=True,progress_callback=None):
+        self.download(id,
+                      name,
+                      "Video",
+                      directory,
+                      tmpDir,
+                      nm3Path,
+                      verbose=verbose,
+                      progress_callback=progress_callback)
         
 
