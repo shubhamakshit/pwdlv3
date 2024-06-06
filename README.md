@@ -1,3 +1,13 @@
+---
+title: pwdlAPIv1
+emoji: 💻🐳
+colorFrom: gray
+colorTo: green
+sdk: docker
+pinned: false
+suggested_storage: small
+license: mit
+---
 # PhysicsWallah M3u8 Parser
 
 This is a Python script that parses M3u8 files. It uses the argparse library to handle command-line arguments.
