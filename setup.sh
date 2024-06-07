@@ -31,6 +31,8 @@ rm get-pip.py
 # Get the absolute path of the script's directory
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+chmod +x $SCRIPT_DIR/bin/*
+
 # Check if 'alias pwdl' is already present in ~/.bashrc
 if ! grep -q "alias pwdl" ~/.bashrc
 then
