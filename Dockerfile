@@ -1,5 +1,5 @@
-# Use an official Python runtime as a parent image
-FROM python:3.9-slim-buster
+# Use an official Ubuntu runtime as a parent image
+FROM ubuntu:latest
 
 # Set the working directory in the container to /app
 WORKDIR /app
@@ -7,16 +7,13 @@ WORKDIR /app
 # Add the current directory contents into the container at /app
 ADD . /app
 
+# Install Python, pip and ffmpeg
+RUN apt-get update && apt-get install -y python3 python3-pip ffmpeg
+
 # Install any needed packages specified in requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip3 install --no-cache-dir -r requirements.txt
 
-# Download a static build of ffmpeg
-RUN apt-get update && apt-get install -y wget
-RUN wget https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz
-RUN tar xvf ffmpeg-release-amd64-static.tar.xz && rm ffmpeg-release-amd64-static.tar.xz
-RUN mv ffmpeg-*-static/ffmpeg /usr/local/bin/ && rm -r ffmpeg-*-static
-
-# Make port 5000 available to the world outside this container
+# Make port 7680 available to the world outside this container
 EXPOSE 7680
 
 RUN chmod +x ./setup.sh
