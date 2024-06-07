@@ -11,7 +11,7 @@ ADD . /app
 RUN apt-get update && apt-get install -y python3 python3-pip ffmpeg
 
 # Install any needed packages specified in requirements.txt
-RUN python3 -m pip install --no-cache-dir -r requirements.txt
+RUN /usr/bin/python3 -m pip install --no-cache-dir -r requirements.txt
 
 # Make port 7680 available to the world outside this container
 EXPOSE 7680
