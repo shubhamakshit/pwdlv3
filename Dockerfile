@@ -13,9 +13,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Make port 5000 available to the world outside this container
 EXPOSE 7680
 
-ADD start.sh ./setup.sh
 RUN chmod +x ./setup.sh
-
+RUN ./setup.sh
 
 # Run gunicorn when the container launches
 CMD ["gunicorn", "--bind", ":7680", "beta.api.api:app"]
