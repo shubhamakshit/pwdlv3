@@ -9,7 +9,12 @@ ADD . /app
 
 # Install any needed packages specified in requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
-RUN apt-get install -y ffmpeg
+
+# Download a static build of ffmpeg
+RUN apt-get update && apt-get install -y wget
+RUN wget https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz
+RUN tar xvf ffmpeg-release-amd64-static.tar.xz && rm ffmpeg-release-amd64-static.tar.xz
+RUN mv ffmpeg-*-static/ffmpeg /usr/local/bin/ && rm -r ffmpeg-*-static
 
 # Make port 5000 available to the world outside this container
 EXPOSE 7680
