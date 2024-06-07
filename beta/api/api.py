@@ -11,6 +11,7 @@ app = Flask(__name__)
 task_manager = TaskManager()
 
 OUT_DIR = Global.api_webdl_directory
+
 try:
     if not os.path.exists(OUT_DIR): os.makedirs(OUT_DIR)
 except Exception as e:
