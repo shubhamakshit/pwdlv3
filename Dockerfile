@@ -23,9 +23,12 @@ RUN pip install --no-cache-dir -r requirements.txt
 EXPOSE 7680
 
 COPY ./defaults.linux.json ./defaults.json
+RUN chmod +x ./bin/*
 
 RUN chmod +x ./setup.sh
 RUN ./setup.sh
+
+RUN mkdir webdl
 
 # Run gunicorn when the container launches
 CMD ["gunicorn", "--bind", ":7680", "beta.api.api:app"]
