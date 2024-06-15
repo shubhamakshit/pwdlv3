@@ -25,7 +25,7 @@ class SysFunc:
     def which(self,program):
 
         if self.os == 0:
-            if shell('which',stderr="",stdout="") != 1 and shell('command -v',stderr="",stdout="") != 255:
+            if shell('which',stderr="",stdout="") != 1 and shell('which',stderr="",stdout="") != 255:
                 error.errorList["dependencyNotFound"]["func"]('which')
                 exit(error.errorList["dependencyNotFound"]["code"])
             else:
