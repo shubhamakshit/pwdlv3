@@ -31,4 +31,4 @@ RUN ./setup.sh
 RUN mkdir webdl
 
 # Run gunicorn when the container launches
-CMD ["gunicorn", "--bind", ":7680", "beta.api.api:app"]
+CMD ["nohup","gunicorn", "-b", "0.0.0.0:7680", "beta.api.api:app", "&"]
