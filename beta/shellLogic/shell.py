@@ -14,7 +14,7 @@ session = PromptSession()
 def main():
     # Perform checkup and get preferences
     # Hardcoded verbose to False
-    state = CheckState().checkup(EXECUTABLES, False)
+    state = CheckState().checkup(EXECUTABLES, './', verbose=False)
     prefs = state['prefs']
 
     # Convert preferences to JSON string for display

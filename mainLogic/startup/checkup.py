@@ -57,6 +57,18 @@ class CheckState:
         prefs['dir'] = OUT_DIRECTORY
 
 
+    def check_token(self,token,id="90dbede8-66a8-40e8-82ce-a2048b5c063d",verbose=False):
+        from mainLogic.big4.decrypt.key import LicenseKeyFetcher
+        lc_fetcher = LicenseKeyFetcher(token)
+        try:
+            key = lc_fetcher.get_key(id,verbose=verbose)
+            return key
+        except Exception as e:
+            Global.errprint(f"An error occurred while getting the key: {e}")
+            Global.errprint("Your Token is Invalid! ")
+            return None
+
+
     def checkup(self,executable,directory="./",verbose=True):
 
         state = {}
@@ -154,7 +166,14 @@ class CheckState:
                     exit(error.errorList["dependencyNotFoundInPrefs"]["code"])
                 
                 if verbose: Global.hr()
-        
+
+        # checking for token
+        if 'token' in prefs:
+            self.check_token(prefs['token'],verbose=verbose)
+        else:
+            error.errorList["tokenNotFound"]["func"]()
+            exit(error.errorList["tokenNotFound"]["code"])
+
         state['prefs'] = prefs
         prefs['dir'] = directory
         self.post_checkup(prefs,verbose)

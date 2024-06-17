@@ -30,6 +30,10 @@ errorList = {
         "code": 6,
         "func": lambda dirName: Global.errprint(f"Could not make directory {dirName}. Exiting..."),
     },
+    "tokenNotFound": {
+        "code": 7,
+        "func": lambda: Global.errprint("Token not found in default settings. Exiting..."),
+    },
     "cantLoadFile": {
         "code": 22,
         "func": lambda fileName: Global.errprint(f"Can't load file {fileName}"),
