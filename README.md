@@ -1,13 +1,3 @@
----
-title: pwdlAPIv1
-emoji: 💻🐳
-colorFrom: gray
-colorTo: green
-sdk: docker
-pinned: false
-suggested_storage: small
-license: mit
----
 # PhysicsWallah M3u8 Parser
 
 This is a Python script that parses M3u8 files. It uses the argparse library to handle command-line arguments.
@@ -20,19 +10,13 @@ The script requires the following executables to be available in the PATH or the
 - [mp4decrypt](https://www.bento4.com/downloads/)
 - [nm3](https://github.com/nilaoda/N_m3u8DL-RE) (renamed to nm3 in the script)
 
-The script also requires the following Python libraries (which are listed in the `requirements.txt` file
-
+The script also requires the following Python libraries (which are listed in the `requirements.txt` file):
 
 - `requests`: A library for making HTTP requests. It abstracts the complexities of making requests behind a simple API, allowing you to send HTTP/1.1 requests.
-
 - `colorama`: Makes ANSI escape character sequences work on Windows and Unix systems, allowing colored terminal text and cursor positioning.
-
 - `argparse`: Provides a way to specify command line arguments and options the program is supposed to accept.
-
 - `bs4` (BeautifulSoup4): A library for pulling data out of HTML and XML files. It provides Pythonic idioms for iterating, searching, and modifying the parse tree.
-
 - `flask`: A micro web framework written in Python. It does not require particular tools or libraries, it has no database abstraction layer, form validation, or any other components where pre-existing third-party libraries provide common functions.
-
 - `flask_socketio`: Gives Flask applications access to low latency bi-directional communications between the clients and the server. The client-side application can use any of the Socket.IO official clients libraries in Javascript, C++, Java and Swift, or any compatible client to establish a permanent connection to the server.
 
 To install these dependencies, you would typically run `pip install -r requirements.txt` in your command line.
@@ -46,7 +30,7 @@ or if you want to install them individually, you can run the following commands:
 You can use the script with the following command-line arguments:
 
 - `--csv-file`: Input csv file. Legacy Support too.
-- `--id`: PhysicsWallh Video Id for single usage. Incompatible with --csv-file. Must be used with --name.
+- `--id`: PhysicsWallah Video Id for single usage. Incompatible with --csv-file. Must be used with --name.
 - `--name`: Name for the output file. Incompatible with --csv-file. Must be used with --url.
 - `--dir`: Output Directory.
 - `--verbose`: Verbose Output.
@@ -69,13 +53,82 @@ The script has built-in error handling. If an error occurs during the parsing of
 
 User preferences can be loaded from a `defaults.json` file. These preferences include the temporary directory (`tmpDir`), verbosity of output (`verbose`), and whether to display a horizontal rule (`hr`). If these preferences are not set in the `defaults.json` file, the script will use default values.
 
+**Note:** The `defaults.json` file must now also include the `token` for the video download process.
+
 ## Simulation Mode
 
 The script includes a simulation mode, which can be enabled with the `--simulate` flag. In this mode, the script will print the files that would be processed, but no files will be downloaded.
 
 ## Shell Mode
 
-Still in beta
+The script includes a shell mode, which can be enabled with the `--shell` flag. 
+
+## API Endpoints 
+
+This section describes the API endpoints provided by `api.py`.
+
+### Create Task
+
+**Endpoint:** `/create_task`
+
+**Method:** `POST`
+
+**Description:** This endpoint is used to create a new download task. It requires a JSON payload with the `id` and `name` of the video to be downloaded.
+
+**Payload:**
+
+```json
+{
+    "id": "<video_id>",
+    "name": "<video_name>"
+}
+```
+
+**Response:** The endpoint returns a JSON object with the `task_id` of the created task.
+
+```json
+{
+    "task_id": "<task_id>"
+}
+```
+
+### Get Progress
+
+**Endpoint:** `/progress/<task_id>`
+
+**Method:** `GET`
+
+**Description:** This endpoint is used to get the progress of a specific task. Replace `<task_id>` with the ID of the task.
+
+**Response:** The endpoint returns a JSON object with the progress of the task.
+
+### Get File
+
+**Endpoint:** `/get-file/<task_id>/<name>`
+
+**Method:** `GET`
+
+**Description:** This endpoint is used to download the file associated with a specific task. Replace `<task_id>` with the ID of the task and `<name>` with the name of the file.
+
+**Response:** The endpoint returns the requested file as a download.
+
+### Index
+
+**Endpoint:** `/`
+
+**Method:** `GET`
+
+**Description:** This is the index endpoint of the API. It returns a simple greeting message.
+
+**Response:** The endpoint returns a JSON object with a greeting message.
+
+```json
+{
+    "message": "Hello, World!"
+}
+```
+
+Please note that the API must be running for these endpoints to be accessible. You can start the API by running `python ./beta/api/app.py`.
 
 ## Error Codes
 
@@ -88,6 +141,8 @@ Still in beta
 | dependencyNotFoundInPrefs        | 3          | Dependency not found in default settings. Exiting...  |
 | csvFileNotFound                  | 4          | CSV file {fileName} not found. Exiting...             |
 | downloadFailed                   | 5          | Download failed for {name} with id {id}. Exiting...   |
+|couldNotMakeDir                   | 6          | Could not make directory {dir}. Exiting...            |
+|tokenNotFound                     | 7          | Token not found. Exiting...                           |
 | cantLoadFile                     | 22         | Can't load file {fileName}                            |
 | requestFailedDueToUnknownReason  | 24         | Request failed due to unknown reason. Status Code: {status_code} |
 | keyExtractionFailed              | 25         | Key extraction failed for id -> {id}. Exiting...      |

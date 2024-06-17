@@ -6,6 +6,10 @@ init()
 
 class Global:
 
+    # PREFERENCES_FILE is currently not used in mainLogic Project
+    # only used in beta project
+    PREFERENCES_FILE = "defaults.json"
+
     disable_hr = False
     EXECUTABLES = ['ffmpeg', 'mp4decrypt', 'nm3']
     api_webdl_directory = "webdl"

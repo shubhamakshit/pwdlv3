@@ -1,6 +1,7 @@
 from mainLogic.utils.basicUtils import BasicUtils
 from mainLogic.utils.glv import Global
 from mainLogic.big4.cleanup import Clean
+from mainLogic.big4.decrypt.key import LicenseKeyFetcher
 import os
 
 
@@ -23,7 +24,7 @@ class Main:
     """
 
     def __init__(self, id, name=None, directory="./", tmpDir="/*auto*/", nm3Path='nm3', ffmpeg="ffmpeg",
-                 mp4d="mp4decrypt", verbose=True, suppress_exit=False,progress_callback=None):
+                 mp4d="mp4decrypt",token=None, verbose=True, suppress_exit=False,progress_callback=None):
         """
         Initialize the Main class with the given parameters.
 
@@ -54,6 +55,7 @@ class Main:
         self.nm3Path = BasicUtils.abspath(nm3Path) if nm3Path != 'nm3' else 'nm3'
         self.ffmpeg = BasicUtils.abspath(ffmpeg) if ffmpeg != 'ffmpeg' else 'ffmpeg'
         self.mp4d = BasicUtils.abspath(mp4d) if mp4d != 'mp4decrypt' else 'mp4decrypt'
+        self.token = token
         self.verbose = verbose
         self.suppress_exit = suppress_exit
         self.progress_callback = progress_callback
@@ -82,7 +84,10 @@ class Main:
 
         Global.sprint("Please wait while we decrypt the files...\nFetching key may take some time.")
 
-        key = key.getKey(self.id, self.verbose)
+        TOKEN = self.token
+        fetcher = LicenseKeyFetcher(TOKEN)
+
+        key = fetcher.get_key(self.id, verbose=self.verbose)
 
         decrypt = decrypt.Decrypt()
 

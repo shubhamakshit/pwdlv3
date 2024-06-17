@@ -4,7 +4,7 @@ import os
 from mainLogic.utils.basicUtils import BasicUtils
 
 class PreferencesLoader:
-    def __init__(self, file_name='defaults.json', verbose=True):
+    def __init__(self, file_name='defaults.json',verbose=True):
         self.file_name = file_name
         self.prefs = {}
 
@@ -18,6 +18,7 @@ class PreferencesLoader:
             "$script" : BasicUtils.abspath(os.path.dirname(__file__)+ ('/../..' if not os.path.exists(os.path.dirname(__file__) + '../pwdl.py') else '')),
             "$home"   : os.path.expanduser("~"),
         }
+
 
         self.load_preferences()
 
