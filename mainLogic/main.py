@@ -2,6 +2,9 @@ from mainLogic.utils.basicUtils import BasicUtils
 from mainLogic.utils.glv import Global
 from mainLogic.big4.cleanup import Clean
 from mainLogic.big4.decrypt.key import LicenseKeyFetcher
+from mainLogic.big4.downloadv2 import Download
+from mainLogic.big4.decrypt.decrypt import Decrypt
+from mainLogic.big4.merge import Merge
 import os
 
 
@@ -23,8 +26,8 @@ class Main:
         suppress_exit (bool): Flag to suppress exit on error. Defaults to False.
     """
 
-    def __init__(self, id, name=None, directory="./", tmpDir="/*auto*/", nm3Path='nm3', ffmpeg="ffmpeg",
-                 mp4d="mp4decrypt",token=None, verbose=True, suppress_exit=False,progress_callback=None):
+    def __init__(self, id, name=None, directory="./", tmpDir="/*auto*/", vsdPath='nm3', ffmpeg="ffmpeg",
+                 mp4d="mp4decrypt", token=None, verbose=True, suppress_exit=False, progress_callback=None):
         """
         Initialize the Main class with the given parameters.
 
@@ -52,7 +55,8 @@ class Main:
         except:
             Global.errprint("Could not create tmp directory")
             exit(-1)
-        self.nm3Path = BasicUtils.abspath(nm3Path) if nm3Path != 'nm3' else 'nm3'
+        # self.nm3Path = BasicUtils.abspath(nm3Path) if nm3Path != 'nm3' else 'nm3'
+        self.vsd = vsdPath
         self.ffmpeg = BasicUtils.abspath(ffmpeg) if ffmpeg != 'ffmpeg' else 'ffmpeg'
         self.mp4d = BasicUtils.abspath(mp4d) if mp4d != 'mp4decrypt' else 'mp4decrypt'
         self.token = token
@@ -65,20 +69,21 @@ class Main:
         Main processing function to handle downloading, decrypting, merging, and cleanup of files.
         """
 
-        from mainLogic.big4.dl import DL
-        from mainLogic.big4.decrypt import key
-        from mainLogic.big4.decrypt import decrypt
-        from mainLogic.big4 import merge
-
         if self.verbose:
             Global.dprint("Starting Main Process... for ID: " + self.id)
 
-        # 1. Downloading Files
+        # 1. Downloading Files (New Download Method using VSD)
 
-        dl = DL()
-        audio, video = dl.downloadAudioAndVideo(self.id, f'{self.name}-enc', self.directory, self.tmpDir, self.nm3Path,
-                                                self.ffmpeg, self.verbose, progress_callback=self.progress_callback)
+        audio, video = Download(self.vsd,
+                                Download.buildUrl(self.id),
+                                self.name,
+                                self.tmpDir,
+                                self.directory,
+                                progress_callback=self.progress_callback).download()
 
+        # dl = DL()
+        # audio, video = dl.downloadAudioAndVideo(self.id, f'{self.name}-enc', self.directory, self.tmpDir, self.nm3Path,
+        #                                         self.ffmpeg, self.verbose, progress_callback=self.progress_callback)
 
         # 2. Decrypting Files
 
@@ -87,13 +92,13 @@ class Main:
         TOKEN = self.token
         fetcher = LicenseKeyFetcher(TOKEN)
 
-        key = fetcher.get_key(self.id, verbose=self.verbose)
+        key = fetcher.get_key(self.id, verbose=self.verbose)[1]
 
-        decrypt = decrypt.Decrypt()
+        decrypt = Decrypt()
 
-        decrypt.decryptAudio(self.directory, f'{self.name}-enc', key, mp4d=self.mp4d, outfile=self.name,
+        decrypt.decryptAudio(self.directory, f'{self.name}-Audio-enc', key, mp4d=self.mp4d, outfile=self.name,
                              verbose=self.verbose, suppress_exit=self.suppress_exit)
-        decrypt.decryptVideo(self.directory, f'{self.name}-enc', key, mp4d=self.mp4d, outfile=self.name,
+        decrypt.decryptVideo(self.directory, f'{self.name}-Video-enc', key, mp4d=self.mp4d, outfile=self.name,
                              verbose=self.verbose, suppress_exit=self.suppress_exit)
 
         # Call the progress callback for decryption completion
@@ -106,7 +111,7 @@ class Main:
 
         # 3. Merging Files
 
-        merge = merge.Merge()
+        merge = Merge()
         merge.ffmpegMerge(f"{self.directory}/{self.name}-Video.mp4", f"{self.directory}/{self.name}-Audio.mp4",
                           f"{self.directory}/{self.name}.mp4", ffmpeg_path=self.ffmpeg, verbose=self.verbose)
 
@@ -117,7 +122,6 @@ class Main:
                 "str": "merge-completed",
                 "next": "cleanup"
             })
-
 
         # 4. Cleanup
         clean = Clean()

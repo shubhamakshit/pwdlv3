@@ -123,7 +123,7 @@ class LicenseKeyFetcher:
                     if verbose: Global.sprint(f"Key: {key}")
 
                     if verbose:Global.hr()
-                    return key
+                    return (kid,key)
             else:
                 Global.errprint("Could not get the key from the server. Exiting...")
                 return None

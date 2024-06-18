@@ -8,10 +8,11 @@ class Global:
 
     # PREFERENCES_FILE is currently not used in mainLogic Project
     # only used in beta project
-    PREFERENCES_FILE = "defaults.json"
+    import os
+    PREFERENCES_FILE = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../defaults.json'))
 
     disable_hr = False
-    EXECUTABLES = ['ffmpeg', 'mp4decrypt', 'nm3']
+    EXECUTABLES = ['ffmpeg', 'mp4decrypt', 'vsd']
     api_webdl_directory = "webdl"
 
     def __init__(self, vout=True, outDir="./"):
