@@ -17,12 +17,13 @@ class Decrypt:
         # during various tests
         # it was found that the decrypted audio file is named as <name>.en.m4a 
         # hence a simple logic to work around this issue is to check if the file exists
-        if not os.path.exists(f'{path}/{name}.m4a') and out == "Audio":
-            name = name + ".en"
+        # if not os.path.exists(f'{path}/{name}.m4a') and out == "Audio":
+        #     name = name + ".en"
 
         # setting extension based on out
         # i.e if out is Audio then extension is 'm4a' else 'mp4'
-        extension = "m4a" if out == "Audio" else "mp4"
+        # extension = "m4a" if out == "Audio" else "mp4"
+        extension = "mp4" # temporary fix
 
         decrypt_command = f'{mp4d} --key 1:{key} {path}/{name}.{extension} {path}/{"" if not outfile else outfile+"-" }{out}.mp4'
 

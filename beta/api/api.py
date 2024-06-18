@@ -28,11 +28,11 @@ def download_pw_video(task_id, id, name, out_dir, progress_callback):
 
     ch = CheckState()
     prefs = ch.checkup(Global.EXECUTABLES, directory="./", verbose=True)
-    nm3 = prefs['nm3']
+    vsd = prefs['vsd']
     ffmpeg = prefs['ffmpeg']
     mp4d = prefs['mp4decrypt']
     verbose = True
-    Main(id=id, name=f"{name}-{task_id}", directory=out_dir, tmpDir="/*auto*/", nm3Path=nm3, ffmpeg=ffmpeg, mp4d=mp4d, verbose=verbose, progress_callback=progress_callback).process()
+    Main(id=id, name=f"{name}-{task_id}", directory=out_dir, tmpDir="/*auto*/", vsdPath=vsd, ffmpeg=ffmpeg, mp4d=mp4d, verbose=verbose, progress_callback=progress_callback).process()
 
 
 @app.route('/create_task', methods=['POST'])

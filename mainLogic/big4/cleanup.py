@@ -11,8 +11,8 @@ class Clean:
 
     def remove(self,path,file,verbose=True):
 
-        audio_enc = f"{path}/{file}-enc.m4a" if os.path.exists(f"{path}/{file}-enc.m4a") else f"{path}/{file}-enc.en.m4a"
-        video_enc = f"{path}/{file}-enc.mp4"
+        audio_enc = f"{path}/{file}-Audio-enc.mp4"
+        video_enc = f"{path}/{file}-Video-enc.mp4"
 
         audio = f"{path}/{file}-Audio.mp4"
         video = f"{path}/{file}-Video.mp4"
