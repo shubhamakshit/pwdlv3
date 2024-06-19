@@ -8,5 +8,38 @@ if errorlevel 1 (
     exit /b 1
 )
 
+REM Define paths to executables
+set SCRIPT_DIR=%~dp0
+set BIN_DIR=%SCRIPT_DIR%bin
+set MP4DECRYPT=%BIN_DIR%\mp4decrypt.exe
+set VSD=%BIN_DIR%\vsd.exe
+
+REM Check if bin directory exists, create if it doesn't
+if not exist "%BIN_DIR%" (
+    mkdir "%BIN_DIR%"
+)
+
+REM Check if mp4decrypt.exe exists
+if not exist "%MP4DECRYPT%" (
+    echo mp4decrypt.exe not found. Downloading...
+    powershell -Command "Invoke-WebRequest -Uri 'https://github.com/shubhamakshit/pwdlv3_assets/raw/main/Windows/x86_64/mp4decrypt.exe' -OutFile '%MP4DECRYPT%'" >nul 2>&1
+    if errorlevel 1 (
+        echo Failed to download mp4decrypt.exe
+    ) else (
+        echo Successfully downloaded mp4decrypt.exe
+    )
+)
+
+REM Check if vsd.exe exists
+if not exist "%VSD%" (
+    echo vsd.exe not found. Downloading...
+    powershell -Command "Invoke-WebRequest -Uri 'https://github.com/shubhamakshit/pwdlv3_assets/raw/main/Windows/x86_64/vsd.exe' -OutFile '%VSD%'" >nul 2>&1
+    if errorlevel 1 (
+        echo Failed to download vsd.exe
+    ) else (
+        echo Successfully downloaded vsd.exe
+    )
+)
+
 REM Run the Python script with the provided arguments
 py "%~dp0pwdl.py" %*
