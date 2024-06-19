@@ -7,6 +7,10 @@ curl -o defaults.json https://raw.githubusercontent.com/shubhamakshit/pwdlv3/mai
 curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
 python_installed=false
 
+# get architecture and os
+# supported (linux64 , linuxarm, androidaarch64)
+
+
 if command -v python &> /dev/null
 then
     python_installed=true
@@ -31,6 +35,14 @@ rm get-pip.py
 # Get the absolute path of the script's directory
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+arch=$(uname -m)
+os=$(uname -o)
+mp4decrypt_url="https://raw.githubusercontent.com/shubhamakshit/pwdlv3_assets/main/$os/$arch/mp4decrypt"
+vsd_url="https://raw.githubusercontent.com/shubhamakshit/pwdlv3_assets/main/$os/$arch/vsd"
+
+# download mp4decrypt and vsd to bin
+curl -o $SCRIPT_DIR/bin/mp4decrypt $mp4decrypt_url
+curl -o $SCRIPT_DIR/bin/vsd $vsd_url
 chmod +x $SCRIPT_DIR/bin/*
 
 # Check if 'alias pwdl' is already present in ~/.bashrc
