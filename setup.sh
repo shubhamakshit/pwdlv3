@@ -41,6 +41,7 @@ mp4decrypt_url="https://raw.githubusercontent.com/shubhamakshit/pwdlv3_assets/ma
 vsd_url="https://raw.githubusercontent.com/shubhamakshit/pwdlv3_assets/main/$os/$arch/vsd"
 
 # download mp4decrypt and vsd to bin
+mkdir -p $SCRIPT_DIR/bin
 curl -o $SCRIPT_DIR/bin/mp4decrypt $mp4decrypt_url
 curl -o $SCRIPT_DIR/bin/vsd $vsd_url
 chmod +x $SCRIPT_DIR/bin/*
