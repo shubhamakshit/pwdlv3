@@ -15,14 +15,14 @@ if command -v python &> /dev/null
 then
     python_installed=true
     echo "Python is installed"
-    python get-pip.py
-    python -m pip install -r requirements.txt
+    python get-pip.py --break-system-packages
+    python -m pip install -r requirements.txt --break-system-packages
 elif command -v python3 &> /dev/null
 then
     python_installed=true
     echo "Python3 is installed"
-    python3 get-pip.py
-    python3 -m pip install -r requirements.txt
+    python3 get-pip.py --break-system-packages
+    python3 -m pip install -r requirements.txt --break-system-packages
 else
     echo "Python is not installed"
     # exit if python is not installed
