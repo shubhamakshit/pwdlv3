@@ -2,9 +2,10 @@ import threading
 import time
 import uuid
 
+
 class TaskManager:
 
-    def handle_completion (self, task_id):
+    def handle_completion(self, task_id):
         print(f"Task {task_id} completed")
         self.tasks[task_id]['status'] = 'completed'
 
@@ -16,16 +17,26 @@ class TaskManager:
 
     def create_task(self, target, *args):
         task_id = str(uuid.uuid4())
-        thread = threading.Thread(target=self._run_task, args=(task_id, target, *args))
+
+        args_dict = args[0]
+        try:
+            name = args_dict['name']
+            id = args_dict['id']
+            out_dir = args_dict['out_dir']
+        except KeyError:
+            raise ValueError('name, id, and out_dir are required in args')
+
+        thread = threading.Thread(target=self._run_task, args=(task_id, target, name, id, out_dir, *args[1:]))
         with self.lock:
-            self.tasks[task_id] = {'progress': "0", 'status': 'running'}
+            self.tasks[task_id] = {'progress': "0", 'status': 'running', 'name': name}
         thread.start()
         return task_id
 
     def _run_task(self, task_id, target, *args):
         try:
-            target(task_id,*args, progress_callback=lambda progress: self._update_progress(task_id, progress))
+            target(task_id, *args, progress_callback=lambda progress: self._update_progress(task_id, progress))
             with self.lock:
+                self.tasks[task_id]['url'] = f'/get-file/{task_id}/{self.tasks[task_id]["name"]}'
                 self.tasks[task_id]['status'] = 'completed'
         except Exception as e:
             with self.lock:

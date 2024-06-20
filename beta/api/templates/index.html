@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Downloader</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        input, button {
+            display: block;
+            width: 100%;
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+        }
+        .progress-container {
+            margin-top: 20px;
+        }
+        .progress {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .progress-bar {
+            width: 100%;
+            background: #ddd;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-right: 10px;
+        }
+        .progress-bar-inner {
+            height: 10px;
+            background-color: #28a745;
+            width: 0;
+        }
+        .status {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Video Downloader</h1>
+        <input type="text" id="videoId" placeholder="Enter Video ID">
+        <input type="text" id="videoName" placeholder="Enter Video Name">
+        <button onclick="createTask()">Download Video</button>
+        <div class="progress-container">
+            <div class="progress">
+                <div class="progress-bar">
+                    <div class="progress-bar-inner" id="progressBar"></div>
+                </div>
+                <span id="progressText">0%</span>
+            </div>
+        </div>
+        <div class="status" id="status"></div>
+        <div id="downloadLink"></div>
+    </div>
+
+    <script>
+        let taskId;
+
+        async function createTask() {
+            const videoId = document.getElementById('videoId').value;
+            const videoName = document.getElementById('videoName').value;
+
+            if (!videoId || !videoName) {
+                alert('Please enter both video ID and name.');
+                return;
+            }
+
+            const response = await fetch('/create_task', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ id: videoId, name: videoName })
+            });
+
+            const result = await response.json();
+
+            if (response.status === 202) {
+                taskId = result.task_id;
+                document.getElementById('progressText').innerText = '0%';
+                document.getElementById('progressBar').style.width = '0%';
+                document.getElementById('status').innerText = '';
+                document.getElementById('downloadLink').innerHTML = '';
+                checkProgress();
+            } else {
+                alert(result.error);
+            }
+        }
+
+        async function checkProgress() {
+            if (!taskId) return;
+
+            const response = await fetch(`/progress/${taskId}`);
+            const progress = await response.json();
+
+            document.getElementById('progressText').innerText = `${progress.progress}%`;
+            document.getElementById('progressBar').style.width = `${progress.progress}%`;
+
+            if (progress.progress < 100) {
+                setTimeout(checkProgress, 1000);
+            } else {
+                const statusText = `Status: ${progress.str} (${progress.next})`;
+                document.getElementById('status').innerText = statusText;
+
+                if (progress.status === 'completed') {
+                    document.getElementById('downloadLink').innerHTML = `
+                        <a href="${progress.url}" download>Download ${progress.name}</a>
+                    `;
+                }
+            }
+        }
+    </script>
+</body>
+</html>

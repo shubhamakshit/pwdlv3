@@ -24,7 +24,7 @@ errorList = {
     },
     "downloadFailed": {
         "code": 5,
-        "func": lambda name, id: Global.errprint(f"Download failed for {name} with id {id}. Exiting..."),
+        "func": lambda name, id: Global.errprint(f"Download failed for {name} with id {id}. (Main.process exited) Exiting..."),
     },
     "couldNotMakeDir":{
         "code": 6,
@@ -33,6 +33,10 @@ errorList = {
     "tokenNotFound": {
         "code": 7,
         "func": lambda: Global.errprint("Token not found in default settings. Exiting..."),
+    },
+    "overWriteAbortedByUser": {
+        "code": 8,
+        "func": lambda: Global.errprint("Overwrite aborted by user. Exiting..."),
     },
     "cantLoadFile": {
         "code": 22,
