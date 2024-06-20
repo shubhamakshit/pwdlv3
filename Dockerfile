@@ -8,7 +8,7 @@ WORKDIR /app
 ADD . /app
 
 # Install ffmpeg
-RUN apt-get update && apt-get install -y ffmpeg && apt-get install curl
+RUN apt-get update && apt-get install -y ffmpeg && apt-get install curl -y
 
 # Create a virtual environment and activate it
 RUN python -m venv /opt/venv
