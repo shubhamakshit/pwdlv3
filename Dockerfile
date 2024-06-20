@@ -32,4 +32,4 @@ RUN chmod +x ./bin/*
 RUN mkdir webdl
 
 # Run gunicorn when the container launches
-CMD ["nohup","gunicorn", "-b", "0.0.0.0:7680", "beta.api.api:app", "&"]
+RUN python ./beta/api/api.py &
