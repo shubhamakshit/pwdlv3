@@ -111,6 +111,7 @@ def main():
                          ).process()
 
                 except Exception as e:
+                    if verbose: Global.hr(); glv.errprint(f"Error: {e}")
                     errorList['downloadFailed']['func'](name, id)
 
 
@@ -138,6 +139,7 @@ def main():
                  verbose=verbose).process()
 
         except Exception as e:
+            if verbose: Global.hr(); glv.errprint(f"Error: {e}")
             errorList['downloadFailed']['func'](args.name, args.id)
             sys.exit(errorList['downloadFailed']['code'])
 
