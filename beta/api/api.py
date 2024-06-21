@@ -7,8 +7,12 @@ from mainLogic.main import Main
 from mainLogic.startup.checkup import CheckState
 from mainLogic.utils.glv import Global
 from mainLogic.utils.basicUtils import BasicUtils
+from flask_cors import CORS, cross_origin
+
 
 app = Flask(__name__)
+CORS(app)
+
 task_manager = TaskManager()
 
 OUT_DIR = Global.api_webdl_directory
@@ -80,10 +84,12 @@ def get_key():
     key = fetcher.get_key(vid_id)
     return jsonify({'key': key}), 200
 
+@app.route('/util')
+def json():
+    return render_template('util.html')
 @app.route('/', methods=['GET'])
 def index():
     return render_template('index.html')
     return jsonify({'message': 'Hello, World!'}), 200
 
-# if __name__ == '__main__':
-#     app.run(debug=True)
+if __name__ == '__main__':app.run(debug=True,port=7680)

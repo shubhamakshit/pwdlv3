@@ -32,4 +32,9 @@ RUN chmod +x ./bin/*
 RUN mkdir webdl
 
 # Run gunicorn when the container launches
-RUN python ./beta/api/api.py &
+#RUN python ./beta/api/api.py
+#RUN echo "from beta.api.api import app" > ./run.py
+#RUN echo "app.run(host='0.0.0.0',port=7680)" >> ./run.py
+#CMD ["python", "run.py", "&"]
+
+CMD ["gunicorn", "--workers", "8", "--bind", "0.0.0.0:7680", "app:app"]

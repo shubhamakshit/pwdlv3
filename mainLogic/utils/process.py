@@ -10,6 +10,9 @@ def shell(command, filter=None, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
 
     command = to_list(command)
 
+    print(f"Running command: {command}")
+
+
     process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding='utf-8', universal_newlines=True)
 
     while True:
