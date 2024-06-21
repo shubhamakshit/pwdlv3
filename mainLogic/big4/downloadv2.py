@@ -3,6 +3,8 @@ import re
 from mainLogic import error
 from mainLogic.utils.process import shell
 from mainLogic.utils.glv import Global
+
+
 class Download:
 
     @staticmethod
@@ -12,6 +14,7 @@ class Download:
             exit(error.errorList["idNotProvided"]["code"])
 
         return f"https://d1d34p8vz63oiq.cloudfront.net/{id}/master.mpd"
+
     def __init__(self,
                  vsd_path,
                  url,
@@ -39,9 +42,8 @@ class Download:
         except Exception as e:
             Global.errprint(f"Could not remove tmp directory : {e}")
 
-        return (self.output_path + '/' + self.name + "-Video-enc.mp4", self.output_path + '/' +self.name + "-Audio-enc.mp4")
-
-
+        return (
+        self.output_path + '/' + self.name + "-Video-enc.mp4", self.output_path + '/' + self.name + "-Audio-enc.mp4")
 
     def download(self):
         """
@@ -49,27 +51,27 @@ class Download:
         """
         # Download the video file
         # Save the video file to the output path
-        shell(
-            f"{self.vsd_path} "  +
-            "save "              +
-            f"{self.url} "       +
-            "--skip-prompts "    +
-            "-t 16 "             +
-            "--no-decrypt "      +
-            " --raw-prompts "     +
-            f"-d {self.tmp_path}",
+        shell([
+            f"{self.vsd_path}",
+            "save",
+            f"{self.url}",
+            "--skip-prompts",
+            "--raw-prompts",
+            "-t",
+            "16",
+            "--no-decrypt",
+            "-d",
+            f'{self.tmp_path}'],
             filter=r"^\d+\.\d+ / \d+ MiB [╸━]+ \d+(\.\d+)?% •\s+\d+/\d+ • \d+:\d+ > \d+:\d+ • \d+(\.\d+)? SEG/s • .+$",
             progress_callback=self.progress_callback,
             handleProgress=self.handleDownloadProgress,
             inline_progress=True,
 
-
-
         )
 
         return self.perform_cleanup()
 
-    def handleDownloadProgress(self,progress):
+    def handleDownloadProgress(self, progress):
         """
         Handle the progress of the download process.
         """
@@ -90,6 +92,5 @@ class Download:
             progress_f = 0.0
 
         output["progress"] = progress_f
-
 
         return output
