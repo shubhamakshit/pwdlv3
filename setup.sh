@@ -10,19 +10,31 @@ python_installed=false
 # get architecture and os
 # supported (linux64 , linuxarm, androidaarch64)
 
+arch=$(uname -m)
+os=$(uname -o)
 
 if command -v python &> /dev/null
 then
     python_installed=true
     echo "Python is installed"
-    python get-pip.py --break-system-packages
-    python -m pip install -r requirements.txt --break-system-packages
+    if [[ $os == "Android" ]]
+    then
+        echo "Python is installed but get pip not supported on android"
+    else
+        python get-pip.py
+    fi
+    python -m pip install -r requirements.txt 
 elif command -v python3 &> /dev/null
 then
     python_installed=true
     echo "Python3 is installed"
-    python3 get-pip.py --break-system-packages
-    python3 -m pip install -r requirements.txt --break-system-packages
+    if [[ $os == "Android" ]]
+    then
+        echo "Python is installed but get pip not supported on android"
+    else
+        python get-pip.py
+    fi
+    python3 -m pip install -r requirements.txt 
 else
     echo "Python is not installed"
     # exit if python is not installed
@@ -35,8 +47,7 @@ rm get-pip.py
 # Get the absolute path of the script's directory
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-arch=$(uname -m)
-os=$(uname -o)
+
 mp4decrypt_url="https://raw.githubusercontent.com/shubhamakshit/pwdlv3_assets/main/$os/$arch/mp4decrypt"
 vsd_url="https://raw.githubusercontent.com/shubhamakshit/pwdlv3_assets/main/$os/$arch/vsd"
 
