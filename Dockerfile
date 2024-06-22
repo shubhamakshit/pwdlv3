@@ -58,4 +58,4 @@ RUN curl -o defaults.json https://raw.githubusercontent.com/shubhamakshit/pwdlv3
 RUN mkdir /app/webdl
 
 # Run gunicorn when the container launches
-CMD ["gunicorn", "--workers", "8", "--bind", "0.0.0.0:7680", "app:app"]
+CMD ["python","run.py"]
