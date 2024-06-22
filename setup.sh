@@ -47,7 +47,6 @@ rm get-pip.py
 # Get the absolute path of the script's directory
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-
 mp4decrypt_url="https://raw.githubusercontent.com/shubhamakshit/pwdlv3_assets/main/$os/$arch/mp4decrypt"
 vsd_url="https://raw.githubusercontent.com/shubhamakshit/pwdlv3_assets/main/$os/$arch/vsd"
 
