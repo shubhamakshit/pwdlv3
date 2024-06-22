@@ -29,13 +29,13 @@ COPY ./defaults.linux.json ./defaults.json
 COPY setup.sh ./setup.sh
 
 # Run setup.sh script
-RUN chmod +x ./setup.sh && ./setup.sh
+RUN chmod +x /app/setup.sh && /app/setup.sh
 
 # Ensure bin directory scripts are executable
-RUN chmod +x ./bin/*
+RUN chmod +x /app/bin/*
 
 # Create webdl directory
-RUN mkdir webdl
+RUN mkdir /app/webdl
 
 # Run gunicorn when the container launches
 CMD ["gunicorn", "--workers", "8", "--bind", "0.0.0.0:7680", "app:app"]
