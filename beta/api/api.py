@@ -43,7 +43,7 @@ def download_pw_video(task_id, name, id, out_dir, progress_callback):
          token=prefs['token'],
          directory=out_dir, tmpDir="/*auto*/", vsdPath=vsd, ffmpeg=ffmpeg, mp4d=mp4d, verbose=verbose, progress_callback=progress_callback).process()
 
-
+@app.route('/api/create_task',methods=['POST'])
 @app.route('/create_task', methods=['POST'])
 def create_task():
     data = request.json
@@ -62,11 +62,13 @@ def create_task():
     task_id = task_manager.create_task(download_pw_video, args)
     return jsonify({'task_id': task_id}), 202
 
+@app.route('/api/progress/<task_id>', methods=['GET'])
 @app.route('/progress/<task_id>', methods=['GET'])
 def get_progress(task_id):
     progress = task_manager.get_progress(task_id)
     return jsonify(progress), 200
 
+@app.route('/api/get-file/<task_id>/<name>', methods=['GET'])
 @app.route('/get-file/<task_id>/<name>', methods=['GET'])
 def get_file(task_id,name):
     file = BasicUtils.abspath(f"{OUT_DIR}/{name}-{task_id}.mp4")
