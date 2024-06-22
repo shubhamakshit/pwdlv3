@@ -20,7 +20,7 @@ ENV PATH="/opt/venv/bin:$PATH"
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Make port 7680 available to the world outside this container
-EXPOSE 7680
+EXPOSE 5000
 
 # Copy defaults.json from the given URL
 COPY ./defaults.linux.json ./defaults.json
@@ -56,5 +56,12 @@ RUN curl -o defaults.json https://raw.githubusercontent.com/shubhamakshit/pwdlv3
 
 # Create webdl directory
 RUN mkdir /app/webdl
+
+#set flask app
+ENV FLASK_DEBUG=1
+ENV FLASK_ENV=development
+ENV FLASK_APP=run:app
+
+ENTRYPOINT ["flask", "run", "--host=0.0.0.0"]
 
 
