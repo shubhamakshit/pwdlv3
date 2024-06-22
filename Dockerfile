@@ -19,8 +19,8 @@ ENV PATH="/opt/venv/bin:$PATH"
 # Install any needed packages specified in requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-## Make port 7680 available to the world outside this container
-#EXPOSE 7680
+# Make port 7680 available to the world outside this container
+EXPOSE 7680
 
 # Copy defaults.json from the given URL
 COPY ./defaults.linux.json ./defaults.json
@@ -57,7 +57,4 @@ RUN curl -o defaults.json https://raw.githubusercontent.com/shubhamakshit/pwdlv3
 # Create webdl directory
 RUN mkdir /app/webdl
 
-EXPOSE 8000
-
-ENTRYPOINT ["python", "./run.py"]
 
