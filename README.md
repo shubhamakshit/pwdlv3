@@ -1,167 +1,141 @@
----
-title: PhysicsWallah M3u8 Parser
-emoji: 💻🐳
-colorFrom: gray
-colorTo: green
-sdk: docker
-pinned: false
-suggested_storage: small
-license: mit
----
-# PhysicsWallah M3u8 Parser
+# Table of Contents
+1. [Project Information](#project-information)
+2. [Tools Used](#tools-used)
+3. [Getting Started](#getting-started)
+    - [Windows](#windows)
+    - [Linux](#linux)
+4. [Usage](#usage)
+5. [API Reference](#api-reference)
+6. [Docker Usage](#docker-usage)
+7. [Error Codes](#error-codes)
+8. [Contributing](#contributing)
+9. [License](#license)
 
-This is a Python script that parses M3u8 files. It uses the argparse library to handle command-line arguments.
+# Project Information
+pwdlv3 is a project aimed at downloading videos from pw.live. It is written in Python and JavaScript, and uses pip for dependency management.
 
-## Dependencies
+# Tools Used
 
-The script requires the following executables to be available in the PATH or the user should provide the path to the executables:
+- **Python**: The main programming language used for developing the project. It is used for scripting the backend logic of the application.
 
-- [ffmpeg](https://ffmpeg.org/download.html)
-- [mp4decrypt](https://www.bento4.com/downloads/)
-- [nm3](https://github.com/nilaoda/N_m3u8DL-RE) (renamed to nm3 in the script)
+- **JavaScript**: Used for handling frontend logic of the application.
 
-The script also requires the following Python libraries (which are listed in the `requirements.txt` file):
+- **pip**: The package installer for Python. It is used for managing project dependencies.
 
-- `requests`: A library for making HTTP requests. It abstracts the complexities of making requests behind a simple API, allowing you to send HTTP/1.1 requests.
-- `colorama`: Makes ANSI escape character sequences work on Windows and Unix systems, allowing colored terminal text and cursor positioning.
-- `argparse`: Provides a way to specify command line arguments and options the program is supposed to accept.
-- `bs4` (BeautifulSoup4): A library for pulling data out of HTML and XML files. It provides Pythonic idioms for iterating, searching, and modifying the parse tree.
-- `flask`: A micro web framework written in Python. It does not require particular tools or libraries, it has no database abstraction layer, form validation, or any other components where pre-existing third-party libraries provide common functions.
-- `flask_socketio`: Gives Flask applications access to low latency bi-directional communications between the clients and the server. The client-side application can use any of the Socket.IO official clients libraries in Javascript, C++, Java and Swift, or any compatible client to establish a permanent connection to the server.
+- **Flask**: A micro web framework written in Python. It is used for handling HTTP requests and rendering the web user interface.
 
-To install these dependencies, you would typically run `pip install -r requirements.txt` in your command line.
+- **Docker**: A platform used for containerization. It is used to create, deploy, and run the application by using containerization. It ensures that the application works uniformly across different computing environments.
 
-or if you want to install them individually, you can run the following commands:
+- **VSD**: A tool used for downloading MPD (MPEG-DASH) files. It is an essential part of the video downloading process. You can find more about it [here](https://github.com/clitic/vsd).
 
-`pip install requests colorama argparse bs4 flask flask_socketio`
+- **Bento4's mp4decrypt**: A tool used for decrypting encrypted MP4 files. It is a part of the Bento4 toolkit and is used in the process of downloading and decrypting videos.
 
-## Usage
+- **FFmpeg**: A tool used for handling multimedia data. It is used for merging audio and video files in the project.
 
-You can use the script with the following command-line arguments:
+Please replace the placeholders with the actual information about your project.
 
-- `--csv-file`: Input csv file. Legacy Support too.
-- `--id`: PhysicsWallah Video Id for single usage. Incompatible with --csv-file. Must be used with --name.
-- `--name`: Name for the output file. Incompatible with --csv-file. Must be used with --url.
-- `--dir`: Output Directory.
-- `--verbose`: Verbose Output.
-- `--version`: Shows the version of the program.
-- `--simulate`: Simulate the download process. No files will be downloaded.
+# Getting Started
 
-## Example
+## Windows
+1. Clone the repository: `git clone https://github.com/username/pwdlv3.git`
+2. Navigate to the project directory: `cd pwdlv3`
+3. Install the required dependencies: `pip install -r requirements.txt`
+4. Run the setup script: `setup.sh`
+
+## Linux
+1. Clone the repository: `git clone https://github.com/username/pwdlv3.git`
+2. Navigate to the project directory: `cd pwdlv3`
+3. Install the required dependencies: `pip install -r requirements.txt`
+4. Run the setup script: `./setup.sh`
+
+# Usage
+To run the project, use the following command:
 
 ```bash
-python pwdl.py --csv-file input.csv --dir ./output --verbose
+python pwdl.py --options
 ```
 
-This will parse the M3u8 files listed in `input.csv` and save the output in the `./output` directory. The `--verbose` flag is used to enable verbose output.
+- To download a single video: `python pwdl.py --id VIDEO_ID --name VIDEO_NAME`
+- To download multiple videos from a CSV file: `python pwdl.py --csv-file FILE_PATH`
+- To start the shell: `python pwdl.py --shell`
+- To start the WebUI: `python pwdl.py --webui`
 
-## Error Handling
+# API Reference
 
-The script has built-in error handling. If an error occurs during the parsing of a file, the script will print an error message and continue with the next file. If both csv file and id (or name) is provided, the script will exit with error code 3.
+The project provides several API endpoints for interacting with the video downloading service. Here are the available endpoints:
 
-## User Preferences
+- **/api/create_task (POST)**: This endpoint is used to create a new download task. It requires a JSON body with 'id' and 'name' fields. The 'id' is the video ID and 'name' is the name of the output file. It returns a JSON response with a 'task_id' field.
 
-User preferences can be loaded from a `defaults.json` file. These preferences include the temporary directory (`tmpDir`), verbosity of output (`verbose`), and whether to display a horizontal rule (`hr`). If these preferences are not set in the `defaults.json` file, the script will use default values.
+- **/api/progress/<task_id> (GET)**: This endpoint is used to get the progress of a download task. Replace `<task_id>` with the ID of the task. It returns a JSON response with the progress information.
 
-**Note:** The `defaults.json` file must now also include the `token` for the video download process.
+- **/api/get-file/<task_id>/<name> (GET)**: This endpoint is used to download the completed video file. Replace `<task_id>` with the ID of the task and `<name>` with the name of the video. It returns the video file as a download.
 
-## Simulation Mode
+- **/key/vid_id (GET)**: This endpoint is used to get the decryption key for a video. It requires 'vid_id' and 'token' as query parameters. It returns a JSON response with a 'key' field.
 
-The script includes a simulation mode, which can be enabled with the `--simulate` flag. In this mode, the script will print the files that would be processed, but no files will be downloaded.
+Please note that these endpoints are also available without the '/api' prefix. For example, you can use '/create_task' instead of '/api/create_task'.
 
-## Shell Mode
+Sure, here's an updated section for "Docker Usage" in your README.md file. It includes a brief description of the Dockerfile and instructions on how to build and run the Docker image.
 
-The script includes a shell mode, which can be enabled with the `--shell` flag. 
+# Docker Usage
 
-## API Endpoints 
+The Dockerfile in this project is used to create a Docker image that encapsulates the entire application, including all its dependencies. This makes it easy to run the application on any system that has Docker installed, without worrying about installing the correct versions of the dependencies.
 
-This section describes the API endpoints provided by `api.py`.
+The Docker image is named `shubhamakshit:pwdl`.
 
-### Create Task
+## Building the Docker Image
 
-**Endpoint:** `/create_task`
+To build the Docker image, navigate to the project directory and run the following command:
 
-**Method:** `POST`
-
-**Description:** This endpoint is used to create a new download task. It requires a JSON payload with the `id` and `name` of the video to be downloaded.
-
-**Payload:**
-
-```json
-{
-    "id": "<video_id>",
-    "name": "<video_name>"
-}
+```bash
+docker build -t pwdl .
 ```
 
-**Response:** The endpoint returns a JSON object with the `task_id` of the created task.
+This command builds a Docker image using the Dockerfile in the current directory, and tags the image with the name `shubhamakshit/pwdl`.
 
-```json
-{
-    "task_id": "<task_id>"
-}
+## Running the Docker Image
+
+To run the Docker image, use the following command:
+
+```bash
+docker run -p 5000:5000 shubhamakshit/pwdl
 ```
 
-### Get Progress
+This command runs the Docker image and maps port 5000 in the container to port 5000 on the host machine. This allows you to access the application at `http://localhost:5000`.
 
-**Endpoint:** `/progress/<task_id>`
 
-**Method:** `GET`
 
-**Description:** This endpoint is used to get the progress of a specific task. Replace `<task_id>` with the ID of the task.
 
-**Response:** The endpoint returns a JSON object with the progress of the task.
 
-### Get File
+# Error Codes
 
-**Endpoint:** `/get-file/<task_id>/<name>`
+| Code | Description |
+| ---- | ----------- |
+| 0 | No error |
+| 1 | defaults.json not found |
+| 2 | Dependency not found |
+| 3 | Dependency not found in default settings |
+| 4 | CSV file not found |
+| 5 | Download failed |
+| 6 | Could not make directory |
+| 7 | Token not found in default settings |
+| 8 | Overwrite aborted by user |
+| 22 | Can't load file |
+| 23 | Flare is not started |
+| 24 | Request failed due to unknown reason |
+| 25 | Key extraction failed |
+| 26 | Key not provided |
+| 27 | Could not download audio |
+| 28 | Could not download video |
+| 29 | Could not decrypt audio |
+| 30 | Could not decrypt video |
+| 31 | Method is patched |
+| 32 | Could not extract key |
 
-**Method:** `GET`
+# Contributing
+Instructions for how to contribute to the project.
 
-**Description:** This endpoint is used to download the file associated with a specific task. Replace `<task_id>` with the ID of the task and `<name>` with the name of the file.
-
-**Response:** The endpoint returns the requested file as a download.
-
-### Index
-
-**Endpoint:** `/`
-
-**Method:** `GET`
-
-**Description:** This is the index endpoint of the API. It returns a simple greeting message.
-
-**Response:** The endpoint returns a JSON object with a greeting message.
-
-```json
-{
-    "message": "Hello, World!"
-}
+# License
+Information about the project's license.
 ```
 
-Please note that the API must be running for these endpoints to be accessible. You can start the API by running `python ./beta/api/app.py`.
-
-## Error Codes
-
-
-| Error Name                       | Error Code | Error Message                                         |
-|----------------------------------|------------|-------------------------------------------------------|
-| noError                          | 0          | None                                                  |
-| defaultsNotFound                 | 1          | defaults.json not found. Exiting...                   |
-| dependencyNotFound               | 2          | Dependency not found. Exiting...                      |
-| dependencyNotFoundInPrefs        | 3          | Dependency not found in default settings. Exiting...  |
-| csvFileNotFound                  | 4          | CSV file {fileName} not found. Exiting...             |
-| downloadFailed                   | 5          | Download failed for {name} with id {id}. Exiting...   |
-|couldNotMakeDir                   | 6          | Could not make directory {dir}. Exiting...            |
-|tokenNotFound                     | 7          | Token not found. Exiting...                           |
-| cantLoadFile                     | 22         | Can't load file {fileName}                            |
-| requestFailedDueToUnknownReason  | 24         | Request failed due to unknown reason. Status Code: {status_code} |
-| keyExtractionFailed              | 25         | Key extraction failed for id -> {id}. Exiting...      |
-| keyNotProvided                   | 26         | Key not provided. Exiting...                          |
-| couldNotDownloadAudio            | 27         | Could not download audio for id -> {id} Exiting...    |
-| couldNotDownloadVideo            | 28         | Could not download video for {id} Exiting...          |
-| couldNotDecryptAudio             | 29         | Could not decrypt audio. Exiting...                   |
-| couldNotDecryptVideo             | 30         | Could not decrypt video. Exiting...                   |
-| methodPatched                    | 31         | Method is patched. Exiting...                         |
-| couldNotExtractKey               | 32         | Could not extract key. Exiting...                     |
-
-Please note that the `{fileName}`, `{name}`, `{id}`, and `{status_code}` in the Error Message column are placeholders and will be replaced with actual values when the error occurs.
+Please replace the placeholders with the actual information about your project.
