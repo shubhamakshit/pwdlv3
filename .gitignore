@@ -189,3 +189,5 @@ pwdlv3.lnk
 *.m4s
 /tmp
 /bin
+*.un~
+*.py~
