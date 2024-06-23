@@ -46,7 +46,7 @@ def main():
 
     if args.webui:
         from run import app
-        app.run()
+        app.run(host="0.0.0.0")
 
     # user_input is given preference i.e if --verbose is true it will override
     # however if --verbose is false but prefs['verbose'] is true
