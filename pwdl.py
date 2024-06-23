@@ -34,6 +34,7 @@ def main():
     parser.add_argument('--dir', type=str, help='Output Directory')
     parser.add_argument('--verbose', action='store_true', help='Verbose Output')
     parser.add_argument('--shell',action='store_true',help='Start the shell')
+    parser.add_argument('--webui', action='store_true', help='Start the Webui')
     parser.add_argument('--version', action='version', version='%(prog)s 1.0')
     parser.add_argument('--simulate', action='store_true',
                         help='Simulate the download process. No files will be downloaded.)')
@@ -43,6 +44,9 @@ def main():
     if args.shell:
         shell.main()
 
+    if args.webui:
+        from run import app
+        app.run()
 
     # user_input is given preference i.e if --verbose is true it will override
     # however if --verbose is false but prefs['verbose'] is true
