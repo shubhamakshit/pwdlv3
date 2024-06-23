@@ -50,6 +50,9 @@ def create_task():
     id = data.get('id')
     name = data.get('name')
 
+    # delete all files in webdl directory which are older than 45 mins
+    BasicUtils.delete_old_files(OUT_DIR, 1)
+
     if not id or not name:
         return jsonify({'error': 'id and name are required'}), 400
 
