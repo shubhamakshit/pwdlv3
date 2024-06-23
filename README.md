@@ -32,7 +32,7 @@ pwdlv3 is a project aimed at downloading videos from pw.live. It is written in P
 
 - **FFmpeg**: A tool used for handling multimedia data. It is used for merging audio and video files in the project.
 
-Please replace the placeholders with the actual information about your project.
+
 
 # Getting Started
 
@@ -102,6 +102,34 @@ docker run -p 5000:5000 shubhamakshit/pwdl
 
 This command runs the Docker image and maps port 5000 in the container to port 5000 on the host machine. This allows you to access the application at `http://localhost:5000`.
 
+Sure, here's an updated section for "Shell Usage" in your README.md file. It includes a brief description of the shell and instructions on how to use it.
+
+
+# Shell Usage (Beta)
+
+The project includes a shell interface for interacting with the video downloading service. This is currently in beta and may not have all the features of the main application.
+
+To start the shell, use the following command:
+
+```bash
+python pwdl.py --shell
+```
+
+This will start an interactive shell where you can enter commands directly.
+
+Here are some of the available commands:
+
+- `create_task <id> <name>`: This command is used to create a new download task. Replace `<id>` with the video ID and `<name>` with the name of the output file.
+
+- `get_progress <task_id>`: This command is used to get the progress of a download task. Replace `<task_id>` with the ID of the task.
+
+- `get_file <task_id> <name>`: This command is used to download the completed video file. Replace `<task_id>` with the ID of the task and `<name>` with the name of the video.
+
+- `get_key <vid_id> <token>`: This command is used to get the decryption key for a video. Replace `<vid_id>` with the video ID and `<token>` with your token.
+
+- `exit`: This command is used to exit the shell.
+
+Please note that these commands are subject to change as the shell is still in beta.
 
 
 
@@ -131,11 +159,14 @@ This command runs the Docker image and maps port 5000 in the container to port 5
 | 31 | Method is patched |
 | 32 | Could not extract key |
 
-# Contributing
-Instructions for how to contribute to the project.
+[//]: # (# Contributing)
 
-# License
-Information about the project's license.
-```
+[//]: # (Instructions for how to contribute to the project.)
 
-Please replace the placeholders with the actual information about your project.
+[//]: # ()
+[//]: # (# License)
+
+[//]: # (Information about the project's license.)
+
+w
+
