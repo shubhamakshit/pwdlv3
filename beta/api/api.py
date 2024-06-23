@@ -86,6 +86,10 @@ def get_key():
     key = fetcher.get_key(vid_id)
     return jsonify({'key': key}), 200
 
+@app.route('/help')
+def help():
+    return render_template('help.html')
+
 @app.route('/util')
 def json():
     return render_template('util.html')
