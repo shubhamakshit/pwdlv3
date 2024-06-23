@@ -34,6 +34,14 @@ def download_pw_video(task_id, name, id, out_dir, progress_callback):
     ch = CheckState()
     state = ch.checkup(Global.EXECUTABLES, directory="./", verbose=True)
     prefs = state['prefs']
+
+    del_time = prefs['webui-del-time'] if prefs['webui-del-time'] else 45
+
+    print(f"Deleting files older than {del_time} minutes in {OUT_DIR}")
+
+    # delete all files in webdl directory which are older than 45 mins
+    BasicUtils.delete_old_files(OUT_DIR, del_time)
+
     vsd = state['vsd']
     ffmpeg = state['ffmpeg']
     mp4d = state['mp4decrypt']
@@ -50,8 +58,7 @@ def create_task():
     id = data.get('id')
     name = data.get('name')
 
-    # delete all files in webdl directory which are older than 45 mins
-    BasicUtils.delete_old_files(OUT_DIR, 1)
+
 
     if not id or not name:
         return jsonify({'error': 'id and name are required'}), 400
