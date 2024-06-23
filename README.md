@@ -119,13 +119,9 @@ This will start an interactive shell where you can enter commands directly.
 
 Here are some of the available commands:
 
-- `create_task <id> <name>`: This command is used to create a new download task. Replace `<id>` with the video ID and `<name>` with the name of the output file.
-
-- `get_progress <task_id>`: This command is used to get the progress of a download task. Replace `<task_id>` with the ID of the task.
-
-- `get_file <task_id> <name>`: This command is used to download the completed video file. Replace `<task_id>` with the ID of the task and `<name>` with the name of the video.
-
 - `get_key <vid_id> <token>`: This command is used to get the decryption key for a video. Replace `<vid_id>` with the video ID and `<token>` with your token.
+
+- `tkn-up <token>`: This command is used to update the token in the default settings. Replace `<token>` with your new token.  
 
 - `exit`: This command is used to exit the shell.
 
