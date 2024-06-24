@@ -9,5 +9,7 @@
   "ffmpeg": "",
   "mp4decrypt": "$script/bin/mp4decrypt",
   "webui-del-time": 45,
+  "webui": true,
+  "webui-port": "5000",
   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MTkwNTM1MjAuNDgxLCJkYXRhIjp7Il9pZCI6IjY0MzE3NTQyNDBlOTc5MDAxODAwMjAyYiIsInVzZXJuYW1lIjoiOTQ3MjUwNzEwMCIsImZpcnN0TmFtZSI6IkFrc2hpdCBTaHViaGFtIiwibGFzdE5hbWUiOiIiLCJvcmdhbml6YXRpb24iOnsiX2lkIjoiNWViMzkzZWU5NWZhYjc0NjhhNzlkMTg5Iiwid2Vic2l0ZSI6InBoeXNpY3N3YWxsYWguY29tIiwibmFtZSI6IlBoeXNpY3N3YWxsYWgifSwiZW1haWwiOiJha3NoaXRzaHViaGFtbWFzQGdtYWlsLmNvbSIsInJvbGVzIjpbIjViMjdiZDk2NTg0MmY5NTBhNzc4YzZlZiJdLCJjb3VudHJ5R3JvdXAiOiJJTiIsInR5cGUiOiJVU0VSIn0sImlhdCI6MTcxODQ0ODcyMH0.PC0u4feVyT4WSzhBfpfPYB2YKwArJxYJER4R8c2gdD8"
 }

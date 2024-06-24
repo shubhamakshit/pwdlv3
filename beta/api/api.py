@@ -1,5 +1,6 @@
 import os
 import time
+import json
 from flask import Flask, jsonify, request, send_from_directory, send_file, render_template
 from beta.api.task_manager import TaskManager  # Assuming the TaskManager class is in task_manager.py
 from mainLogic.big4.decrypt.key import LicenseKeyFetcher
@@ -35,12 +36,19 @@ def download_pw_video(task_id, name, id, out_dir, progress_callback):
     state = ch.checkup(Global.EXECUTABLES, directory="./", verbose=True)
     prefs = state['prefs']
 
-    del_time = prefs['webui-del-time'] if prefs['webui-del-time'] else 45
+    if 'webui-del-time' in prefs:
+        del_time = prefs['webui-del-time']
+    else:
+        del_time = 45
 
     print(f"Deleting files older than {del_time} minutes in {OUT_DIR}")
 
     # delete all files in webdl directory which are older than 45 mins
-    BasicUtils.delete_old_files(OUT_DIR, del_time)
+    try:
+        BasicUtils.delete_old_files(OUT_DIR, int(del_time))
+    except Exception as e:
+        Global.errprint(f"Could not delete files in {OUT_DIR}")
+        Global.errprint(f"Error: {e}")
 
     vsd = state['vsd']
     ffmpeg = state['ffmpeg']
@@ -107,5 +115,40 @@ def json():
 def index():
     return render_template('index.html')
     return jsonify({'message': 'Hello, World!'}), 200
+
+@app.route('/api/prefs/defaults.json', methods=['GET'])
+@app.route('/prefs/defaults.json', methods=['GET'])
+def get_prefs():
+    file_path = Global.PREFERENCES_FILE
+    if not os.path.exists(file_path):
+        return jsonify({'error': 'file not found'}), 404
+    data = None
+    with open(file_path, 'r') as file:
+        import json as js_on
+        data = js_on.loads(file.read())
+    return jsonify(data), 200
+
+@app.route('/api/update/defaults.json', methods=['POST'])
+@app.route('/update/defaults.json', methods=['POST'])
+def update_prefs():
+    file_path = Global.PREFERENCES_FILE
+    if not os.path.exists(file_path):
+        return jsonify({'error': 'file not found'}), 404
+    try:
+        data = request.json
+    except:
+        return jsonify({'error': 'Invalid JSON'}), 400
+    with open(file_path, 'r') as file:
+        import json as js_on
+        data = js_on.loads(file.read())
+    data.update(request.json)
+    with open(file_path, 'w') as file:
+        import json as js_on
+        js_on.dump(data, file, indent=4)
+    return jsonify(data), 200
+
+@app.route('/prefs')
+def prefs():
+    return render_template('prefs.html')
 
 if __name__ == '__main__':app.run(debug=True,port=7680)
