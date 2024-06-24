@@ -1,3 +1,4 @@
+import re
 import os
 import time
 import json
@@ -28,7 +29,29 @@ except Exception as e:
 
 def setup_directory():
     pass
+
+def generate_safe_folder_name(folder_name: str) -> str:
+    """
+    Generate a safe folder name by replacing spaces with underscores and removing special characters.
+    
+    Parameters:
+    folder_name (str): The original folder name.
+    
+    Returns:
+    str: The safe folder name.
+    """
+    # Replace spaces with underscores
+    safe_name = folder_name.replace(' ', '_')
+    
+    # Remove any characters that are not alphanumeric or underscores
+    safe_name = re.sub(r'[^a-zA-Z0-9_]', '', safe_name)
+    
+    return safe_name
+
 def download_pw_video(task_id, name, id, out_dir, progress_callback):
+
+    name = generate_safe_folder_name(name)
+    
 
     print(f"Downloading {name} with id {id} to {out_dir}")
 
