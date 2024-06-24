@@ -34,7 +34,7 @@ def main():
     parser.add_argument('--dir', type=str, help='Output Directory')
     parser.add_argument('--verbose', action='store_true', help='Verbose Output')
     parser.add_argument('--shell',action='store_true',help='Start the shell')
-    parser.add_argument('--webui', action='store_true', help='Start the Webui')
+    parser.add_argument('--webui', nargs='?', const=-1, type=int, help='Start the Webui')
     parser.add_argument('--version', action='version', version='%(prog)s 1.0')
     parser.add_argument('--simulate', action='store_true',
                         help='Simulate the download process. No files will be downloaded.)')
@@ -44,9 +44,7 @@ def main():
     if args.shell:
         shell.main()
 
-    if args.webui:
-        from run import app
-        app.run(host="0.0.0.0")
+
 
     # user_input is given preference i.e if --verbose is true it will override
     # however if --verbose is false but prefs['verbose'] is true
@@ -58,6 +56,28 @@ def main():
     state = CheckState().checkup(EXECUTABLES, directory=args.dir,verbose=glv.vout)
     prefs = state['prefs']
 
+    if args.webui:
+        from run import app
+        if not prefs['webui']:
+            Global.errprint("WebUI is not enabled in the preferences. Exiting ...")
+            sys.exit(1)
+
+        if 'webui-port' in prefs:
+            port = prefs['webui-port']
+        else:
+            port = 5000
+
+        try:
+            if args.webui != -1 :
+                port = int(args.webui)
+            else:
+                pass
+        except:
+            pass
+
+        if glv.vout: Global.hr(); Global.dprint(f"Starting WebUI on port {port}")
+
+        app.run(host="0.0.0.0",debug=True,port=port)
 
     # --------------------------------------------------------------------------------------------------------------------------------------
     # setting verbose output

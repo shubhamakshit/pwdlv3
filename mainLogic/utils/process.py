@@ -2,7 +2,7 @@ import subprocess
 import re
 import sys
 
-def shell(command, filter=None, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True, progress_callback=None, handleProgress=None, inline_progress=True):
+def shell(command, filter=None, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True, progress_callback=None, handleProgress=None, inline_progress=False):
     import os
 
     # Set PYTHONUNBUFFERED environment variable
@@ -36,7 +36,11 @@ def shell(command, filter=None, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
                     sys.stdout.flush()
                 else:
                     # Print output normally
-                    print(output.strip())
+                    if not stdout == '' or not stdout == None:
+                        continue
+                    print(output)
+
+
 
         except UnicodeEncodeError:
             sys.stdout.write("\rUnicodeEncodeError")
