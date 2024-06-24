@@ -66,7 +66,8 @@ def create_task():
     id = data.get('id')
     name = data.get('name')
 
-
+    # if name contains space etc replace it with _ (and no consequetive _)
+    name = "_".join(name.split())
 
     if not id or not name:
         return jsonify({'error': 'id and name are required'}), 400
