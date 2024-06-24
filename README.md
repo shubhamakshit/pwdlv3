@@ -40,7 +40,7 @@ pwdlv3 is a project aimed at downloading videos from pw.live. It is written in P
 1. Clone the repository: `git clone https://github.com/username/pwdlv3.git`
 2. Navigate to the project directory: `cd pwdlv3`
 3. Install the required dependencies: `pip install -r requirements.txt`
-4. Run the setup script: `setup.sh`
+4. Run the setup script: `pwdl.bat`
 
 ## Linux
 1. Clone the repository: `git clone https://github.com/username/pwdlv3.git`
