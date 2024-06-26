@@ -50,9 +50,7 @@ def generate_safe_folder_name(folder_name: str) -> str:
 
 def download_pw_video(task_id, name, id, out_dir, progress_callback):
 
-    name = generate_safe_folder_name(name)
-    
-
+  
     print(f"Downloading {name} with id {id} to {out_dir}")
 
     ch = CheckState()
@@ -89,8 +87,8 @@ def create_task():
     id = data.get('id')
     name = data.get('name')
 
-    # if name contains space etc replace it with _ (and no consequetive _)
-    name = "_".join(name.split())
+    # generate safe names 
+    name = generate_safe_folder_name(name)
 
     if not id or not name:
         return jsonify({'error': 'id and name are required'}), 400
