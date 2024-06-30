@@ -3,6 +3,7 @@ import os
 from flask import Blueprint, request, jsonify
 
 from mainLogic.utils.glv import Global
+from mainLogic.utils.glv_var import PREFS_FILE
 
 api_prefs = Blueprint('api_prefs', __name__)
 
@@ -10,7 +11,7 @@ api_prefs = Blueprint('api_prefs', __name__)
 @api_prefs.route('/prefs/defaults.json', methods=['GET'])
 def get_prefs():
     import json as js
-    file_path = Global.PREFERENCES_FILE
+    file_path = PREFS_FILE
     if not os.path.exists(file_path):
         return jsonify({'error': 'file not found'}), 404
     with open(file_path, 'r') as file:
@@ -22,7 +23,7 @@ def get_prefs():
 @api_prefs.route('/update/defaults.json', methods=['POST'])
 def update_prefs():
     import json as js
-    file_path = Global.PREFERENCES_FILE
+    file_path = PREFS_FILE
     if not os.path.exists(file_path):
         return jsonify({'error': 'file not found'}), 404
     try:

@@ -3,6 +3,7 @@ from mainLogic.utils.gen_utils import delete_old_files
 from mainLogic.main import Main
 from mainLogic.startup.checkup import CheckState
 from mainLogic.utils.glv import Global
+from mainLogic.utils import glv_var
 
 
 def download_pw_video(task_id, name, id, out_dir, client_id, session_id, progress_callback):
@@ -13,7 +14,7 @@ def download_pw_video(task_id, name, id, out_dir, client_id, session_id, progres
     print(f"Downloading {name} with id {id} to {client_session_dir}")
 
     ch = CheckState()
-    state = ch.checkup(Global.EXECUTABLES, directory="./", verbose=False)
+    state = ch.checkup(glv_var.EXECUTABLES, directory="./", verbose=False)
     prefs = state['prefs']
 
     if 'webui-del-time' in prefs:
@@ -21,7 +22,7 @@ def download_pw_video(task_id, name, id, out_dir, client_id, session_id, progres
     else:
         del_time = 45
 
-    delete_old_files(Global.api_webdl_directory, del_time)
+    delete_old_files(glv_var.api_webdl_directory, del_time)
 
     vsd = state['vsd']
     ffmpeg = state['ffmpeg']

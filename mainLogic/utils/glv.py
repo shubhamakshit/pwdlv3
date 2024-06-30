@@ -1,5 +1,8 @@
 from colorama import Fore, Style, init
+import mainLogic.utils.glv_var
 import shutil
+
+from mainLogic.utils import glv_var
 
 # Initialize colorama
 init()
@@ -9,11 +12,7 @@ class Global:
     # PREFERENCES_FILE is currently not used in mainLogic Project
     # only used in beta project
     import os
-    PREFERENCES_FILE = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../defaults.json'))
-
     disable_hr = False
-    EXECUTABLES = ['ffmpeg', 'mp4decrypt', 'vsd']
-    api_webdl_directory = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../webdl'))
 
     def __init__(self, vout=True, outDir="./"):
         self.outDir = outDir

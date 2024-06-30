@@ -76,28 +76,28 @@ class CheckState:
         # set script path to ../startup
         # this is the path to the folder containing the pwdl.py file
         # since the checkup.py is in the startup folder, we need to go one level up
-        if verbose: Global.hr();Global.dprint("Setting script path...")
-        if verbose: Global.errprint('Warning! Hard Coded \'$script\' location to checkup.py/../../')
-
-        Global.script_path = os.path.abspath(os.path.join(os.path.dirname(__file__),'../..'))
-        default_json = os.path.join(Global.script_path,'defaults.json')
-
-        # check if defaults.json exists
-        # and if it does, load the preferences
-        if verbose: Global.hr();Global.dprint("Checking for default settings...")
-
-        if verbose: Global.hr();Global.dprint(f"Checking at {default_json}")
-        if verbose: Global.errprint('Warning!\nHard Coded \'defaults.json\' location to $script/default.json ')
-
-        if not os.path.exists(default_json):
-            error.errorList["defaultsNotFound"]["func"]()
-            exit(error.errorList["defaultsNotFound"]["code"])
-
-        if verbose: Global.sprint("Default settings found."); Global.hr()
+        # if verbose: Global.hr();Global.dprint("Setting script path...")
+        # if verbose: Global.errprint('Warning! Hard Coded \'$script\' location to checkup.py/../../')
+        #
+        # Global.script_path = os.path.abspath(os.path.join(os.path.dirname(__file__),'../..'))
+        # default_json = os.path.join(Global.script_path,'defaults.json')
+        #
+        # # check if defaults.json exists
+        # # and if it does, load the preferences
+        # if verbose: Global.hr();Global.dprint("Checking for default settings...")
+        #
+        # if verbose: Global.hr();Global.dprint(f"Checking at {default_json}")
+        # if verbose: Global.errprint('Warning!\nHard Coded \'defaults.json\' location to $script/default.json ')
+        #
+        # if not os.path.exists(default_json):
+        #     error.errorList["defaultsNotFound"]["func"]()
+        #     exit(error.errorList["defaultsNotFound"]["code"])
+        #
+        # if verbose: Global.sprint("Default settings found."); Global.hr()
         
         # load the preferences
         from mainLogic.startup.userPrefs import PreferencesLoader
-        prefs = PreferencesLoader(file_name=default_json,verbose=verbose).prefs
+        prefs = PreferencesLoader(verbose=verbose).prefs
 
         # check if method is patched (currently via userPrefs.py)
         if 'patched' in prefs:
