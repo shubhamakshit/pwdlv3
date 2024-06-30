@@ -195,3 +195,4 @@ pwdlv3.lnk
 # ignore all *.test.py files
 *.test.py
 clients.json
+clients.json
