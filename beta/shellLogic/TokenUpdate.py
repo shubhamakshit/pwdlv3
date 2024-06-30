@@ -1,11 +1,12 @@
 from mainLogic.utils.glv import Global
 from beta.shellLogic import simpleParser
+from mainLogic.utils.glv_var import PREFS_FILE
 from beta.shellLogic.update import UpdateJSONFile
 class TokenUpdate:
 
     def __init__(self):
 
-        self.file_path = Global.PREFERENCES_FILE
+        self.file_path = PREFS_FILE
         # hard coding 'defaults.json' as to ../../defaults.json
         #Global.errprint("Warning! This is a beta feature. Use at your own risk.")
         #Global.errprint("Hard Coded to use 'defaults.json' as to ../../defaults.json (in Global.PREFERENCES_FILE)")

@@ -1,8 +1,9 @@
-from mainLogic.big4.dl import DL
+from mainLogic.big4.dl_obsolete import DL
 from mainLogic.startup.checkup import CheckState
 from mainLogic.utils.glv import Global
 from mainLogic.main import Main
 from beta.shellLogic import simpleParser
+from mainLogic.utils import glv_var
 
 
 class HandleShellDL:
@@ -28,7 +29,7 @@ class HandleShellDL:
 
         dl = DL()
         ch =CheckState()
-        prefs = ch.checkup(Global.EXECUTABLES,verbose=False)
+        prefs = ch.checkup(glv_var.EXECUTABLES,verbose=False)
         dl.downloadAudioAndVideo(name=name,
                                  id=id,
                                  directory='./',
@@ -45,7 +46,7 @@ class HandleShellDL:
         id = args[1]
 
         ch = CheckState()
-        prefs = ch.checkup(Global.EXECUTABLES,verbose=False)
+        prefs = ch.checkup(glv_var.EXECUTABLES,verbose=False)
 
         Main(id=id,
              name=name,

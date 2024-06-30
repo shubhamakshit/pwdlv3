@@ -8,6 +8,7 @@ from mainLogic.main import Main
 from beta.shellLogic import shell
 from mainLogic.startup.checkup import CheckState
 from mainLogic.utils.gen_utils import generate_safe_folder_name
+from mainLogic.utils import glv_var
 
 # global variables
 prefs = {}
@@ -16,7 +17,7 @@ os2 = SysFunc()
 
 # hardcoding the list of executables required for the script to run
 # should be available in the PATH or the user should provide the path to the executables
-EXECUTABLES = glv.EXECUTABLES
+EXECUTABLES = glv_var.EXECUTABLES
 
 
 

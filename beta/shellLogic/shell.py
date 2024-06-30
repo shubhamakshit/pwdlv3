@@ -3,9 +3,10 @@ from mainLogic.utils.glv import Global
 from mainLogic.startup.checkup import CheckState
 import json
 from mainLogic.utils.os2 import SysFunc
+from mainLogic.utils import glv_var
 
 glv = Global()
-EXECUTABLES = glv.EXECUTABLES
+EXECUTABLES = glv_var.EXECUTABLES
 os2 = SysFunc()
 
 # Initialize Prompt Toolkit session

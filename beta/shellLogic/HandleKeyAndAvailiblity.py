@@ -1,13 +1,14 @@
 from mainLogic.big4.decrypt.key import LicenseKeyFetcher
 from beta.shellLogic import simpleParser
 from mainLogic.utils.glv import Global
+from mainLogic.utils import glv_var
 
 class HandleKeyAndAvailiblity:
 
     def __init__(self):
         from mainLogic.startup.checkup import CheckState
         ch = CheckState()
-        self.token = ch.checkup(Global.EXECUTABLES,verbose=False)['prefs']['token']
+        self.token = ch.checkup(glv_var.EXECUTABLES,verbose=False)['prefs']['token']
         self.lkf = LicenseKeyFetcher(self.token)
         self.commandList = {
             "get_key":{
