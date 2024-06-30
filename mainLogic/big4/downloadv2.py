@@ -58,7 +58,7 @@ class Download:
             "--skip-prompts",
             "--raw-prompts",
             "-t",
-            "8",
+            "16",
             "--no-decrypt",
             "-d",
             f'{self.tmp_path}'],

@@ -2,7 +2,7 @@ from flask import Blueprint, request, jsonify
 from beta.api.api_dl import download_pw_video
 from beta.api.gen_utils import generate_random_word
 from beta.api.mr_manager.boss_manager import Boss
-
+from beta.api.gen_utils import generate_safe_folder_name
 
 
 session_lodge = Blueprint('session_lodge', __name__)
@@ -35,6 +35,9 @@ def create_session(client_id, session_id):
 
     if len(ids) != len(names):
         return jsonify({'error': 'ids and names must be of equal length'}), 400
+
+    names_safe = [generate_safe_folder_name(name) for name in names]
+    names = names_safe
 
     task_ids = []
 
