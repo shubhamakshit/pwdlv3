@@ -1,6 +1,9 @@
 from flask import Blueprint, request, jsonify
 from beta.api.api_dl import download_pw_video
+from beta.api.gen_utils import generate_random_word
 from beta.api.mr_manager.boss_manager import Boss
+
+
 
 session_lodge = Blueprint('session_lodge', __name__)
 
@@ -19,10 +22,13 @@ def create_session(client_id, session_id):
     session = client_manager.get_client_info(client_id).get('sessions', {}).get(session_id)
     if not session:
         client_manager.add_session(client_id, session_id)
-
+        sess_name = generate_random_word()
+        print(f"Generated session name: {sess_name}")
+        client_manager.set_session_name(client_id, session_id, sess_name)
     data = request.json
     ids = data.get('ids', [])
     names = data.get('names', [])
+
 
     if not ids or not names:
         return jsonify({'error': 'ids and names are required'}), 400
@@ -58,3 +64,16 @@ def start_task(task_id):
     except Exception as e:
         print(e)
         return jsonify({'error': str(e)}), 500
+
+@session_lodge.route('/api/client/<client_id>/delete_client')
+@session_lodge.route('/client/<client_id>/delete_client')
+def delete_client_route(client_id):
+    client_manager.remove_client(client_id)
+    return jsonify({'message': f'Client with ID {client_id} deleted successfully'}), 200
+
+@session_lodge.route('/api/client/<client_id>/<session_id>/delete_session')
+@session_lodge.route('/client/<client_id>/<session_id>/delete_session')
+def delete_session_route(client_id, session_id):
+    client_manager.remove_session(client_id, session_id)
+    return jsonify({'message': f'Session with ID {session_id} for client {client_id} deleted successfully'}), 200
+

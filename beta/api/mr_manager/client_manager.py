@@ -46,7 +46,7 @@ class ClientManager:
     def add_session(self, client_id="anonymous", session_id="anonymous"):
         if client_id in self.clients:
             if session_id not in self.clients[client_id]['sessions']:
-                self.clients[client_id]['sessions'][session_id] = {"tasks": {}}
+                self.clients[client_id]['sessions'][session_id] = {"tasks": {}, "name": ""}
                 self.save_data()
             else:
                 print(f"Session with ID {session_id} already exists for client {client_id}.")
@@ -96,3 +96,24 @@ class ClientManager:
         else:
             print(f"Client with ID {client_id} does not exist.")
             return None
+
+    def set_session_name(self, client_id, session_id, name):
+        if client_id in self.clients and session_id in self.clients[client_id]['sessions']:
+            self.clients[client_id]['sessions'][session_id]['name'] = name
+            self.save_data()
+        else:
+            print(f"Either client with ID {client_id} or session with ID {session_id} does not exist.")
+
+    def delete_session(self, client_id, session_id):
+        if client_id in self.clients and session_id in self.clients[client_id]['sessions']:
+            del self.clients[client_id]['sessions'][session_id]
+            self.save_data()
+        else:
+            print(f"Session with ID {session_id} does not exist for client {client_id}.")
+
+    def delete_client(self, client_id):
+        if client_id in self.clients:
+            del self.clients[client_id]
+            self.save_data()
+        else:
+            print(f"Client with ID {client_id} does not exist.")
