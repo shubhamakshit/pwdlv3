@@ -1,5 +1,5 @@
 import os
-from beta.api.gen_utils import delete_old_files
+from mainLogic.utils.gen_utils import delete_old_files
 from mainLogic.main import Main
 from mainLogic.startup.checkup import CheckState
 from mainLogic.utils.glv import Global

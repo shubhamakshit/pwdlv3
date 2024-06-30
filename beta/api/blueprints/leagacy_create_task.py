@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from beta.api.api_dl import download_pw_video
 from beta.api.mr_manager.boss_manager import Boss
-from beta.api.gen_utils import generate_safe_folder_name
+from mainLogic.utils.gen_utils import generate_safe_folder_name
 
 legacy_create_task = Blueprint('legacy_create_task', __name__)
 
