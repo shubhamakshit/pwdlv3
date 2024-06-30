@@ -191,3 +191,7 @@ pwdlv3.lnk
 /bin
 *.un~
 *.py~
+
+# ignore all *.test.py files
+*.test.py
+clients.json

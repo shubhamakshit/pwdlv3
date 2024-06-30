@@ -13,7 +13,7 @@ class Global:
 
     disable_hr = False
     EXECUTABLES = ['ffmpeg', 'mp4decrypt', 'vsd']
-    api_webdl_directory = "webdl"
+    api_webdl_directory = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../webdl'))
 
     def __init__(self, vout=True, outDir="./"):
         self.outDir = outDir
