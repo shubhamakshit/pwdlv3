@@ -1,6 +1,8 @@
 import os
+import random
 import re
 import time
+import requests
 
 
 def setup_directory():
@@ -61,3 +63,17 @@ def delete_old_files(base_path, t):
                             if int(file_age) > int(age_threshold):
                                 os.remove(file_path)
                                 print(f"Deleted: {file_path}")
+
+
+def generate_random_word():
+    word_site = "https://www.mit.edu/~ecprice/wordlist.10000"
+    response = requests.get(word_site)
+    words = response.content.splitlines()
+
+    int1 = random.randint(0, len(words) - 1)
+    int2 = random.randint(0, len(words) - 1)
+
+    word1 = words[int1].decode("utf-8")
+    word2 = words[int2].decode("utf-8")
+
+    return f"{word1}-{word2}"

@@ -20,3 +20,6 @@ def prefs():
 def help():
     return render_template('help.html')
 
+@template_blueprint.route('/sessions')
+def sessions():
+    return render_template('sessions.html')
