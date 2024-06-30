@@ -7,6 +7,7 @@ import os
 from mainLogic.main import Main
 from beta.shellLogic import shell
 from mainLogic.startup.checkup import CheckState
+from mainLogic.utils.gen_utils import generate_safe_folder_name
 
 # global variables
 prefs = {}
@@ -119,6 +120,7 @@ def main():
         with open(args.csv_file, 'r') as f:
             for line in f:
                 name, id = line.strip().split(',')
+                name = generate_safe_folder_name(name)
 
                 # adding support for csv file with partial errors
                 try:
@@ -153,7 +155,7 @@ def main():
         try:
 
             Main(id=args.id,
-                 name=args.name,
+                 name=generate_safe_folder_name(args.name),
                  directory=OUT_DIRECTORY,
                  ffmpeg=state['ffmpeg'],
                  vsdPath=state['vsd'],
