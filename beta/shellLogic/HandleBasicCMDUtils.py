@@ -17,6 +17,19 @@ class HandleBasicCMDUtils:
                     "regex": r"cls",
                     "func": self.cls
                 },
+
+            "cd":
+                {
+                    "desc": "Change directory",
+                    "regex": r"cd",
+                    "func": self.cd
+                },
+            "cmd":
+                {
+                    "desc": "Run a command",
+                    "regex": r"cmd",
+                    "func": self.cmd
+                },
             "exit":
                 {
                     "desc": "Exit the shell",
@@ -25,14 +38,24 @@ class HandleBasicCMDUtils:
                 },
         }
 
-    def cls(self,args=[]):
+    def cls(self, args=[]):
         os2.clear()
         if args: print(args)
 
-    def exit_shell(self,args=[]):
-        sys.exit(10)
+    def exit_shell(self, args=[]):
+        sys.exit(0)
 
-    def parseAndRun(self, command,args=[]):
+    def cd(self, args=[]):
+        if args:
+            os2.cd(args[0])
+        else:
+            os2.cd()
+
+    def cmd(self, args=[]):
+        import os
+        os.system(" ".join(args))
+
+    def parseAndRun(self, command, args=[]):
         # for key in self.commandList:
         #     if re.match(self.commandList[key]["regex"], command):
         #         self.commandList[key]["func"]()

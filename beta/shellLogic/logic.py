@@ -14,6 +14,8 @@ commands_available={
     # command: [location_of_function,help_class]
     "exit": [f1.parseAndRun,""],
     "cls" : [f1.parseAndRun,""],
+    "cd"  : [f1.parseAndRun,""],
+    "cmd" : [f1.parseAndRun,""],
     "get_key":[key_utils.parseAndRun,""],
     "check": [key_utils.parseAndRun,""],
     "edl": [dl_utils.parseAndRun,""],
