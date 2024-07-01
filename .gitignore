@@ -196,3 +196,4 @@ pwdlv3.lnk
 *.test.py
 clients.json
 clients.json
+/csv_files/
