@@ -34,6 +34,21 @@ class CheckState:
 
         # setting up directory for pwdl
         if "dir" in prefs:
+            try:
+                if not os.path.exists(os.path.expandvars(prefs['dir'])):
+                    try:
+                        os.makedirs(os.path.expandvars(prefs['dir']))
+                    except OSError as exc:
+                        error.errorList["couldNotMakeDir"]['func'](os.path.expandvars(prefs['dir']))
+                        Global.errprint("Failed to create Output Directory")
+                        Global.errprint("Falling Back to Default")
+            except TypeError:
+                pass
+            except Exception as e:
+                Global.errprint(f"Error: {e}")
+                Global.errprint("Falling back to default")
+                OUT_DIRECTORY = './'
+
             try: OUT_DIRECTORY = os.path.abspath(os.path.expandvars(prefs['dir']))
 
             # if the user provides a non-string value for the directory or dir is not found
@@ -67,6 +82,7 @@ class CheckState:
             Global.errprint(f"An error occurred while getting the key: {e}")
             Global.errprint("Your Token is Invalid! ")
             return None
+
 
 
     def checkup(self,executable,directory="./",verbose=True):
