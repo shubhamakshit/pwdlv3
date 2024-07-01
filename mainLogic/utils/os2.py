@@ -61,4 +61,11 @@ class SysFunc:
         absolute_path = os.path.abspath(expanded_path)
         modified_path = absolute_path.replace(os.sep, '/')
         return modified_path
+
+    def cd(self,dir=None):
+        try:
+            if dir: os.chdir(dir)
+            else: os.chdir(os.path.expanduser("~"))
+        except Exception as e:
+            Global.errprint(f"Could not change directory : {e}")
         

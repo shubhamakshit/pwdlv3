@@ -1,9 +1,10 @@
-from mainLogic.big4.dl_obsolete import DL
+from mainLogic.big4.downloadv2 import Download
 from mainLogic.startup.checkup import CheckState
 from mainLogic.utils.glv import Global
 from mainLogic.main import Main
 from beta.shellLogic import simpleParser
 from mainLogic.utils import glv_var
+from mainLogic import downloader
 
 
 class HandleShellDL:
@@ -27,15 +28,17 @@ class HandleShellDL:
         name = args[0]
         id = args[1]
 
-        dl = DL()
         ch =CheckState()
-        prefs = ch.checkup(glv_var.EXECUTABLES,verbose=False)
-        dl.downloadAudioAndVideo(name=name,
-                                 id=id,
-                                 directory='./',
-                                 nm3Path=prefs['nm3'],
-                                 verbose=False if not 'verbose' in prefs else prefs['verbose'],
-                                 )
+        state = ch.checkup(glv_var.EXECUTABLES,verbose=False)
+        prefs = state['prefs']
+
+        Download(
+            vsd_path=prefs['vsd'],
+            url=Download.buildUrl(id),
+            name=name,
+            tmp_path=prefs['tmpDir'],
+            output_path=prefs['dir'],
+        ).download()
 
     def download(self,args=[]):
         if not args or len(args) < 2:
@@ -45,16 +48,12 @@ class HandleShellDL:
         name = args[0]
         id = args[1]
 
-        ch = CheckState()
-        prefs = ch.checkup(glv_var.EXECUTABLES,verbose=False)
+        downloader.main(
+            id=id,
+            name=name,
+        )
 
-        Main(id=id,
-             name=name,
-             directory='./',
-             nm3Path=prefs['nm3'],
-             mp4d=prefs['mp4decrypt'],
-             ffmpeg=prefs['ffmpeg']
-             ).process()
+
 
 
 

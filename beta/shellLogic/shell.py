@@ -1,18 +1,32 @@
+from prompt_toolkit.completion.filesystem import PathCompleter
 from prompt_toolkit import PromptSession
 from mainLogic.utils.glv import Global
 from mainLogic.startup.checkup import CheckState
 import json
+
+from mainLogic.utils.glv_var import EXECUTABLES
 from mainLogic.utils.os2 import SysFunc
 from mainLogic.utils import glv_var
 
-glv = Global()
-EXECUTABLES = glv_var.EXECUTABLES
-os2 = SysFunc()
 
-# Initialize Prompt Toolkit session
-session = PromptSession()
+from prompt_toolkit.completion import Completer, Completion
+from prompt_toolkit.completion.filesystem import PathCompleter
+from prompt_toolkit.document import Document
+
+class CustomCompleter(Completer):
+    def __init__(self):
+        self.file_completer = PathCompleter()
+
+    def get_completions(self, document: Document, complete_event):
+        text = document.text_before_cursor
+        if text.startswith('cd '):
+            for completion in self.file_completer.get_completions(document, complete_event):
+                yield completion
 
 def main():
+    # Initialize Prompt Toolkit session
+    session = PromptSession()
+
     # Perform checkup and get preferences
     # Hardcoded verbose to False
     state = CheckState().checkup(EXECUTABLES, './', verbose=False)
@@ -21,18 +35,15 @@ def main():
     # Convert preferences to JSON string for display
     prefs_json = json.dumps(prefs, indent=4)
 
-
-
-    # Define available commands for auto-completion
-    #commands = ['show_prefs', 'exit']
-    #completer = WordCompleter(commands, ignore_case=True)
+    # Add a custom completer
+    custom_completer = CustomCompleter()
 
     from beta.shellLogic import logic
 
     # Command-line interface loop
     while True:
         try:
-            user_input = session.prompt('|pwdl> ',)
+            user_input = session.prompt('|pwdl> ', completer=custom_completer)
 
             # just in case the user hits enter without typing anything
             if not user_input: continue
@@ -47,8 +58,6 @@ def main():
             continue
         except EOFError:
             break
-
-
 
 if __name__ == "__main__":
     main()
