@@ -44,9 +44,11 @@ class ClientManager:
             print(f"Client with ID {client_id} does not exist.")
 
     def add_session(self, client_id="anonymous", session_id="anonymous"):
+        from mainLogic.utils.gen_utils import generate_timestamp
         if client_id in self.clients:
             if session_id not in self.clients[client_id]['sessions']:
-                self.clients[client_id]['sessions'][session_id] = {"tasks": {}, "name": ""}
+                timestamp = generate_timestamp()
+                self.clients[client_id]['sessions'][session_id] = {"tasks": {}, "name": "", "timestamp": timestamp}
                 self.save_data()
             else:
                 print(f"Session with ID {session_id} already exists for client {client_id}.")
@@ -103,6 +105,7 @@ class ClientManager:
             self.save_data()
         else:
             print(f"Either client with ID {client_id} or session with ID {session_id} does not exist.")
+
 
     def delete_session(self, client_id, session_id):
         if client_id in self.clients and session_id in self.clients[client_id]['sessions']:

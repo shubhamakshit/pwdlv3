@@ -10,16 +10,16 @@ def index():
 
 @template_blueprint.route('/util')
 def util():
-    return render_template('util.html')
+    return render_template('index.html')
 
 @template_blueprint.route('/prefs')
 def prefs():
-    return render_template('prefs.html')
+    return render_template('index.html')
 
 @template_blueprint.route('/help')
 def help():
-    return render_template('help.html')
+    return render_template('index.html')
 
 @template_blueprint.route('/sessions')
 def sessions():
-    return render_template('sessions.html')
+    return render_template('index.html')

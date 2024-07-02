@@ -1,14 +1,3 @@
----
-title: PhysicsWallah M3u8 Parser
-emoji: 💻🐳
-colorFrom: gray
-colorTo: green
-sdk: docker
-pinned: false
-suggested_storage: small
-license: mit
----
-
 # Table of Contents
 1. [Project Information](#project-information)
 2. [Tools Used](#tools-used)
