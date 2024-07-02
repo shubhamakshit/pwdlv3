@@ -77,3 +77,12 @@ def generate_random_word():
     word2 = words[int2].decode("utf-8")
 
     return f"{word1}-{word2}"
+
+from datetime import datetime
+
+def generate_timestamp():
+    # Get the current date and time
+    now = datetime.now()
+    # Format the timestamp as a string
+    timestamp = now.strftime("%Y-%m-%d %H:%M:%S")
+    return timestamp
