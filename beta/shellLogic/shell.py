@@ -1,12 +1,10 @@
-from prompt_toolkit.completion.filesystem import PathCompleter
 from prompt_toolkit import PromptSession
 from mainLogic.utils.glv import Global
 from mainLogic.startup.checkup import CheckState
 import json
 
 from mainLogic.utils.glv_var import EXECUTABLES
-from mainLogic.utils.os2 import SysFunc
-from mainLogic.utils import glv_var
+
 
 
 from prompt_toolkit.completion import Completer, Completion

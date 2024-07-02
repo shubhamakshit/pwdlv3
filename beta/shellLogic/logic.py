@@ -1,7 +1,7 @@
 from mainLogic.utils.os2 import SysFunc
-from beta.shellLogic.HandleBasicCMDUtils import HandleBasicCMDUtils
-from beta.shellLogic.HandleKeyAndAvailiblity import HandleKeyAndAvailiblity
-from beta.shellLogic.HandleShellDL import HandleShellDL
+from beta.shellLogic.handleLogics.HandleBasicCMDUtils import HandleBasicCMDUtils
+from beta.shellLogic.handleLogics.HandleKeyAndAvailiblity import HandleKeyAndAvailiblity
+from beta.shellLogic.handleLogics.HandleShellDL import HandleShellDL
 from beta.shellLogic.TokenUpdate import TokenUpdate
 
 os2 = SysFunc()
