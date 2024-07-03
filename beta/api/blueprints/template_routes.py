@@ -23,3 +23,7 @@ def help():
 @template_blueprint.route('/sessions')
 def sessions():
     return render_template('index.html')
+
+@template_blueprint.route('/admin')
+def admin():
+    return render_template('index.html')
