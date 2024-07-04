@@ -81,11 +81,21 @@ def start_task(task_id):
 @session_lodge.route('/client/<client_id>/delete_client')
 def delete_client_route(client_id):
     client_manager.remove_client(client_id)
+    try:
+        import shutil
+        shutil.rmtree(f"{OUT_DIR}/{client_id}")
+    except Exception as e:
+        print(f"Could not delete client folder: {e}")
     return jsonify({'message': f'Client with ID {client_id} deleted successfully'}), 200
 
 @session_lodge.route('/api/client/<client_id>/<session_id>/delete_session')
 @session_lodge.route('/client/<client_id>/<session_id>/delete_session')
 def delete_session_route(client_id, session_id):
     client_manager.remove_session(client_id, session_id)
+    try:
+        import shutil
+        shutil.rmtree(f"{OUT_DIR}/{client_id}/{session_id}")
+    except Exception as e:
+        print(f"Could not delete session folder: {e}")
     return jsonify({'message': f'Session with ID {session_id} for client {client_id} deleted successfully'}), 200
 
