@@ -2,7 +2,7 @@ import requests
 import re
 import base64
 import json
-from mainLogic.big4.dl_obsolete import DL
+from mainLogic.big4.obsolete.dl_obsolete import DL
 from mainLogic.utils.glv import Global
 
 class LicenseKeyFetcher:

@@ -25,10 +25,10 @@ class ClientManager:
     def session_exists(self, client_id, session_id):
         return client_id in self.clients and session_id in self.clients[client_id]['sessions']
 
-    def add_client(self, client_id="anonymous"):
+    def add_client(self, client_id="anonymous",name=""):
         if client_id not in self.clients:
             self.clients[client_id] = {
-                "name": "Anonymous" if client_id == "anonymous" else "",
+                "name": "Anonymous" if client_id == "anonymous" else name,
                 "client_id": client_id,
                 "sessions": {}
             }
@@ -39,6 +39,13 @@ class ClientManager:
     def remove_client(self, client_id):
         if client_id in self.clients:
             del self.clients[client_id]
+            self.save_data()
+        else:
+            print(f"Client with ID {client_id} does not exist.")
+
+    def set_client_name(self, client_id, name):
+        if client_id in self.clients:
+            self.clients[client_id]['name'] = name
             self.save_data()
         else:
             print(f"Client with ID {client_id} does not exist.")

@@ -16,8 +16,17 @@ OUT_DIR = Boss.OUT_DIR
 @session_lodge.route('/client/<client_id>/<session_id>/create_session', methods=['POST'])
 def create_session(client_id, session_id):
     clients = client_manager.get_client_info(client_id)
+    data = request.json
+    from mainLogic.utils.gen_utils import generate_random_word
+
     if not clients:
-        client_manager.add_client(client_id)
+        if 'client_name' in data:   name = data['client_name']
+        else:                       name = f"{generate_random_word()}"
+        print(f"Creating client with ID {client_id} and name {name}")
+        client_manager.add_client(client_id,name)
+
+    if 'client_name' in data:
+        client_manager.set_client_name(client_id, data['client_name'])
 
     session = client_manager.get_client_info(client_id).get('sessions', {}).get(session_id)
     if not session:
