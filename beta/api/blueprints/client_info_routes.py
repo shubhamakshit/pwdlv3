@@ -101,3 +101,41 @@ def get_key():
     fetcher = LicenseKeyFetcher(token)
     key = fetcher.get_key(vid_id)
     return jsonify({'key': key}), 200
+
+
+@client_info.route('/api/random/name')
+@client_info.route('/random/name')
+def random_name():
+    from mainLogic.utils.gen_utils import generate_random_word
+    return jsonify({'name': generate_random_word()}), 200
+
+@client_info.route('/api/client/names')
+@client_info.route('/client/names')
+def client_names():
+
+    clients = client_manager.clients
+    data = {}
+    for client_id in clients:
+        data[client_id] = clients[client_id]['name']
+
+    return jsonify(data), 200
+
+@client_info.route('/api/client/<client_id>/names')
+@client_info.route('/client/<client_id>/names')
+def session_names(client_id):
+    if client_id == 'anonymous':
+        return jsonify({'error': 'Access to anonymous client is not allowed'}), 403
+
+    client = client_manager.get_client_info(client_id)
+    if not client:
+        return jsonify({'error': 'Client not found'}), 404
+
+    names = {}
+
+    for session in client['sessions']:
+        names[session] = client['sessions'][session]['name']
+
+    return jsonify(names), 200
+
+
+
