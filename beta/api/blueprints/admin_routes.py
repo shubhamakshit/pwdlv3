@@ -46,3 +46,15 @@ def get_subpath(subpath):
         return send_file(path_to_file, as_attachment=True, download_name=os.path.basename(path_to_file))
     else:
         return jsonify({'error': 'file not found'}), 404
+
+@admin.route('/api/server/usages')
+@admin.route('/server/usages')
+def get_usages_for_all_client():
+    usages = {}
+    # will store usage in form of {client_id: size}
+
+    for client_id in client_manager.clients:
+        usages[client_id] = int(SysFunc.get_size_in_mB(os.path.join(Boss.OUT_DIR, client_id)))
+
+    return jsonify(usages), 200
+
