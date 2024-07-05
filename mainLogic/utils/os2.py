@@ -100,7 +100,18 @@ class SysFunc:
             if os.path.isfile(path):
                 os.remove(path)
             elif os.path.isdir(path):
+
                 shutil.rmtree(path)
+
+    @staticmethod
+    def get_size_in_mB(path):
+        import os
+        total_size = 0
+        for dirpath, dirnames, filenames in os.walk(path):
+            for f in filenames:
+                fp = os.path.join(dirpath, f)
+                total_size += os.path.getsize(fp)
+        return total_size / (1024 * 1024)
 
     def cd(self, dir=None):
         try:
@@ -110,3 +121,5 @@ class SysFunc:
                 os.chdir(os.path.expanduser("~"))
         except Exception as e:
             Global.errprint(f"Could not change directory : {e}")
+
+
