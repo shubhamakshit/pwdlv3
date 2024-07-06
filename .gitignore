@@ -194,8 +194,10 @@ pwdlv3.lnk
 
 # ignore all *.test.py files
 *.test.py
+*.json
 clients.json
 clients.json
 /csv_files/
 /populate.py
 /populate.py
+defaults.json
