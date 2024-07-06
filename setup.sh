@@ -1,6 +1,5 @@
 #!/bin/bash
 
-#checking updater 1
 # Function to download and install pip
 install_pip() {
     curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
