@@ -200,5 +200,3 @@ clients.json
 /csv_files/
 /populate.py
 /populate.py
-defaults.json
-defaults.linux.json
