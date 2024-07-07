@@ -1,6 +1,5 @@
 import os
 from flask import Flask
-from flask_cors import CORS
 from mainLogic.utils.glv import Global
 from beta.api.mr_manager.boss_manager import Boss
 
@@ -13,7 +12,6 @@ from beta.api.blueprints.client_info_routes import client_info
 from beta.api.blueprints.admin_routes import admin
 
 app = Flask(__name__)
-CORS(app)
 
 # Initialize ClientManager and TaskManager
 client_manager = Boss.client_manager
