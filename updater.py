@@ -2,29 +2,32 @@ import re
 import subprocess
 import sys
 
-from mainLogic.utils.os2 import SysFunc
-from mainLogic.error import errorList
 from mainLogic.utils.process import shell
 from mainLogic.utils.glv import Global
-from mainLogic.utils.process import to_list
-from mainLogic.utils.glv_var import vars
+from mainLogic.error import errorList
 
 defaults = [
     "defaults.json",
     "defaults.linux.json"
 ]
 
-unindex_defaults = f'git update-index --skip-worktree {" ".join(defaults)}'
 UPDATE_CHECK_CODE = 'git fetch --dry-run --verbose'
 
 
-
+def check_git_availability():
+    """Check if Git is available."""
+    try:
+        subprocess.run(['git', '--version'], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    except subprocess.CalledProcessError as e:
+        Global.errprint("Git is not available. Please install Git to use this script.")
+        sys.exit(errorList["gitNotAvailable"]["code"])
 
 
 def check_for_updates():
     """Check for updates."""
     Global.sprint("Checking for updates...")
-    code, out = shell(to_list(UPDATE_CHECK_CODE),return_out=True)
+    check_git_availability()
+    code, out = shell(UPDATE_CHECK_CODE.split(), return_out=True)
     out = "\n".join(out)
 
     pattern = r"\s*=\s*\[up to date\]\s*main\s*->\s*origin/main\s*"
@@ -51,10 +54,27 @@ def main():
         if code == 0:
             Global.sprint("Please restart the script.")
         else:
-            Global.errprint("Error occurred while pulling the latest changes. Exiting...")
-            sys.exit(errorList["unknownError"]["code"])
+            Global.errprint(f"Error occurred while pulling the latest changes (exit code {code}).")
+            answer = input("Do you want to stash your changes and try pulling again? (y/n): ").strip().lower()
+            if answer == 'y':
+                stash_code, stash_out = shell(["git", "stash"])
+                if stash_code == 0:
+                    pull_code, pull_out = pull()
+                    if pull_code == 0:
+                        Global.sprint("Please restart the script.")
+                    else:
+                        Global.errprint(f"Failed to pull after stashing (exit code {pull_code}). Exiting...")
+                        sys.exit(errorList["gitPullError"]["code"])
+                else:
+                    Global.errprint("Failed to stash changes. Exiting...")
+                    sys.exit(errorList["gitStashError"]["code"])
+            else:
+                Global.errprint("User opted not to stash changes. Exiting...")
+                sys.exit(errorList["gitPullError"]["code"])
     else:
         Global.sprint("No updates found.")
         sys.exit(errorList["noError"]["code"])
 
 
+if __name__ == "__main__":
+    main()
