@@ -1,7 +1,6 @@
 import argparse
 from mainLogic import downloader
 
-#hell me nki
 def parse_arguments():
     """Parse command-line arguments."""
     parser = argparse.ArgumentParser(description='PhysicsWallah M3u8 parser.')
