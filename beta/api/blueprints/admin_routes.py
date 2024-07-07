@@ -58,3 +58,25 @@ def get_usages_for_all_client():
 
     return jsonify(usages), 200
 
+@admin.route('/api/server/update',methods=['GET','POST'])
+@admin.route('/server/update',methods=['GET','POST'])
+def update_server():
+    from updater import check_for_updates, pull
+    if request.method == 'POST':
+        try:
+            if check_for_updates():
+                code, out = pull()
+                if code == 0:
+                    return jsonify({'message': 'Please restart the script.'}), 200
+                else:
+                    return jsonify({'error': 'Error occurred while pulling the latest changes. Exiting...'}), 500
+            else:
+                return jsonify({'message': 'No updates found.'}), 200
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+    try:
+        update = check_for_updates()
+        return jsonify({'update': update}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+

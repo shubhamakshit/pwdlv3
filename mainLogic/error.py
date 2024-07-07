@@ -1,6 +1,10 @@
 from mainLogic.utils.glv import Global
 
 errorList = {
+    "unknownError": {
+        "code": 100,
+        "func": lambda: Global.errprint("Unknown error. Exiting..."),
+    },
     "noError": {
         "code": 0,
         "func": lambda: None,
