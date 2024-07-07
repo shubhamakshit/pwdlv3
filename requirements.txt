@@ -1,4 +1,5 @@
 ﻿requests
+tabulate
 colorama
 argparse
 flask
