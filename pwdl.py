@@ -14,7 +14,7 @@ def parse_arguments():
     parser.add_argument('--shell', action='store_true', help='Start the shell')
     parser.add_argument('--webui', nargs='?', const=-1, type=int, help='Start the Webui')
     parser.add_argument('--simulate', action='store_true',
-                        help='Simulate the download process. No files will be downloaded.')
+                        help='Simulate the download process. No files will be downloaded. Incompatible wit h --csv-file. Must be used with --id and --name')
     return parser.parse_args()
 
 if __name__ == "__main__":
