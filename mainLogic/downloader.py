@@ -28,14 +28,22 @@ def start_shell():
     shell.main()
 
 def start_webui(port, verbose):
+
     """Start the WebUI if requested."""
     from run import app
     if not prefs['webui']:
         Global.errprint("WebUI is not enabled in the preferences. Exiting ...")
         sys.exit(1)
 
-    if 'webui-port' in prefs:
+
+
+    if 'webui-port' in prefs and not port == -1:
         port = prefs['webui-port']
+
+    if port == -1:
+        port = 5000
+
+
 
     if verbose:
         Global.hr()
