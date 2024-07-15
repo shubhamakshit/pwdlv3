@@ -27,3 +27,7 @@ def sessions():
 @template_blueprint.route('/admin')
 def admin():
     return render_template('index.html')
+
+@template_blueprint.route('/manifest.json')
+def manifest():
+    return render_template('manifest.json')
