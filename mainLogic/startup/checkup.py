@@ -85,7 +85,7 @@ class CheckState:
 
 
 
-    def checkup(self,executable,directory="./",verbose=True):
+    def checkup(self,executable,directory="./",verbose=True,do_raise=False):
 
         state = {}
 
@@ -119,6 +119,7 @@ class CheckState:
         if 'patched' in prefs:
             if prefs['patched']:
                 error.errorList["methodPatched"]["func"]()
+                if do_raise: raise Exception("Method Patched")
                 exit(error.errorList["methodPatched"]["code"])
 
         # FLare no longer required
@@ -171,6 +172,7 @@ class CheckState:
                     if not os.path.exists(prefs[exe].strip()):
                         Global.errprint(f"{exe} not found at {prefs[exe].strip()}")
                         error.errorList["dependencyNotFoundInPrefs"]["func"](exe)
+                        if do_raise: raise Exception(f"{exe} not found")
                         exit(error.errorList["dependencyNotFoundInPrefs"]["code"])
 
                     if verbose: Global.sprint(f"{exe} found at {prefs[exe].strip()}")
@@ -179,15 +181,21 @@ class CheckState:
 
                 else:
                     error.errorList["dependencyNotFoundInPrefs"]["func"](exe)
+                    if do_raise: raise Exception(f"{exe} not found in prefs")
                     exit(error.errorList["dependencyNotFoundInPrefs"]["code"])
                 
                 if verbose: Global.hr()
 
         # checking for token
         if 'token' in prefs:
-            self.check_token(prefs['token'],verbose=verbose)
+            id = self.check_token(prefs['token'],verbose=verbose)
+            if not id:
+                error.errorList["tokenInvalid"]["func"]()
+                if do_raise: raise Exception("Token Invalid")
+                exit(error.errorList["tokenInvalid"]["code"])
         else:
             error.errorList["tokenNotFound"]["func"]()
+            if do_raise: raise Exception("Token Not Found")
             exit(error.errorList["tokenNotFound"]["code"])
 
         state['prefs'] = prefs

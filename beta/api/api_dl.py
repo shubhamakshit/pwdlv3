@@ -14,7 +14,7 @@ def download_pw_video(task_id, name, id, out_dir, client_id, session_id, progres
     print(f"Downloading {name} with id {id} to {client_session_dir}")
 
     ch = CheckState()
-    state = ch.checkup(glv_var.EXECUTABLES, directory="./", verbose=False)
+    state = ch.checkup(glv_var.EXECUTABLES, directory="./", verbose=False,do_raise=True)
     prefs = state['prefs']
 
     if 'webui-del-time' in prefs:
@@ -26,10 +26,16 @@ def download_pw_video(task_id, name, id, out_dir, client_id, session_id, progres
 
     vsd = state['vsd']
     ffmpeg = state['ffmpeg']
+
     mp4d = state['mp4decrypt']
-    verbose = True
-    Main(id=id,
-         name=f"{name}-{task_id}",
-         token=prefs['token'],
-         directory=client_session_dir, tmpDir="/*auto*/", vsdPath=vsd, ffmpeg=ffmpeg, mp4d=mp4d, verbose=verbose,
-         progress_callback=progress_callback).process()
+
+    try:
+        Main(id=id,
+             name=f"{name}-{task_id}",
+             token=prefs['token'],
+             directory=client_session_dir, tmpDir="/*auto*/", vsdPath=vsd, ffmpeg=ffmpeg, mp4d=mp4d, verbose=False,
+             progress_callback=progress_callback).process()
+    except Exception as e:
+        Global.errprint(f"Download failed for {name} with id {id}. (Main.process exited)")
+        Global.errprint(f"Error: {e}")
+        return False
