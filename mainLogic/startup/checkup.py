@@ -192,7 +192,7 @@ class CheckState:
             if not id:
                 error.errorList["tokenInvalid"]["func"]()
                 if do_raise: raise Exception("Token Invalid")
-                exit(error.errorList["tokenInvalid"]["code"])
+                #exit(error.errorList["tokenInvalid"]["code"])
         else:
             error.errorList["tokenNotFound"]["func"]()
             if do_raise: raise Exception("Token Not Found")
