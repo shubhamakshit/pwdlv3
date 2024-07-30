@@ -38,8 +38,12 @@ errorList = {
         "code": 7,
         "func": lambda: Global.errprint("Token not found in default settings. Exiting..."),
     },
-    "overWriteAbortedByUser": {
+    "tokenInvalid": {
         "code": 8,
+        "func": lambda: Global.errprint("Token invalid. Exiting..."),
+    },
+    "overWriteAbortedByUser": {
+        "code": 9,
         "func": lambda: Global.errprint("Overwrite aborted by user. Exiting..."),
     },
     "cantLoadFile": {
