@@ -1,3 +1,5 @@
+import json
+
 from flask import Blueprint, request, jsonify
 from beta.api.mr_manager.boss_manager import Boss
 from mainLogic.big4.decrypt.key import LicenseKeyFetcher
@@ -7,6 +9,7 @@ task_manager = Boss.task_manager
 OUT_DIR = Boss.OUT_DIR
 
 client_info = Blueprint('client_info', __name__)
+
 
 @client_info.route('/api/session/<client_id>/<session_id>', methods=['GET'])
 @client_info.route('/session/<client_id>/<session_id>', methods=['GET'])
@@ -25,9 +28,17 @@ def get_session(client_id, session_id):
 @client_info.route('/api/client/<client_id>', methods=['GET'])
 @client_info.route('/client/<client_id>', methods=['GET'])
 def get_client(client_id):
-
     client_info = client_manager.get_client_info(client_id)
     if client_info:
+        # sorting sessions by timestamp
+        from datetime import datetime
+
+        # Assuming client_info['sessions'] is a dictionary
+        client_info['sessions'] = dict(sorted(client_info['sessions'].items(),
+                                              key=lambda x: datetime.strptime(x[1]['timestamp'], '%Y-%m-%d %H:%M:%S'),
+                                              reverse=True))
+        print(json.dumps([client_info["sessions"][x]["timestamp"] for x in client_info["sessions"]], indent=4))
+
         return jsonify(client_info), 200
     else:
         return jsonify({'error': 'Client not found'}), 404
@@ -90,7 +101,6 @@ def get_active_sessions(client_id):
     return jsonify({'error': 'Client not found'}), 404
 
 
-
 @client_info.route('/api/key/vid_id', methods=['GET'])
 @client_info.route('/key/vid_id', methods=['GET'])
 def get_key():
@@ -109,16 +119,17 @@ def random_name():
     from mainLogic.utils.gen_utils import generate_random_word
     return jsonify({'name': generate_random_word()}), 200
 
+
 @client_info.route('/api/client/names')
 @client_info.route('/client/names')
 def client_names():
-
     clients = client_manager.clients
     data = {}
     for client_id in clients:
         data[client_id] = clients[client_id]['name']
 
     return jsonify(data), 200
+
 
 @client_info.route('/api/client/<client_id>/names')
 @client_info.route('/client/<client_id>/names')
@@ -136,6 +147,3 @@ def session_names(client_id):
         names[session] = client['sessions'][session]['name']
 
     return jsonify(names), 200
-
-
-
