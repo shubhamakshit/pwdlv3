@@ -121,6 +121,23 @@ class ClientManager:
         else:
             print(f"Session with ID {session_id} does not exist for client {client_id}.")
 
+    def merge_sessions(self,client_id,session_id_1,session_id_2):
+        if client_id in self.clients and session_id_1 in self.clients[client_id]['sessions'] and session_id_2 in self.clients[client_id]['sessions']:
+            # also remove 'downloading/inactive' tasks from session_id_2
+            for task_id, task in self.clients[client_id]['sessions'][session_id_2]['tasks'].items():
+                print(f"Task {task_id} status: {task['status']}")
+                if task['status'] == 'downloading' or task['status'] == 'inactive' or task['status'] == 'failed':
+                    del self.clients[client_id]['sessions'][session_id_2]['tasks'][task_id]
+
+            # move tasks from session_id_2 to session_id_1
+            self.clients[client_id]['sessions'][session_id_1]['tasks'].update(self.clients[client_id]['sessions'][session_id_2]['tasks'])
+
+
+            del self.clients[client_id]['sessions'][session_id_2]
+            self.save_data()
+        else:
+            print(f"Either client with ID {client_id} or session with ID {session_id_1} or {session_id_2} does not exist.")
+
     def delete_client(self, client_id):
         if client_id in self.clients:
             del self.clients[client_id]

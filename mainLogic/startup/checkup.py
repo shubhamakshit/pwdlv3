@@ -3,12 +3,49 @@ import os
 from mainLogic.utils.os2 import SysFunc
 from mainLogic.utils.glv import Global
 
+
 class CheckState:
+    class MethodPatched(Exception):
+
+        def __init__(self):
+            self.err_str = "Method Has been patched"
+            super().__init__(self.err_str)
+
+        def __str__(self):
+            return self.err_str
+
+    class TokenInvalid(Exception):
+
+        def __init__(self):
+            self.err_str = "Token Invalid"
+            super().__init__(self.err_str)
+
+        def __str__(self):
+            return self.err_str
+
+    class ExecutableNotFound(Exception):
+
+        def __init__(self, exe):
+            self.exe = exe
+            self.err_str = f"{exe} not found"
+            super().__init__(self.err_str)
+
+        def __str__(self):
+            return self.err_str
+
+    class TokenNotFound(Exception):
+
+        def __init__(self):
+            self.err_str = "Token Not Found"
+            super().__init__(self.err_str)
+
+        def __str__(self):
+            return self.err_str
 
     def __init__(self) -> None:
         pass
 
-    def post_checkup(self,prefs,verbose=True):
+    def post_checkup(self, prefs, verbose=True):
 
         """
             Post Checkup Function
@@ -25,7 +62,7 @@ class CheckState:
             if not os.path.exists(tmpDir):
                 try:
                     os.makedirs(tmpDir)
-                except OSError as exc: # Guard against failure
+                except OSError as exc:  # Guard against failure
                     error.errorList["couldNotMakeDir"]['func'](tmpDir)
                     Global.errprint("Failed to create TmpDir")
                     Global.errprint("Falling Back to Default")
@@ -49,10 +86,12 @@ class CheckState:
                 Global.errprint("Falling back to default")
                 OUT_DIRECTORY = './'
 
-            try: OUT_DIRECTORY = os.path.abspath(os.path.expandvars(prefs['dir']))
+            try:
+                OUT_DIRECTORY = os.path.abspath(os.path.expandvars(prefs['dir']))
 
             # if the user provides a non-string value for the directory or dir is not found
-            except TypeError: OUT_DIRECTORY = './'
+            except TypeError:
+                OUT_DIRECTORY = './'
 
             # if the directory is not found
             except Exception as e:
@@ -71,21 +110,18 @@ class CheckState:
         prefs['tmpDir'] = tmpDir
         prefs['dir'] = OUT_DIRECTORY
 
-
-    def check_token(self,token,id="90dbede8-66a8-40e8-82ce-a2048b5c063d",verbose=False):
+    def check_token(self, token, id="90dbede8-66a8-40e8-82ce-a2048b5c063d", verbose=False):
         from mainLogic.big4.decrypt.key import LicenseKeyFetcher
         lc_fetcher = LicenseKeyFetcher(token)
         try:
-            key = lc_fetcher.get_key(id,verbose=verbose)
+            key = lc_fetcher.get_key(id, verbose=verbose)
             return key
         except Exception as e:
             Global.errprint(f"An error occurred while getting the key: {e}")
             Global.errprint("Your Token is Invalid! ")
             return None
 
-
-
-    def checkup(self,executable,directory="./",verbose=True,do_raise=False):
+    def checkup(self, executable, directory="./", verbose=True, do_raise=False):
 
         state = {}
 
@@ -110,7 +146,7 @@ class CheckState:
         #     exit(error.errorList["defaultsNotFound"]["code"])
         #
         # if verbose: Global.sprint("Default settings found."); Global.hr()
-        
+
         # load the preferences
         from mainLogic.startup.userPrefs import PreferencesLoader
         prefs = PreferencesLoader(verbose=verbose).prefs
@@ -119,7 +155,7 @@ class CheckState:
         if 'patched' in prefs:
             if prefs['patched']:
                 error.errorList["methodPatched"]["func"]()
-                if do_raise: raise Exception("Method Patched")
+                if do_raise: raise CheckState.MethodPatched("Method Patched")
                 exit(error.errorList["methodPatched"]["code"])
 
         # FLare no longer required
@@ -135,7 +171,7 @@ class CheckState:
 
         os2 = SysFunc()
 
-        found= []
+        found = []
         notFound = []
 
         for exe in executable:
@@ -150,13 +186,14 @@ class CheckState:
                 # add exe's which are not found to the notFound list
                 notFound.append(exe)
 
-            else: 
+            else:
                 if verbose: Global.sprint(f"{exe} found.")
                 state[exe] = exe
 
         if len(notFound) > 0:
 
-            if verbose: Global.hr();Global.dprint("Following dependencies were not found on path. Checking in default settings...")
+            if verbose: Global.hr();Global.dprint(
+                "Following dependencies were not found on path. Checking in default settings...")
             if verbose: Global.dprint(notFound); Global.hr()
 
             for exe in notFound:
@@ -172,7 +209,7 @@ class CheckState:
                     if not os.path.exists(prefs[exe].strip()):
                         Global.errprint(f"{exe} not found at {prefs[exe].strip()}")
                         error.errorList["dependencyNotFoundInPrefs"]["func"](exe)
-                        if do_raise: raise Exception(f"{exe} not found")
+                        if do_raise: raise CheckState.ExecutableNotFound(f"{exe} not found")
                         exit(error.errorList["dependencyNotFoundInPrefs"]["code"])
 
                     if verbose: Global.sprint(f"{exe} found at {prefs[exe].strip()}")
@@ -181,28 +218,26 @@ class CheckState:
 
                 else:
                     error.errorList["dependencyNotFoundInPrefs"]["func"](exe)
-                    if do_raise: raise Exception(f"{exe} not found in prefs")
+                    if do_raise: raise CheckState.ExecutableNotFound(f"{exe} not found in prefs")
                     exit(error.errorList["dependencyNotFoundInPrefs"]["code"])
-                
+
                 if verbose: Global.hr()
 
         # checking for token
         if 'token' in prefs:
-            id = self.check_token(prefs['token'],verbose=verbose)
-            if not id:
-                error.errorList["tokenInvalid"]["func"]()
-                if do_raise: raise Exception("Token Invalid")
-                #exit(error.errorList["tokenInvalid"]["code"])
+            id = self.check_token(prefs['token'], verbose=verbose)
+            #exit(error.errorList["tokenInvalid"]["code"])
         else:
             error.errorList["tokenNotFound"]["func"]()
-            if do_raise: raise Exception("Token Not Found")
+            if do_raise: raise CheckState.TokenNotFound()
             exit(error.errorList["tokenNotFound"]["code"])
+
+        if not id:
+            error.errorList["tokenInvalid"]["func"]()
+            if do_raise: raise CheckState.TokenInvalid()
 
         state['prefs'] = prefs
         prefs['dir'] = directory
-        self.post_checkup(prefs,verbose)
-        
+        self.post_checkup(prefs, verbose)
 
         return state
-
-
