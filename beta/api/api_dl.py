@@ -29,13 +29,17 @@ def download_pw_video(task_id, name, id, out_dir, client_id, session_id, progres
 
     mp4d = state['mp4decrypt']
 
+
+
+
     try:
         Main(id=id,
              name=f"{name}-{task_id}",
              token=prefs['token'],
              directory=client_session_dir, tmpDir="/*auto*/", vsdPath=vsd, ffmpeg=ffmpeg, mp4d=mp4d, verbose=False,
              progress_callback=progress_callback).process()
+    except TypeError as e:
+        raise Exception(f"Invalid ID: {e}")
     except Exception as e:
-        Global.errprint(f"Download failed for {name} with id {id}. (Main.process exited)")
-        Global.errprint(f"Error: {e}")
-        return False
+        raise Exception(f"An error occurred while processing the video: {e}")
+

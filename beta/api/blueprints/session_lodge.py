@@ -1,3 +1,5 @@
+import os
+
 from flask import Blueprint, request, jsonify
 from beta.api.api_dl import download_pw_video
 from mainLogic.utils.gen_utils import generate_random_word
@@ -99,3 +101,24 @@ def delete_session_route(client_id, session_id):
         print(f"Could not delete session folder: {e}")
     return jsonify({'message': f'Session with ID {session_id} for client {client_id} deleted successfully'}), 200
 
+@session_lodge.route('/api/client/<client_id>/merge_sessions',methods=['POST'])
+@session_lodge.route('/client/<client_id>/merge_sessions', methods=['POST'])
+def merge_sessions(client_id):
+    data = request.json
+    session_ids = data.get('session_ids', [])
+    if len(session_ids) > 2:
+        return jsonify({'error': 'Only two sessions can be merged at a time'}), 400
+    if not session_ids:
+        return jsonify({'error': 'session_ids is required'}), 400
+    try:
+        client_manager.merge_sessions(client_id, session_ids[0],session_ids[1])
+        # also move /webdl/<client>/session_id_2/* to /webdl/<client>/session_id_1
+        import shutil
+        for file in os.listdir(f"{OUT_DIR}/{client_id}/{session_ids[1]}"):
+            shutil.move(f"{OUT_DIR}/{client_id}/{session_ids[1]}/{file}", f"{OUT_DIR}/{client_id}/{session_ids[0]}/{file}")
+        shutil.rmtree(f"{OUT_DIR}/{client_id}/{session_ids[1]}")
+
+
+        return jsonify({'message': f'Sessions {session_ids} for client {client_id} merged successfully'}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500

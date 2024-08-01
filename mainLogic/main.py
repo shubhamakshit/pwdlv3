@@ -64,6 +64,14 @@ class Main:
         if self.verbose:
             Global.dprint("Starting Main Process... for ID: " + self.id)
 
+        TOKEN = self.token
+        fetcher = LicenseKeyFetcher(TOKEN)
+        try:
+            key = fetcher.get_key(self.id, verbose=self.verbose)[1]
+        except Exception as e:
+            raise TypeError(f"ID is invalid (if the token is valid) ")
+
+
         # 1. Downloading Files (New Download Method using VSD)
 
         audio, video = Download(self.vsd,
@@ -77,11 +85,7 @@ class Main:
 
         # 2. Decrypting Files
 
-        Global.sprint("Please wait while we decrypt the files...\nFetching key may take some time.")
-
-        TOKEN = self.token
-        fetcher = LicenseKeyFetcher(TOKEN)
-        key = fetcher.get_key(self.id, verbose=self.verbose)[1]
+        Global.sprint("Please wait while we decrypt the files...\n")
 
         decrypt = Decrypt()
 
