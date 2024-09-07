@@ -225,6 +225,7 @@ class CheckState:
 
         # checking for token
         if 'token' in prefs:
+            id = ""
 
             # checking if new token_context is enabled ? 
             token_data = prefs['token'].strip()
@@ -234,10 +235,12 @@ class CheckState:
                     data = json.loads(token_data)
                     prefs['token'] = data['token']
                     prefs['random_id'] = data['randomId']
+                    id = self.check_token(prefs['token'], prefs['random_id'], verbose=verbose)
                 except Exception as e:
                     if do_raise: raise CheckState.TokenInvalid()
-                    
-            id = self.check_token(prefs['token'], prefs['random_id'], verbose=verbose)
+            else:
+                pass
+
             #exit(error.errorList["tokenInvalid"]["code"])
         else:
             error.errorList["tokenNotFound"]["func"]()
