@@ -110,9 +110,9 @@ class CheckState:
         prefs['tmpDir'] = tmpDir
         prefs['dir'] = OUT_DIRECTORY
 
-    def check_token(self, token, id="90dbede8-66a8-40e8-82ce-a2048b5c063d", verbose=False):
+    def check_token(self, token, random_id, id="90dbede8-66a8-40e8-82ce-a2048b5c063d", verbose=False):
         from mainLogic.big4.decrypt.key import LicenseKeyFetcher
-        lc_fetcher = LicenseKeyFetcher(token)
+        lc_fetcher = LicenseKeyFetcher(token=token,random_id=random_id)
         try:
             key = lc_fetcher.get_key(id, verbose=verbose)
             return key
@@ -225,7 +225,19 @@ class CheckState:
 
         # checking for token
         if 'token' in prefs:
-            id = self.check_token(prefs['token'], verbose=verbose)
+
+            # checking if new token_context is enabled ? 
+            token_data = prefs['token'].strip()
+            if token_data.startswith("{"):
+                try:
+                    import json
+                    data = json.loads(token_data)
+                    prefs['token'] = data['token']
+                    prefs['random_id'] = data['randomId']
+                except Exception as e:
+                    if do_raise: raise CheckState.TokenInvalid()
+                    
+            id = self.check_token(prefs['token'], prefs['random_id'], verbose=verbose)
             #exit(error.errorList["tokenInvalid"]["code"])
         else:
             error.errorList["tokenNotFound"]["func"]()

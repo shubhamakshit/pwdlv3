@@ -23,3 +23,6 @@ def base64_to_hex(base64_str):
 
     return hex_bytes
 
+def cookies_dict_to_str(cookies):
+    return ';'.join([f'{key}={value}' for key, value in cookies.items()])
+

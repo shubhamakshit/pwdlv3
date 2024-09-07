@@ -67,6 +67,7 @@ def download_process(id, name, state, verbose, simulate=False):
             ffmpeg=state['ffmpeg'],
             vsdPath=state['vsd'],
             token=prefs['token'],
+            random_id=prefs['random_id'],
             mp4d=state['mp4decrypt'],
             tmpDir=prefs['tmpDir'],
             verbose=verbose
