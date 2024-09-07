@@ -1,6 +1,7 @@
 ﻿requests
 colorama
 argparse
+pycryptodome
 flask
 prompt-toolkit
 gunicorn

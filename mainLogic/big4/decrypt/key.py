@@ -2,17 +2,27 @@ import requests
 import re
 import base64
 import json
-from mainLogic.big4.obsolete.dl_obsolete import DL
+
+from mainLogic.big4.decrypt.heck import cookie_splitter, get_cookiees_from_url
+from mainLogic.big4.downloadv2 import Download
 from mainLogic.utils.glv import Global
+from mainLogic.utils.keyUtils import cookies_dict_to_str
 
 class LicenseKeyFetcher:
-    def __init__(self, token):
+    def __init__(self, token, random_id):
+        self.url = None
         self.token = token
+        self.random_id = random_id
+        self.cookies = None
+
+
+
+
 
     def build_license_url(self, encoded_otp_key):
         return f"https://api.penpencil.co/v1/videos/get-otp?key={encoded_otp_key}&isEncoded=true"
 
-    def get_headers(self):
+    def get_otp_headers(self):
         headers = {
             "accept": "*/*",
             "accept-language": "en-US,en;q=0.9,la;q=0.8",
@@ -80,6 +90,10 @@ class LicenseKeyFetcher:
         match = re.search(pattern, mpd_content)
         return match.group(1) if match else None
 
+    def set_cookies(self, url):
+        self.cookies = cookies_dict_to_str(get_cookiees_from_url(url))
+
+
     def get_key(self, id, verbose=True):
         if verbose: Global.hr()
 
@@ -88,8 +102,19 @@ class LicenseKeyFetcher:
         if verbose: Global.dprint("Building the URL to get the key...")
 
         try:
-            url = DL.buildUrl(id)
+            from mainLogic.big4.decrypt.signedUrl import get_signed_url
+
+            policy_string = get_signed_url(token=self.token, random_id=self.random_id, id=id, verbose=verbose)['data']
+            add_on = cookie_splitter(policy_string, verbose)
+
+            url = Download.buildUrl(id)+f"{add_on}"
+            self.url = url
+            self.set_cookies(url)
+
             if verbose: Global.sprint(f"URL: {url}")
+            if verbose:
+                Global.hr()
+                Global.sprint(f"Cookies: {self.cookies}")
 
             if verbose: Global.dprint("Extracting the KID from the MPD file...")
             kid = self.extract_kid_from_mpd(url).replace("-", "")
@@ -109,7 +134,7 @@ class LicenseKeyFetcher:
             if verbose: Global.sprint(f"License URL: {license_url}")
 
             if verbose: Global.dprint("Getting the headers...")
-            headers = self.get_headers()
+            headers = self.get_otp_headers()
             if verbose: Global.sprint(f"Headers: {json.dumps(headers, indent=4)}")
 
             if verbose: Global.dprint("Making a request to the server to get the license (key)...")

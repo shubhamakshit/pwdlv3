@@ -36,7 +36,8 @@ class Main:
                  vsdPath='nm3',
                  ffmpeg="ffmpeg",
                  mp4d="mp4decrypt",
-                 token=None, verbose=True, suppress_exit=False, progress_callback=None):
+                 color=True,
+                 token=None, random_id=None, verbose=True, suppress_exit=False, progress_callback=None):
 
         os2 = SysFunc()
 
@@ -51,7 +52,10 @@ class Main:
         self.vsd = vsdPath if vsdPath != 'vsd' else 'vsd'
         self.ffmpeg = BasicUtils.abspath(ffmpeg) if ffmpeg != 'ffmpeg' else 'ffmpeg'
         self.mp4d = BasicUtils.abspath(mp4d) if mp4d != 'mp4decrypt' else 'mp4decrypt'
+        self.color = color
+
         self.token = token
+        self.random_id = random_id
         self.verbose = verbose
         self.suppress_exit = suppress_exit
         self.progress_callback = progress_callback
@@ -65,9 +69,11 @@ class Main:
             Global.dprint("Starting Main Process... for ID: " + self.id)
 
         TOKEN = self.token
-        fetcher = LicenseKeyFetcher(TOKEN)
+        RANDOM_ID = self.random_id
+        fetcher = LicenseKeyFetcher(TOKEN, RANDOM_ID)
         try:
             key = fetcher.get_key(self.id, verbose=self.verbose)[1]
+            cookies = fetcher.cookies
         except Exception as e:
             raise TypeError(f"ID is invalid (if the token is valid) ")
 
@@ -75,17 +81,21 @@ class Main:
         # 1. Downloading Files (New Download Method using VSD)
 
         audio, video = Download(self.vsd,
-                                Download.buildUrl(self.id),
+                                fetcher.url,
                                 self.name,
                                 self.tmpDir,
                                 self.directory,
+                                cookie=fetcher.cookies,
+                                color=self.color,
+                                verbose=self.verbose,
                                 progress_callback=self.progress_callback).download()
-        Global.sprint("\nDownload completed.")
+
+        Global.sprint("Download completed.")
         if self.verbose: Global.sprint(f"Audio: {audio}\nVideo: {video}")
 
         # 2. Decrypting Files
 
-        Global.sprint("Please wait while we decrypt the files...\n")
+        Global.sprint("Please wait while we decrypt the files...")
 
         decrypt = Decrypt()
 

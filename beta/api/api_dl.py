@@ -36,6 +36,8 @@ def download_pw_video(task_id, name, id, out_dir, client_id, session_id, progres
         Main(id=id,
              name=f"{name}-{task_id}",
              token=prefs['token'],
+             random_id=prefs['random_id'],
+             color=False,
              directory=client_session_dir, tmpDir="/*auto*/", vsdPath=vsd, ffmpeg=ffmpeg, mp4d=mp4d, verbose=False,
              progress_callback=progress_callback).process()
     except TypeError as e:
