@@ -226,6 +226,7 @@ class CheckState:
         # checking for token
         if 'token' in prefs:
             id = ""
+            if verbose: Global.hr(); Global.dprint("TokeKey Found, Checking for token...")
 
             # checking if new token_context is enabled ? 
             token_data = prefs['token'].strip()
@@ -236,6 +237,11 @@ class CheckState:
                     prefs['token'] = data['token']
                     prefs['random_id'] = data['randomId']
                     id = self.check_token(prefs['token'], prefs['random_id'], verbose=verbose)
+                    if not id:
+                        error.errorList["tokenInvalid"]["func"]()
+                        if do_raise: raise CheckState.TokenInvalid()
+                    else:
+                        if verbose: Global.sprint("Token is valid")
                 except Exception as e:
                     if do_raise: raise CheckState.TokenInvalid()
             else:
