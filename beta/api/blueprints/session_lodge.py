@@ -112,6 +112,7 @@ def merge_sessions(client_id):
         return jsonify({'error': 'session_ids is required'}), 400
     try:
         client_manager.merge_sessions(client_id, session_ids[0],session_ids[1])
+
         # also move /webdl/<client>/session_id_2/* to /webdl/<client>/session_id_1
         import shutil
         for file in os.listdir(f"{OUT_DIR}/{client_id}/{session_ids[1]}"):
