@@ -8,8 +8,8 @@
     "vsd": "$script/bin/vsd.exe",
     "ffmpeg": "$script/bin/ffmpeg",
     "mp4decrypt": "$script/bin/mp4decrypt.exe",
-    "webui-del-time": "45",
+    "webui-del-time": "30",
     "webui": true,
     "webui-port": "5000",
-    "token": "{\"token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MjYzMDAxOTguMjU2LCJkYXRhIjp7Il9pZCI6IjYyNDY3NzEwZWIwMTM3MDAxOGEzMzIzNiIsInVzZXJuYW1lIjoiNjIwNzQ4NjkwMyIsImZpcnN0TmFtZSI6IlNoYXVyeWEgQ2hhbmRyYSIsImxhc3ROYW1lIjoiIiwib3JnYW5pemF0aW9uIjp7Il9pZCI6IjVlYjM5M2VlOTVmYWI3NDY4YTc5ZDE4OSIsIndlYnNpdGUiOiJwaHlzaWNzd2FsbGFoLmNvbSIsIm5hbWUiOiJQaHlzaWNzd2FsbGFoIn0sImVtYWlsIjoic2hhdXJ5YWNoYW5kcmF3b3JrQGdtYWlsLmNvbSIsInJvbGVzIjpbIjViMjdiZDk2NTg0MmY5NTBhNzc4YzZlZiIsIjVjYzk1YTJlOGJkZTRkNjZkZTQwMGIzNyJdLCJjb3VudHJ5R3JvdXAiOiJJTiIsInR5cGUiOiJVU0VSIn0sImlhdCI6MTcyNTY5NTM5OH0.7l9tX9zdkwOcu22d9_YWmFKwqwKBtRaqPQMD_-vYFGA\",\"refresh_token\":\"2fdf545fe2ec2223077e5a01c1105ebc7c5ab80cf5e95f0a8c3f2475d36078b7\",\"expires_in\":1726300198263,\"randomId\":\"190f01f4-d14b-4ce7-85b3-8a6b98cedcea\"}"
+    "token": "{\"token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MjcxMDcwMjcuOTk4LCJkYXRhIjp7Il9pZCI6IjYyNDY3NzEwZWIwMTM3MDAxOGEzMzIzNiIsInVzZXJuYW1lIjoiNjIwNzQ4NjkwMyIsImZpcnN0TmFtZSI6IlNoYXVyeWEgQ2hhbmRyYSIsImxhc3ROYW1lIjoiIiwib3JnYW5pemF0aW9uIjp7Il9pZCI6IjVlYjM5M2VlOTVmYWI3NDY4YTc5ZDE4OSIsIndlYnNpdGUiOiJwaHlzaWNzd2FsbGFoLmNvbSIsIm5hbWUiOiJQaHlzaWNzd2FsbGFoIn0sImVtYWlsIjoic2hhdXJ5YWNoYW5kcmF3b3JrQGdtYWlsLmNvbSIsInJvbGVzIjpbIjViMjdiZDk2NTg0MmY5NTBhNzc4YzZlZiIsIjVjYzk1YTJlOGJkZTRkNjZkZTQwMGIzNyJdLCJjb3VudHJ5R3JvdXAiOiJJTiIsInR5cGUiOiJVU0VSIn0sImlhdCI6MTcyNjUwMjIyN30.KtwJJg7nQzhLw9wKiZGLctzqkV3_4XixTbgN25Ka7YQ\",\"refresh_token\":\"45dc834bbefc0e7298687b84d4ec8dd5b7484e5c6d5bcff7b2e9a6b3f88df8ad\",\"expires_in\":1727107028008,\"randomId\":\"441c443a-2ab0-40da-86c1-885b88892094\"}"
 }
