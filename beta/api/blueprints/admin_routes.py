@@ -3,7 +3,7 @@ import os.path
 from flask import Blueprint, request, jsonify, send_file
 from beta.api.mr_manager.boss_manager import Boss
 from mainLogic.utils.os2 import SysFunc
-from updater import check_for_updates, pull
+from updater import check_for_updates, pull_latest_changes as pull
 
 client_manager = Boss.client_manager
 task_manager = Boss.task_manager
