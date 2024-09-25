@@ -104,6 +104,8 @@ def main(csv_file=None, id=None, name=None, directory=None, verbose=False, shell
 
     state = check_dependencies(directory, glv.vout)
 
+    glv_var.vars['prefs'] = state['prefs']
+
     if webui_port is not None:
         start_webui(webui_port, glv.vout)
 
