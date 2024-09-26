@@ -12,7 +12,7 @@ from beta.api.blueprints.leagacy_create_task import legacy_create_task
 from beta.api.blueprints.client_info_routes import client_info
 from beta.api.blueprints.admin_routes import admin
 from beta.api.blueprints.scarper import create_scraper_blueprint as scraper
-
+from beta.api.blueprints.login import login
 app = Flask(__name__)
 
 # Initialize ClientManager and TaskManager
@@ -37,7 +37,10 @@ app.register_blueprint(session_lodge)
 app.register_blueprint(dl_and_post_dl)
 app.register_blueprint(client_info)
 app.register_blueprint(admin)
+
 app.register_blueprint(scraper(vars['prefs']['token']))
+
+app.register_blueprint(login)
 
 if __name__ == '__main__':
     app.run(debug=True, port=7680)

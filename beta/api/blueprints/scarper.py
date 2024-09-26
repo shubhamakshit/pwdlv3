@@ -25,8 +25,8 @@ def create_scraper_blueprint(token=None):
         except Exception as e:
             return create_response(error=str(e)), 500
 
-    @scraper.route('/topics/<subject_slug>', methods=['GET'])
-    @scraper.route('/api/topics/<subject_slug>', methods=['GET'])
+    @scraper.route('/batches/<subject_slug>', methods=['GET'])
+    @scraper.route('/api/batches/<subject_slug>', methods=['GET'])
     def get_topics(subject_slug):
         try:
             batch_name = request.args.get('batch_name', batch_api.batch_name)
@@ -36,8 +36,8 @@ def create_scraper_blueprint(token=None):
         except Exception as e:
             return create_response(error=str(e)), 500
 
-    @scraper.route('/subtopics/<subject_slug>', methods=['GET'])
-    @scraper.route('/api/subtopics/<subject_slug>', methods=['GET'])
+    @scraper.route('/chapters/<subject_slug>', methods=['GET'])
+    @scraper.route('/api/chapters/<subject_slug>', methods=['GET'])
     def get_subtopics(subject_slug):
         try:
             batch_name = request.args.get('batch_name', batch_api.batch_name)
@@ -89,8 +89,8 @@ def create_scraper_blueprint(token=None):
         except Exception as e:
             return create_response(error=str(e)), 500
 
-    @scraper.route('/normal/lectures/<subject_slug>/<chapter_slug>', methods=['GET'])
     @scraper.route('/normal/lectures', methods=['GET'])
+    @scraper.route('/api/normal/lectures', methods=['GET'])
     @scraper.route('/api/normal/videos', methods=['GET'])
     def get_normal_videos():
         try:

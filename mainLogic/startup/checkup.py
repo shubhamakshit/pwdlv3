@@ -1,264 +1,196 @@
-from mainLogic import error
 import os
+from mainLogic import error
 from mainLogic.utils.os2 import SysFunc
 from mainLogic.utils.glv import Global
 
 
 class CheckState:
     class MethodPatched(Exception):
-
         def __init__(self):
             self.err_str = "Method Has been patched"
             super().__init__(self.err_str)
 
-        def __str__(self):
-            return self.err_str
-
     class TokenInvalid(Exception):
-
         def __init__(self):
             self.err_str = "Token Invalid"
             super().__init__(self.err_str)
 
-        def __str__(self):
-            return self.err_str
-
     class ExecutableNotFound(Exception):
-
         def __init__(self, exe):
-            self.exe = exe
             self.err_str = f"{exe} not found"
             super().__init__(self.err_str)
 
-        def __str__(self):
-            return self.err_str
-
     class TokenNotFound(Exception):
-
         def __init__(self):
             self.err_str = "Token Not Found"
             super().__init__(self.err_str)
-
-        def __str__(self):
-            return self.err_str
 
     def __init__(self) -> None:
         pass
 
     def post_checkup(self, prefs, verbose=True):
-
         """
-            Post Checkup Function
-            1. Setting up the tmpDir
-            2. Setting up the output directory
-            3. Setting up the horizontal rule
+        Post Checkup Function
+        1. Setting up the tmpDir
+        2. Setting up the output directory
+        3. Setting up the horizontal rule
         """
-
-        OUT_DIRECTORY = ""
-
-        # setting up prefs
-        if 'tmpDir' in prefs:
-            tmpDir = SysFunc.modify_path(prefs['tmpDir'])
-            if not os.path.exists(tmpDir):
-                try:
-                    os.makedirs(tmpDir)
-                except OSError as exc:  # Guard against failure
-                    error.errorList["couldNotMakeDir"]['func'](tmpDir)
-                    Global.errprint("Failed to create TmpDir")
-                    Global.errprint("Falling Back to Default")
-        else:
-            tmpDir = './tmp/'
-
-        # setting up directory for pwdl
-        if "dir" in prefs:
+        # Setting up tmpDir
+        tmpDir = SysFunc.modify_path(prefs.get('tmpDir', './tmp/'))
+        if not os.path.exists(tmpDir):
             try:
-                if not os.path.exists(os.path.expandvars(prefs['dir'])):
-                    try:
-                        os.makedirs(os.path.expandvars(prefs['dir']))
-                    except OSError as exc:
-                        error.errorList["couldNotMakeDir"]['func'](os.path.expandvars(prefs['dir']))
-                        Global.errprint("Failed to create Output Directory")
-                        Global.errprint("Falling Back to Default")
-            except TypeError:
-                pass
-            except Exception as e:
-                Global.errprint(f"Error: {e}")
-                Global.errprint("Falling back to default")
-                OUT_DIRECTORY = './'
+                os.makedirs(tmpDir)
+            except OSError:
+                error.errorList["couldNotMakeDir"]['func'](tmpDir)
+                Global.errprint("Failed to create TmpDir, falling back to default.")
+                tmpDir = './tmp/'
 
-            try:
-                OUT_DIRECTORY = os.path.abspath(os.path.expandvars(prefs['dir']))
-
-            # if the user provides a non-string value for the directory or dir is not found
-            except TypeError:
-                OUT_DIRECTORY = './'
-
-            # if the directory is not found
-            except Exception as e:
-                Global.errprint(f"Error: {e}")
-                Global.errprint("Falling back to default")
-                OUT_DIRECTORY = './'
+        # Setting up output directory
+        if not prefs.get('dir'):
+            out_dir = './'
         else:
+            out_dir = prefs.get('dir')
+        try:
+            out_dir = os.path.expandvars(out_dir)
+            if not os.path.exists(out_dir):
+                os.makedirs(out_dir)
+            OUT_DIRECTORY = os.path.abspath(out_dir)
+        except Exception as e:
+            Global.errprint(f"Error: {e}, falling back to default output directory.")
             OUT_DIRECTORY = './'
 
-        # setting up hr (horizontal rule)
-        if not 'hr' in prefs:
-            Global.disable_hr = False
-        elif not prefs['hr']:
-            Global.disable_hr = True
+        # Setting up horizontal rule
+        Global.disable_hr = not prefs.get('hr', True)
 
         prefs['tmpDir'] = tmpDir
         prefs['dir'] = OUT_DIRECTORY
 
+    def validate_token(self, token_data, verbose=False):
+        """Validates and extracts token and random ID from token data."""
+        import json
+        if isinstance(token_data, dict):
+            return token_data.get('token') or token_data.get('access_token'), token_data.get('random_id', "a3e290fa-ea36-4012-9124-8908794c33aa")
+        if token_data.startswith("{"):
+            try:
+                data = json.loads(token_data)
+                token = data.get('token') or data.get('access_token')
+                random_id = data.get('randomId', "a3e290fa-ea36-4012-9124-8908794c33aa")
+                return token, random_id
+            except json.JSONDecodeError as e:
+                if verbose:
+                    Global.errprint(f"Error decoding token data: {e}")
+                raise self.TokenInvalid()
+        return token_data, "a3e290fa-ea36-4012-9124-8908794c33aa"
+
     def check_token(self, token, random_id, id="90dbede8-66a8-40e8-82ce-a2048b5c063d", verbose=False):
+        """Checks the validity of a token using LicenseKeyFetcher."""
+        if verbose:
+            Global.hr()
+            Global.dprint("Checking Token...")
+            Global.dprint(f"Token: {token}")
+            Global.dprint(f"Random ID: {random_id}")
+            Global.dprint(f"ID: {id}")
+
         from mainLogic.big4.decrypt.key import LicenseKeyFetcher
-        lc_fetcher = LicenseKeyFetcher(token=token,random_id=random_id)
+        lc_fetcher = LicenseKeyFetcher(token=token, random_id=random_id)
+
         try:
-            key = lc_fetcher.get_key(id, verbose=verbose)
-            return key
+            return lc_fetcher.get_key(id, verbose=verbose)
         except Exception as e:
             Global.errprint(f"An error occurred while getting the key: {e}")
-            Global.errprint("Your Token is Invalid! ")
+            Global.errprint("Your Token is Invalid!")
             return None
 
     def checkup(self, executable, directory="./", verbose=True, do_raise=False):
-
         state = {}
+        prefs = self.load_preferences(verbose)
 
-        # set script path to ../startup
-        # this is the path to the folder containing the pwdl.py file
-        # since the checkup.py is in the startup folder, we need to go one level up
-        # if verbose: Global.hr();Global.dprint("Setting script path...")
-        # if verbose: Global.errprint('Warning! Hard Coded \'$script\' location to checkup.py/../../')
-        #
-        # Global.script_path = os.path.abspath(os.path.join(os.path.dirname(__file__),'../..'))
-        # default_json = os.path.join(Global.script_path,'defaults.json')
-        #
-        # # check if defaults.json exists
-        # # and if it does, load the preferences
-        # if verbose: Global.hr();Global.dprint("Checking for default settings...")
-        #
-        # if verbose: Global.hr();Global.dprint(f"Checking at {default_json}")
-        # if verbose: Global.errprint('Warning!\nHard Coded \'defaults.json\' location to $script/default.json ')
-        #
-        # if not os.path.exists(default_json):
-        #     error.errorList["defaultsNotFound"]["func"]()
-        #     exit(error.errorList["defaultsNotFound"]["code"])
-        #
-        # if verbose: Global.sprint("Default settings found."); Global.hr()
+        if self.is_method_patched(prefs, do_raise):
+            return state
 
-        # load the preferences
-        from mainLogic.startup.userPrefs import PreferencesLoader
-        prefs = PreferencesLoader(verbose=verbose).prefs
+        # Check for executables
+        state.update(self.check_executables(executable, prefs, verbose, do_raise))
 
-        # check if method is patched (currently via userPrefs.py)
-        if 'patched' in prefs:
-            if prefs['patched']:
-                error.errorList["methodPatched"]["func"]()
-                if do_raise: raise CheckState.MethodPatched("Method Patched")
-                exit(error.errorList["methodPatched"]["code"])
-
-        # FLare no longer required
-        # if verbose: Global.hr(); Global.dprint("Checking for Flare...")
-        # default url is localhost:8191
-        # however user can change it in the preferences file
-        # if verbose: Global.dprint(f"Checking at {prefs['flare_url'] if 'flare_url' in prefs else 'http://localhost:8191/v1'}")
-        # if not checkFlare(prefs['flare_url'] if 'flare_url' in prefs else 'http://localhost:8191/v1'):
-        #     error.errorList["flareNotStarted"]["func"]()
-        #     exit(error.errorList["flareNotStarted"]["code"])
-        #
-        # if verbose: Global.sprint("Flare is running."); Global.hr()
-
-        os2 = SysFunc()
-
-        found = []
-        notFound = []
-
-        for exe in executable:
-            if verbose: Global.hr(); Global.dprint(f"Checking for {exe}...")
-
-            if os2.which(exe) == 1:
-                if verbose: error.errorList["dependencyNotFound"]["func"](exe)
-                if verbose: print(f"{exe} not found on path! Checking in default settings...")
-
-                # add exe's which are found to the found list
-                found.append(exe)
-                # add exe's which are not found to the notFound list
-                notFound.append(exe)
-
-            else:
-                if verbose: Global.sprint(f"{exe} found.")
-                state[exe] = exe
-
-        if len(notFound) > 0:
-
-            if verbose: Global.hr();Global.dprint(
-                "Following dependencies were not found on path. Checking in default settings...")
-            if verbose: Global.dprint(notFound); Global.hr()
-
-            for exe in notFound:
-
-                if verbose: Global.dprint(f"Checking for {exe} in default settings...")
-
-                if exe in prefs:
-
-                    if verbose: Global.sprint(f"Key for {exe} found in default settings.")
-                    if verbose: Global.sprint(f"Value: {prefs[exe]}")
-                    if verbose: Global.dprint(f"Checking for {exe} at '{prefs[exe].strip()}' ...")
-
-                    if not os.path.exists(prefs[exe].strip()):
-                        Global.errprint(f"{exe} not found at {prefs[exe].strip()}")
-                        error.errorList["dependencyNotFoundInPrefs"]["func"](exe)
-                        if do_raise: raise CheckState.ExecutableNotFound(f"{exe} not found")
-                        exit(error.errorList["dependencyNotFoundInPrefs"]["code"])
-
-                    if verbose: Global.sprint(f"{exe} found at {prefs[exe].strip()}")
-                    state[exe] = prefs[exe].strip()
-
-
-                else:
-                    error.errorList["dependencyNotFoundInPrefs"]["func"](exe)
-                    if do_raise: raise CheckState.ExecutableNotFound(f"{exe} not found in prefs")
-                    exit(error.errorList["dependencyNotFoundInPrefs"]["code"])
-
-                if verbose: Global.hr()
-
-        # checking for token
-        if 'token' in prefs:
-            id = ""
-            if verbose: Global.hr(); Global.dprint("TokeKey Found, Checking for token...")
-
-            # checking if new token_context is enabled ? 
-            token_data = prefs['token'].strip()
-            if token_data.startswith("{"):
-                try:
-                    import json
-                    data = json.loads(token_data)
-                    prefs['token'] = data['token']
-                    prefs['random_id'] = data['randomId']
-                    id = self.check_token(prefs['token'], prefs['random_id'], verbose=verbose)
-                    if not id:
-                        error.errorList["tokenInvalid"]["func"]()
-                        if do_raise: raise CheckState.TokenInvalid()
-                    else:
-                        if verbose: Global.sprint("Token is valid")
-                except Exception as e:
-                    if do_raise: raise CheckState.TokenInvalid()
-            else:
-                pass
-
-            #exit(error.errorList["tokenInvalid"]["code"])
+        # Validate token
+        token = prefs.get('token')
+        if token:
+            try:
+                token, random_id = self.validate_token(token, verbose)
+                if not self.check_token(token, random_id, verbose=verbose):
+                    self.raise_or_exit("tokenInvalid", do_raise)
+            except self.TokenInvalid:
+                self.raise_or_exit("tokenInvalid", do_raise)
         else:
-            error.errorList["tokenNotFound"]["func"]()
-            if do_raise: raise CheckState.TokenNotFound()
-            exit(error.errorList["tokenNotFound"]["code"])
-
-        if not id:
-            error.errorList["tokenInvalid"]["func"]()
-            if do_raise: raise CheckState.TokenInvalid()
+            self.raise_or_exit("tokenNotFound", do_raise)
 
         state['prefs'] = prefs
         prefs['dir'] = directory
         self.post_checkup(prefs, verbose)
 
         return state
+
+    def load_preferences(self, verbose):
+        """Loads user preferences from the PreferencesLoader."""
+        from mainLogic.startup.userPrefs import PreferencesLoader
+        return PreferencesLoader(verbose=verbose).prefs
+
+    def is_method_patched(self, prefs, do_raise):
+        """Checks if the method is patched based on preferences."""
+        if prefs.get('patched'):
+            error.errorList["methodPatched"]["func"]()
+            if do_raise:
+                raise self.MethodPatched()
+            exit(error.errorList["methodPatched"]["code"])
+        return False
+
+    def check_executables(self, executables, prefs, verbose, do_raise):
+        """Checks if the required executables are available."""
+        os2 = SysFunc()
+        state = {}
+        not_found = []
+
+        for exe in executables:
+            if os2.which(exe) == 1:
+                not_found.append(exe)
+            else:
+                if verbose:
+                    Global.sprint(f"{exe} found.")
+                state[exe] = exe
+
+        if not_found:
+            self.handle_not_found_executables(not_found, prefs, state, verbose, do_raise)
+
+        return state
+
+    def handle_not_found_executables(self, not_found, prefs, state, verbose, do_raise):
+        """Handles the case where some executables are not found."""
+        if verbose:
+            Global.hr()
+            Global.dprint("Following dependencies were not found on path. Checking in default settings...")
+            Global.dprint(not_found)
+            Global.hr()
+
+        for exe in not_found:
+            if verbose:
+                Global.dprint(f"Checking for {exe} in default settings...")
+
+            exe_path = prefs.get(exe)
+            if exe_path:
+                exe_path = exe_path.strip()
+                if not os.path.exists(exe_path):
+                    Global.errprint(f"{exe} not found at {exe_path}")
+                    self.raise_or_exit("dependencyNotFoundInPrefs", do_raise, exe)
+                if verbose:
+                    Global.sprint(f"{exe} found at {exe_path}")
+                state[exe] = exe_path
+            else:
+                self.raise_or_exit("dependencyNotFoundInPrefs", do_raise, exe)
+            if verbose:
+                Global.hr()
+
+    def raise_or_exit(self, error_key, do_raise, exe=None):
+        """Raises an exception or exits based on the error key."""
+        error.errorList[error_key]["func"](exe)
+        if do_raise:
+            raise getattr(self, error_key)()
+        exit(error.errorList[error_key]["code"])

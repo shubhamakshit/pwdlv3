@@ -28,6 +28,10 @@ def sessions():
 def admin():
     return render_template('index.html')
 
+@template_blueprint.route('/boss')
+def boss():
+    return render_template('index.html')
+
 # @template_blueprint.route('/manifest.json')
 # def manifest():
 #     return render_template('manifest.json')
