@@ -32,6 +32,14 @@ def admin():
 def boss():
     return render_template('index.html')
 
+@template_blueprint.route('/login')
+def login():
+    return render_template('index.html')
+
+@template_blueprint.route('/profile')
+def profile():
+    return render_template('index.html')
+
 # @template_blueprint.route('/manifest.json')
 # def manifest():
 #     return render_template('manifest.json')
