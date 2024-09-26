@@ -1,5 +1,6 @@
 import os
 from mainLogic import error
+from mainLogic.utils import glv_var
 from mainLogic.utils.os2 import SysFunc
 from mainLogic.utils.glv import Global
 
@@ -116,12 +117,34 @@ class CheckState:
         if token:
             try:
                 token, random_id = self.validate_token(token, verbose)
-                if not self.check_token(token, random_id, verbose=verbose):
+                prefs['token_config'] = prefs.get('token')
+                prefs['token'] = token
+                prefs['random_id'] = random_id
+                try:
+                    key = self.check_token(token, random_id, verbose=verbose)
+                    if key:
+                        if verbose:
+                            Global.sprint("Token Valid")
+                        prefs['key'] = key
+                    else:
+                        if verbose:
+                            Global.errprint("Token Invalid! Please run pwdl --login")
+
+                        #self.raise_or_exit("tokenInvalid", do_raise)
+                except Exception as e:
+                    if verbose:
+                        Global.errprint(f"Error: {e}")
+                        Global.errprint(f"Token Invalid")
                     self.raise_or_exit("tokenInvalid", do_raise)
             except self.TokenInvalid:
                 self.raise_or_exit("tokenInvalid", do_raise)
         else:
-            self.raise_or_exit("tokenNotFound", do_raise)
+            if glv_var.vars.get('ig_token'):
+                # ignore token
+                Global.errprint("Token not found But ignoring it")
+            else:
+                self.raise_or_exit("tokenNotFound", do_raise)
+
 
         state['prefs'] = prefs
         prefs['dir'] = directory
@@ -190,7 +213,10 @@ class CheckState:
 
     def raise_or_exit(self, error_key, do_raise, exe=None):
         """Raises an exception or exits based on the error key."""
-        error.errorList[error_key]["func"](exe)
+        if not exe:
+            error.errorList[error_key]["func"]()
+        else:
+            error.errorList[error_key]["func"](exe)
         if do_raise:
             raise getattr(self, error_key)()
         exit(error.errorList[error_key]["code"])

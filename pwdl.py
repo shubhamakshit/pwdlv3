@@ -2,6 +2,8 @@ import argparse
 
 from beta.call_login import LoginInterface
 from mainLogic import downloader
+from mainLogic.utils import glv_var
+
 
 def parse_arguments():
     """Parse command-line arguments."""
@@ -19,13 +21,18 @@ def parse_arguments():
                         help='Simulate the download process. No files will be downloaded. Incompatible wit h --csv-file. Must be used with --id and --name')
     parser.add_argument('--version', action='version', version='%(prog)s 1.0')
     parser.add_argument('--login', action='store_true', help='Login to PhysicsWallah')
+    parser.add_argument('--ignore-token', action='store_true', help='Ignore the token.')
+
     return parser.parse_args()
+
 
 if __name__ == "__main__":
     args = parse_arguments()
 
     if args.login:
         LoginInterface.cli()
+    if args.ignore_token:
+        glv_var.vars['ig_token'] = True
 
     downloader.main(
         csv_file=args.csv_file,

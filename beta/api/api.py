@@ -38,7 +38,7 @@ app.register_blueprint(dl_and_post_dl)
 app.register_blueprint(client_info)
 app.register_blueprint(admin)
 
-app.register_blueprint(scraper(vars['prefs']['token']))
+app.register_blueprint(scraper())
 
 app.register_blueprint(login)
 
