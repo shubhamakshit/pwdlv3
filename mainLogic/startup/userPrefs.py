@@ -40,7 +40,7 @@ class PreferencesLoader:
 
                 # replace the variables with their values
                 for var in vars:
-                    contents = contents.replace(var, vars[var])
+                    contents = contents.replace(var, str(vars[var]))
 
                 # replace the backslashes with forward slashes
                 contents.replace('\\', '/')

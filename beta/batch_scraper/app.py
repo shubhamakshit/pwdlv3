@@ -2,16 +2,25 @@ import json
 
 import requests
 from beta.batch_scraper.Endpoints import Endpoints
+from mainLogic.utils import glv_var
+from mainLogic.utils.glv import Global
 
 
 class BatchAPI:
-    def __init__(self, batch_name: str, token: str):
+    def __init__(self, batch_name: str, token: str, force=True):
         self.batch_name = batch_name
         self.token = token
-        #print(f"token: {token}")
+        self.force = force
+
+        print(f"token: {self.token}")
 
     def dataFromAPI(self, url: str, headers: dict = {}, params: dict = {}, data: dict = {}, method: str = 'GET',
                     post_modifier_function=None):
+
+        if self.force:
+            self.token = glv_var.vars['prefs'].get('token')
+            Global.sprint(f"New Token: {self.token}")
+
         if self.token:
             if 'Authorization' not in headers:
                 headers['Authorization'] = f'Bearer {self.token}'
@@ -143,7 +152,7 @@ class BatchAPI:
                         sub_topic_id=sub_topic_id,
                         page=1
                     ),
-                    headers = {
+                    headers={
                         "randomId": "441c443a-2ab0-40da-86c1-885b88892094",
                         "Referer": "https://www.pw.live/",
                         "sec-ch-ua": '"Google Chrome";v="129", "Not=A?Brand";v="8", "Chromium";v="129"',
@@ -155,11 +164,10 @@ class BatchAPI:
                         "Accept": "application/json, text/plain, */*",
                         "client-version": "6.0.6"
                     },
-            post_modifier_function=lambda response: response.json()['data']
+                    post_modifier_function=lambda response: response.json()['data']
                 )
             )
         )
-
 
     def get_subjects_details(self):
         def batch_details_to_subject_slugs(data):
@@ -213,7 +221,6 @@ class BatchAPI:
             )
         )
 
-
 # TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Mjc4MjAxNDEuNTEsImRhdGEiOnsiX2lkIjoiNjI0Njc3MTBlYjAxMzcwMDE4YTMzMjM2IiwidXNlcm5hbWUiOiI2MjA3NDg2OTAzIiwiZmlyc3ROYW1lIjoiU2hhdXJ5YSBDaGFuZHJhIiwibGFzdE5hbWUiOiIiLCJvcmdhbml6YXRpb24iOnsiX2lkIjoiNWViMzkzZWU5NWZhYjc0NjhhNzlkMTg5Iiwid2Vic2l0ZSI6InBoeXNpY3N3YWxsYWguY29tIiwibmFtZSI6IlBoeXNpY3N3YWxsYWgifSwiZW1haWwiOiJzaGF1cnlhY2hhbmRyYXdvcmtAZ21haWwuY29tIiwicm9sZXMiOlsiNWIyN2JkOTY1ODQyZjk1MGE3NzhjNmVmIiwiNWNjOTVhMmU4YmRlNGQ2NmRlNDAwYjM3Il0sImNvdW50cnlHcm91cCI6IklOIiwidHlwZSI6IlVTRVIifSwiaWF0IjoxNzI3MjE1MzQxfQ.46-GMHHcv6Ps6GaQxQ7FtM-wY0rtGNIFRBZMt-Mh5Ok"
 # batch = BatchAPI("12th-neet-khazana-370407", TOKEN)
 #
@@ -249,4 +256,3 @@ class BatchAPI:
 # videos = normal_batch.get_video_data(phy, chapter_0['slug'])
 # print(videos)
 #
-

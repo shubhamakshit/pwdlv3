@@ -6,6 +6,8 @@ from flask import Flask, jsonify, request, Blueprint
 
 login = Blueprint('login', __name__)
 
+
+@login.route('/api/otp', methods=['POST'])
 @login.route('/otp', methods=['POST'])
 def send_otp():
     data = request.json
@@ -22,7 +24,8 @@ def send_otp():
     else:
         return jsonify({'success': 'OTP sent successfully'}), 200
 
-@login.route('/verify', methods=['POST'])
+@login.route('/api/verify-otp', methods=['POST'])
+@login.route('/verify-otp', methods=['POST'])
 def verify_otp():
     data = request.json
     if 'phone' not in data or 'otp' not in data:
@@ -40,3 +43,5 @@ def verify_otp():
         u = UpdateJSONFile(PREFS_FILE)
         u.update('token',lg.token)
         return jsonify({'success': 'OTP verified successfully','token':lg.token}), 200
+
+

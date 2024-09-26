@@ -1,49 +1,37 @@
+# main.py
+
 import sys
 import os
-from mainLogic.error import errorList
+from mainLogic.utils.dependency_checker import check_dependencies  # Import the check_dependencies function
 from mainLogic.utils.glv import Global
-from mainLogic.utils.os2 import SysFunc
+from mainLogic.utils.gen_utils import generate_safe_folder_name
 from mainLogic.main import Main
 from beta.shellLogic import shell
-from mainLogic.startup.checkup import CheckState
-from mainLogic.utils.gen_utils import generate_safe_folder_name
 from mainLogic.utils import glv_var
+from mainLogic.error import errorList
 
-# global variables
-prefs = {}
+# Global variables
 glv = Global()
 
 # hardcoding the list of executables required for the script to run
 EXECUTABLES = glv_var.EXECUTABLES
-
-def check_dependencies(directory, verbose):
-    """Check if all dependencies are installed."""
-    global prefs
-    state = CheckState().checkup(EXECUTABLES, directory=directory, verbose=verbose)
-    prefs = state['prefs']
-    return state
 
 def start_shell():
     """Start the shell if requested."""
     shell.main()
 
 def start_webui(port, verbose):
-
     """Start the WebUI if requested."""
     from run import app
     if not prefs['webui']:
         Global.errprint("WebUI is not enabled in the preferences. Exiting ...")
         sys.exit(1)
 
-
-
     if 'webui-port' in prefs and not port == -1:
         port = prefs['webui-port']
 
     if port == -1:
         port = 5000
-
-
 
     if verbose:
         Global.hr()
@@ -97,14 +85,14 @@ def handle_csv_file(csv_file, state, verbose, simulate=False):
             download_process(id, name, state, verbose)
 
 def main(csv_file=None, id=None, name=None, directory=None, verbose=False, shell=False, webui_port=None, simulate=False):
+    global prefs  # Use global keyword to modify global prefs
+
     if shell:
         start_shell()
 
     glv.vout = verbose
 
-    state = check_dependencies(directory, glv.vout)
-
-    glv_var.vars['prefs'] = state['prefs']
+    state, prefs = check_dependencies(directory, glv.vout)  # Capture returned prefs
 
     if webui_port is not None:
         start_webui(webui_port, glv.vout)
@@ -126,3 +114,5 @@ def main(csv_file=None, id=None, name=None, directory=None, verbose=False, shell
         download_process(id, name, state, glv.vout)
     else:
         sys.exit(1)
+
+

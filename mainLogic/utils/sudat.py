@@ -1,4 +1,9 @@
+import os
+import sys
+
 import requests
+
+from mainLogic.utils import glv_var
 
 
 class Login:
@@ -68,7 +73,11 @@ class Login:
         response = requests.post(self.token_url, headers=self.headers, json=payload)
         if response.status_code == 200 or response.status_code == 201:
             self.token = response.json().get('data')
+            # reload glv_var.vars['prefs']
+            from mainLogic.utils.dependency_checker import check_dependencies
+            #check_dependencies(glv_var.vars['prefs'].get('dir','./'),True)
             return True
+
         else:
             return False
 

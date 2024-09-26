@@ -1,7 +1,14 @@
 import os.path
 
 from flask import Blueprint, request, jsonify, send_file
+
+from beta.api.blueprints.template_routes import prefs
 from beta.api.mr_manager.boss_manager import Boss
+from beta.update import UpdateJSONFile
+from mainLogic.startup.checkup import CheckState
+from mainLogic.utils import glv_var
+from mainLogic.utils.dependency_checker import check_dependencies
+from mainLogic.utils.glv_var import PREFS_FILE
 from mainLogic.utils.os2 import SysFunc
 from updater import check_for_updates, pull_latest_changes as pull
 
@@ -87,3 +94,42 @@ def update_server():
 def get_latest_origin_hash():
     from updater import get_latest_origin_hash, get_info_by_commit_hash
     return jsonify(get_info_by_commit_hash(get_latest_origin_hash())), 200
+
+@admin.route('/api/check_token')
+@admin.route('/check_token')
+def check_token():
+
+    ch = CheckState()
+    # reload preferences
+    from mainLogic.utils.dependency_checker import EXECUTABLES, check_dependencies
+
+    try:
+        state, prefs = check_dependencies(glv_var.vars['prefs'].get('dir',{}), verbose=False, do_raise=True)
+        glv_var.vars['prefs'] = prefs
+    except Exception as e:
+        return jsonify({'error': f"Error: {e}"}), 500
+
+    if 'token' in prefs:
+        token = prefs['token']
+    else:
+        return jsonify({'error': 'Token not found'}), 404
+    if 'random_id' in prefs:
+        random_id = prefs['random_id']
+    else:
+        return jsonify({'error': 'Random ID not found'}), 404
+
+    if ch.check_token(token, random_id):
+        return jsonify({'success': 'Token is valid'}), 200
+    else:
+        return jsonify({'error': 'Token is invalid'}), 404
+
+@admin.route('/api/change_to_old_token_scheme')
+@admin.route('/change_to_old_token_scheme')
+def change_to_old_token_scheme():
+    UpdateJSONFile(PREFS_FILE).update('token', "")
+    try:
+        state, prefs = check_dependencies(glv_var.vars['prefs'].get('dir',{}), verbose=False, do_raise=True)
+        glv_var.vars['prefs'] = prefs
+    except Exception as e:
+        return jsonify({'error': f"Error: {e}"}), 500
+    return jsonify({'success': 'Token scheme changed to old'}), 200
