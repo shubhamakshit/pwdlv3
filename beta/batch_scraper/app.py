@@ -8,7 +8,7 @@ class BatchAPI:
     def __init__(self, batch_name: str, token: str):
         self.batch_name = batch_name
         self.token = token
-        print(f"token: {token}")
+        #print(f"token: {token}")
 
     def dataFromAPI(self, url: str, headers: dict = {}, params: dict = {}, data: dict = {}, method: str = 'GET',
                     post_modifier_function=None):
@@ -27,10 +27,10 @@ class BatchAPI:
         else:
             raise ValueError('Method not recognized')
 
-        # print(f"Debug")
-        # print(f"Response: {response}")
-        # print(f"Response Status Code: {response.status_code}")
-        # print(f"Response Text: {response.text}")
+        print(f"Debug")
+        print(f"Response: {response}")
+        print(f"Response Status Code: {response.status_code}")
+        print(f"Response Text: {response.text}")
 
         if callable(post_modifier_function):
             return post_modifier_function(response)

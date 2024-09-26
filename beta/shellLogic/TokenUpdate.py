@@ -1,7 +1,6 @@
 from mainLogic.utils.glv import Global
-from beta.shellLogic import simpleParser
 from mainLogic.utils.glv_var import PREFS_FILE
-from beta.shellLogic.update import UpdateJSONFile
+from beta.update import UpdateJSONFile
 class TokenUpdate:
 
     def __init__(self):

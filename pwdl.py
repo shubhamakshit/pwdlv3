@@ -1,4 +1,6 @@
 import argparse
+
+from beta.call_login import LoginInterface
 from mainLogic import downloader
 
 def parse_arguments():
@@ -15,10 +17,16 @@ def parse_arguments():
     parser.add_argument('--webui', nargs='?', const=-1, type=int, help='Start the Webui')
     parser.add_argument('--simulate', action='store_true',
                         help='Simulate the download process. No files will be downloaded. Incompatible wit h --csv-file. Must be used with --id and --name')
+    parser.add_argument('--version', action='version', version='%(prog)s 1.0')
+    parser.add_argument('--login', action='store_true', help='Login to PhysicsWallah')
     return parser.parse_args()
 
 if __name__ == "__main__":
     args = parse_arguments()
+
+    if args.login:
+        LoginInterface.cli()
+
     downloader.main(
         csv_file=args.csv_file,
         id=args.id,
