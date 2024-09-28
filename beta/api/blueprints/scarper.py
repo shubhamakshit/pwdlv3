@@ -1,5 +1,8 @@
+from email.headerregistry import Group
+
 from flask import Flask, jsonify, request, Blueprint
 from beta.batch_scraper.app import BatchAPI  # Assuming the original code is in a file named BatchAPI.py
+from mainLogic.utils.glv import Global
 
 
 def create_scraper_blueprint(token=None):
@@ -76,6 +79,7 @@ def create_scraper_blueprint(token=None):
             subjects = batch_api.get_subjects_details()
             return create_response(data=subjects)
         except Exception as e:
+            Global.errprint(f"Error: {e}")
             return create_response(error=str(e)), 500
 
     @scraper.route('/normal/chapters/<subject_slug>', methods=['GET'])

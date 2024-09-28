@@ -14,8 +14,12 @@ def download_pw_video(task_id, name, id, out_dir, client_id, session_id, progres
     print(f"Downloading {name} with id {id} to {client_session_dir}")
 
     ch = CheckState()
+
     state = ch.checkup(glv_var.EXECUTABLES, directory="./", verbose=False,do_raise=True)
     prefs = state['prefs']
+
+    #from mainLogic.utils.dependency_checker import check_dependencies
+
 
     if 'webui-del-time' in prefs:
         del_time = int(prefs['webui-del-time'])
