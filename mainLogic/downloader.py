@@ -2,7 +2,9 @@
 
 import sys
 import os
-from mainLogic.utils.dependency_checker import check_dependencies  # Import the check_dependencies function
+
+from mainLogic.startup.checkup import CheckState
+#from mainLogic.utils.dependency_checker import check_dependencies  # Import the check_dependencies function
 from mainLogic.utils.glv import Global
 from mainLogic.utils.gen_utils import generate_safe_folder_name
 from mainLogic.main import Main
@@ -92,7 +94,14 @@ def main(csv_file=None, id=None, name=None, directory=None, verbose=False, shell
 
     glv.vout = verbose
 
-    state, prefs = check_dependencies(directory, glv.vout)  # Capture returned prefs
+    # calling og check_dependencies function (checkup)
+
+    ch = CheckState()
+    state = ch.checkup(EXECUTABLES, directory=directory, verbose=verbose, do_raise=True)
+    prefs = state['prefs']
+
+    # set the global preferences
+    glv_var.vars['prefs'] = prefs
 
     if webui_port is not None:
         start_webui(webui_port, glv.vout)

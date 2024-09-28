@@ -18,7 +18,14 @@ class BatchAPI:
                     post_modifier_function=None):
 
         if self.force:
-            self.token = glv_var.vars['prefs'].get('token')
+            Global.errprint("Forced to get token from stored prefs")
+            try:
+                self.token = glv_var.vars['prefs'].get('token')
+            except Exception as e:
+                Global.errprint(f"Error: {e}")
+                self.token = None
+                raise ValueError("Token not found in prefs")
+
             Global.sprint(f"New Token: {self.token}")
 
         if self.token:
@@ -36,10 +43,12 @@ class BatchAPI:
         else:
             raise ValueError('Method not recognized')
 
-        print(f"Debug")
-        print(f"Response: {response}")
+        Global.hr()
+        print(f"Debugging at {url}")
+        Global.sprint(f"Response: {response}")
         print(f"Response Status Code: {response.status_code}")
         print(f"Response Text: {response.text}")
+        Global.hr()
 
         if callable(post_modifier_function):
             return post_modifier_function(response)

@@ -2,6 +2,7 @@ import os
 
 from flask import Blueprint, request, jsonify
 
+from mainLogic.utils import glv_var
 from mainLogic.utils.glv import Global
 from mainLogic.utils.glv_var import PREFS_FILE
 
@@ -35,5 +36,11 @@ def update_prefs():
     data.update(request.json)
     with open(file_path, 'w') as file:
         js.dump(data, file, indent=4)
+
+    ## recheck dependencies
+    from mainLogic.utils.dependency_checker import re_check_dependencies
+    re_check_dependencies()
+
+
     return jsonify(data), 200
 

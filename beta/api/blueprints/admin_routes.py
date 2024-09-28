@@ -7,7 +7,8 @@ from beta.api.mr_manager.boss_manager import Boss
 from beta.update import UpdateJSONFile
 from mainLogic.startup.checkup import CheckState
 from mainLogic.utils import glv_var
-from mainLogic.utils.dependency_checker import check_dependencies
+from mainLogic.utils.dependency_checker import re_check_dependencies
+from mainLogic.utils.glv import Global
 from mainLogic.utils.glv_var import PREFS_FILE
 from mainLogic.utils.os2 import SysFunc
 from updater import check_for_updates, pull_latest_changes as pull
@@ -17,20 +18,24 @@ task_manager = Boss.task_manager
 
 admin = Blueprint('admin', __name__)
 
+
 @admin.route('/api/webdl')
 @admin.route('/webdl')
 def webdl():
     return jsonify(SysFunc.list_files_and_folders(Boss.OUT_DIR)), 200
+
 
 @admin.route('/api/webdl/webdl')
 @admin.route('/webdl/webdl')
 def webdl_copy():
     return webdl()
 
+
 @admin.route('/api/webdl/<path:subpath>')
 @admin.route('/webdl/<path:subpath>')
 def webdl_subpath(subpath):
     return jsonify(SysFunc.list_files_and_folders(os.path.join(Boss.OUT_DIR, subpath))), 200
+
 
 @admin.route('/api/delete/<path:subpath>')
 @admin.route('/delete/<path:subpath>')
@@ -46,6 +51,7 @@ def delete_subpath(subpath):
     else:
         return jsonify({'error': 'file not found'}), 404
 
+
 @admin.route('/api/get/<path:subpath>')
 @admin.route('/get/<path:subpath>')
 def get_subpath(subpath):
@@ -54,6 +60,7 @@ def get_subpath(subpath):
         return send_file(path_to_file, as_attachment=True, download_name=os.path.basename(path_to_file))
     else:
         return jsonify({'error': 'file not found'}), 404
+
 
 @admin.route('/api/server/usages')
 @admin.route('/server/usages')
@@ -65,6 +72,7 @@ def get_usages_for_all_client():
         usages[client_id] = int(SysFunc.get_size_in_mB(os.path.join(Boss.OUT_DIR, client_id)))
 
     return jsonify(usages), 200
+
 
 @admin.route('/api/server/update', methods=['GET', 'POST'])
 @admin.route('/server/update', methods=['GET', 'POST'])
@@ -89,23 +97,32 @@ def update_server():
         error_message = f"Unexpected error: {str(e)}"
         return jsonify({'error': error_message}), 500
 
+
 @admin.route('/api/server/update/latest')
 @admin.route('/server/update/latest')
 def get_latest_origin_hash():
     from updater import get_latest_origin_hash, get_info_by_commit_hash
     return jsonify(get_info_by_commit_hash(get_latest_origin_hash())), 200
 
+
 @admin.route('/api/check_token')
 @admin.route('/check_token')
 def check_token():
-
     ch = CheckState()
     # reload preferences
-    from mainLogic.utils.dependency_checker import EXECUTABLES, check_dependencies
+    # from mainLogic.utils.dependency_checker import EXECUTABLES, check_dependencies
 
     try:
-        state, prefs = check_dependencies(glv_var.vars['prefs'].get('dir',{}), verbose=False, do_raise=True)
-        glv_var.vars['prefs'] = prefs
+
+        #  imporoper method to reload preferences
+        # state, prefs = check_dependencies(glv_var.vars['prefs'].get('dir',{}), verbose=False, do_raise=True)
+        # glv_var.vars['prefs'] = prefs
+
+        # original method (still improper)
+        state, prefs = re_check_dependencies()
+
+        print(glv_var.vars['prefs'].get('token',{}))
+
     except Exception as e:
         return jsonify({'error': f"Error: {e}"}), 500
 
@@ -113,6 +130,7 @@ def check_token():
         token = prefs['token']
     else:
         return jsonify({'error': 'Token not found'}), 404
+
     if 'random_id' in prefs:
         random_id = prefs['random_id']
     else:
@@ -123,13 +141,17 @@ def check_token():
     else:
         return jsonify({'error': 'Token is invalid'}), 404
 
+
 @admin.route('/api/change_to_old_token_scheme')
 @admin.route('/change_to_old_token_scheme')
 def change_to_old_token_scheme():
     UpdateJSONFile(PREFS_FILE).update('token', "")
     try:
-        state, prefs = check_dependencies(glv_var.vars['prefs'].get('dir',{}), verbose=False, do_raise=True)
-        glv_var.vars['prefs'] = prefs
+        re_check_dependencies()
+
+        Global.sprint(f"Changed token scheme to old")
+        Global.errprint(f"Current token: {glv_var.vars['prefs']['token']}")
+
     except Exception as e:
         return jsonify({'error': f"Error: {e}"}), 500
     return jsonify({'success': 'Token scheme changed to old'}), 200
