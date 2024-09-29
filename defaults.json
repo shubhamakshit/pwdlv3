@@ -1,5 +1,5 @@
 {
-    "flare_url": "http://localhost:8191/v1",
+    "webui-del-time": "30",
     "cloudfront_id": "d1d34p8vz63oiq",
     "patched": false,
     "os-info": "winx64",
@@ -8,8 +8,7 @@
     "vsd": "$script/bin/vsd.exe",
     "ffmpeg": "$script/bin/ffmpeg",
     "mp4decrypt": "$script/bin/mp4decrypt.exe",
-    "webui-del-time": "30",
     "webui": true,
     "webui-port": "5000",
-    "token": "{\"token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MjcxMDcwMjcuOTk4LCJkYXRhIjp7Il9pZCI6IjYyNDY3NzEwZWIwMTM3MDAxOGEzMzIzNiIsInVzZXJuYW1lIjoiNjIwNzQ4NjkwMyIsImZpcnN0TmFtZSI6IlNoYXVyeWEgQ2hhbmRyYSIsImxhc3ROYW1lIjoiIiwib3JnYW5pemF0aW9uIjp7Il9pZCI6IjVlYjM5M2VlOTVmYWI3NDY4YTc5ZDE4OSIsIndlYnNpdGUiOiJwaHlzaWNzd2FsbGFoLmNvbSIsIm5hbWUiOiJQaHlzaWNzd2FsbGFoIn0sImVtYWlsIjoic2hhdXJ5YWNoYW5kcmF3b3JrQGdtYWlsLmNvbSIsInJvbGVzIjpbIjViMjdiZDk2NTg0MmY5NTBhNzc4YzZlZiIsIjVjYzk1YTJlOGJkZTRkNjZkZTQwMGIzNyJdLCJjb3VudHJ5R3JvdXAiOiJJTiIsInR5cGUiOiJVU0VSIn0sImlhdCI6MTcyNjUwMjIyN30.KtwJJg7nQzhLw9wKiZGLctzqkV3_4XixTbgN25Ka7YQ\",\"refresh_token\":\"45dc834bbefc0e7298687b84d4ec8dd5b7484e5c6d5bcff7b2e9a6b3f88df8ad\",\"expires_in\":1727107028008,\"randomId\":\"441c443a-2ab0-40da-86c1-885b88892094\"}"
+    "token": "{\"token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Mjc5NzE0MjMuNDUyLCJkYXRhIjp7Il9pZCI6IjYyNDY3NzEwZWIwMTM3MDAxOGEzMzIzNiIsInVzZXJuYW1lIjoiNjIwNzQ4NjkwMyIsImZpcnN0TmFtZSI6IlNoYXVyeWEgQ2hhbmRyYSIsImxhc3ROYW1lIjoiIiwib3JnYW5pemF0aW9uIjp7Il9pZCI6IjVlYjM5M2VlOTVmYWI3NDY4YTc5ZDE4OSIsIndlYnNpdGUiOiJwaHlzaWNzd2FsbGFoLmNvbSIsIm5hbWUiOiJQaHlzaWNzd2FsbGFoIn0sImVtYWlsIjoic2hhdXJ5YWNoYW5kcmF3b3JrQGdtYWlsLmNvbSIsInJvbGVzIjpbIjViMjdiZDk2NTg0MmY5NTBhNzc4YzZlZiIsIjVjYzk1YTJlOGJkZTRkNjZkZTQwMGIzNyJdLCJjb3VudHJ5R3JvdXAiOiJJTiIsInR5cGUiOiJVU0VSIn0sImlhdCI6MTcyNzM2NjYyM30.hgw3MdnO-Y9XI-j8jFAGcW5IztmmEjFIPNdOZRV9kls\",\"refresh_token\":\"d1331bf9af892357a7b167dd9afda7643f0493452fc8dd2ec7e61a50b443b852\",\"expires_in\":1727971423459,\"randomId\":\"769a7f97-4565-48f8-95f7-bd12602ce07d\"}"
 }
