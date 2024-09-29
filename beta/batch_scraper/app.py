@@ -47,7 +47,7 @@ class BatchAPI:
         print(f"Debugging at {url}")
         Global.sprint(f"Response: {response}")
         print(f"Response Status Code: {response.status_code}")
-        print(f"Response Text: {response.text}")
+        print(f"Response Text: " + "\n"+f"{json.dumps(response.json())}")
         Global.hr()
 
         if callable(post_modifier_function):
@@ -180,11 +180,12 @@ class BatchAPI:
 
     def get_subjects_details(self):
         def batch_details_to_subject_slugs(data):
+            print(f"Data: {json.dumps(data)}")
             return [{
                 'slug': subject['slug'],
                 'name': subject['subject'],
-                'chapter_count': subject['tagCount'],
-                'img': '' if 'imageId' not in subject else subject['imageId']['baseUrl'] + subject['imageId']['key']
+                'chapter_count': subject['tagCount'] if 'tagCount' in subject else 0,
+
             } for subject in data]
 
         return (
@@ -204,10 +205,15 @@ class BatchAPI:
                 'video_count': chapter['videos'],
             } for chapter in data]
 
+        Global.hr()
+        print(f"Batch: {self.batch_name}")
+        print(f"Subject: {subject_slug}")
+        Global.hr()
+
         return (
             get_chapter_slugs(
                 self.get_paginated_data(
-                    Endpoints.get_topics_of_subject(subject_slug=subject_slug),
+                    Endpoints.get_topics_of_subject(batch_slug=self.batch_name,subject_slug=subject_slug),
                     post_modifier_function=lambda response: response.json()['data']
                 )
             )

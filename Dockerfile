@@ -1,15 +1,17 @@
 # Use an official Python runtime as a parent image
-FROM python:3.12-slim
-
+FROM python:3.12-slim as build
 
 # Set the working directory in the container to /app
 WORKDIR /app
 
 # Add the current directory contents into the container at /app
-ADD . /app
+COPY . /app
 
-# Install ffmpeg and curl
-RUN apt-get update && apt-get install -y ffmpeg curl
+# Install ffmpeg, curl, and other necessary dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ffmpeg \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
 
 # Create a virtual environment and activate it
 RUN python -m venv /opt/venv
@@ -20,13 +22,7 @@ ENV PATH="/opt/venv/bin:$PATH"
 # Install any needed packages specified in requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Make port 7680 available to the world outside this container
-EXPOSE 5000
-
 # Copy defaults.json from the given URL
-COPY ./defaults.linux.json ./defaults.json
-
-# Run setup script commands
 RUN curl -o defaults.json https://raw.githubusercontent.com/shubhamakshit/pwdlv3/main/defaults.linux.json && \
     curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && \
     if command -v python &> /dev/null; then \
@@ -58,11 +54,26 @@ RUN curl -o defaults.json https://raw.githubusercontent.com/shubhamakshit/pwdlv3
 # Create webdl directory
 RUN mkdir /app/webdl
 
-#set flask app
+# Use a minimal image for the runtime
+FROM python:3.12-slim
+
+# Set the working directory in the container to /app
+WORKDIR /app
+
+# Copy only the necessary files from the build stage
+COPY --from=build /opt/venv /opt/venv
+COPY --from=build /app /app
+
+# Ensure the virtual environment is used
+ENV PATH="/opt/venv/bin:$PATH"
+
+# Set Flask environment variables
 ENV FLASK_DEBUG=1
 ENV FLASK_ENV=development
 ENV FLASK_APP=run:app
 
+# Make port 5000 available to the world outside this container
+EXPOSE 5000
+
+# Run the Flask application
 ENTRYPOINT ["flask", "run", "--host=0.0.0.0"]
-
-

@@ -5,7 +5,7 @@ class Endpoints:
         return f"https://api.penpencil.co/v3/batches/{batch_slug}/details"
 
     @staticmethod
-    def get_topics_of_subject(batch_slug='lakshya-neet-2025-416888',subject_slug='physics-553715',page='{page}'):
+    def get_topics_of_subject(batch_slug='',subject_slug='physics-553715',page='{page}'):
         return f"https://api.penpencil.co/v2/batches/{batch_slug}/subject/{subject_slug}/topics?page={page}"
 
     @staticmethod
