@@ -148,6 +148,7 @@ class BatchAPI:
                 'name': video['title'],
                 'url': video['content'][0]['videoUrl'],
                 'img': video['content'][0]["videoDetails"]["image"],
+                'duration': video['content'][0]["videoDetails"]["duration"],
             } for video in data]
 
         return (
@@ -221,10 +222,12 @@ class BatchAPI:
 
     def get_video_data(self, subject_slug, chapter_slug):
         def get_video_slugs(data):
+            #Global.dprint(f"Data: {json.dumps(data)}")
             return [{
                 'name': video['topic'],
                 'url': video['url'],
                 'img': video['videoDetails']['image'],
+                'duration': video['videoDetails']['duration'],
             } for video in data]
 
         return (
