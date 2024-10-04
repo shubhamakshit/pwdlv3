@@ -213,14 +213,17 @@ class CheckState:
 
     def raise_or_exit(self, error_key, do_raise, exe=None):
         """Raises an exception or exits based on the error key."""
-        if not exe:
-            error.errorList[error_key]["func"]()
-        else:
-            error.errorList[error_key]["func"](exe)
         if do_raise:
             # check if CheckState has the error_key as a method else raise the error with the error_key
             if hasattr(self, error_key):
                 raise getattr(self, error_key)()
             else:
-                raise Exception(error.errorList[error_key]["func"])
-        exit(error.errorList[error_key]["code"])
+                pass
+
+        if not exe:
+            error.errorList[error_key]["func"]()
+        else:
+            error.errorList[error_key]["func"](exe)
+
+        if not do_raise:
+            exit(error.errorList[error_key]["code"])
