@@ -218,5 +218,9 @@ class CheckState:
         else:
             error.errorList[error_key]["func"](exe)
         if do_raise:
-            raise getattr(self, error_key)()
+            # check if CheckState has the error_key as a method else raise the error with the error_key
+            if hasattr(self, error_key):
+                raise getattr(self, error_key)()
+            else:
+                raise Exception(error.errorList[error_key]["code"])
         exit(error.errorList[error_key]["code"])
