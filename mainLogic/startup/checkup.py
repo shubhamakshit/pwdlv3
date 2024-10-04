@@ -222,5 +222,5 @@ class CheckState:
             if hasattr(self, error_key):
                 raise getattr(self, error_key)()
             else:
-                raise Exception(error.errorList[error_key]["code"])
+                raise Exception(error.errorList[error_key]["func"])
         exit(error.errorList[error_key]["code"])
