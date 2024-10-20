@@ -1,6 +1,8 @@
 import json
 from mainLogic import error
 import os
+
+from mainLogic.error import CantLoadFile
 from mainLogic.utils.glv_var import vars, PREFS_FILE as pf
 
 PREFS_FILE = pf
@@ -49,8 +51,7 @@ class PreferencesLoader:
 
         # if the file is not found, print an error message and exit
         except FileNotFoundError:
-            error.errorList["cantLoadFile"]["func"](self.file_name)
-            exit(error.errorList["cantLoadFile"]["code"])
+            CantLoadFile(self.file_name).exit()
 
     # print the preferences (internal function)
     def print_preferences(self):

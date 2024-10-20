@@ -1,6 +1,7 @@
 import platform
 import os
 from mainLogic import error
+from mainLogic.error import CouldNotMakeDir, DependencyNotFound
 from mainLogic.utils.process import shell
 from mainLogic.utils.glv import Global
 
@@ -22,8 +23,7 @@ class SysFunc:
                 os.makedirs(dirName)
         except:
             if verbose: Global.errprint(f"Could not make directory {dirName}. Exiting...")
-            error.errorList["couldNotMakeDir"]["func"](dirName)
-            exit(error.errorList["couldNotMakeDir"]["code"])
+            CouldNotMakeDir(dirName).exit()
 
         if verbose: Global.dprint(f"Directory {dirName} created")
 
@@ -39,8 +39,7 @@ class SysFunc:
 
         if self.os == 0:
             if shell('which', stderr="", stdout="") != 1 and shell('which', stderr="", stdout="") != 255:
-                error.errorList["dependencyNotFound"]["func"]('which')
-                exit(error.errorList["dependencyNotFound"]["code"])
+                DependencyNotFound("which").exit()
             else:
                 self.whichPresent = True
 
@@ -49,8 +48,7 @@ class SysFunc:
         elif self.os == 1:
 
             if shell('where', stderr="", stdout="") != 2:
-                error.errorList["dependencyNotFound"]["func"]('where')
-                exit(error.errorList["dependencyNotFound"]["code"])
+                DependencyNotFound("where").exit()
             else:
                 self.whichPresent = True
             return shell(f"where {program}", stderr="", stdout="")

@@ -7,7 +7,7 @@ VIDEO_ENCRYPTION_KEY = 'pw3c199c2911cb437a907b1k0907c17n'
 INITIALISATION_VECTOR = '5184781c32kkc4e8'
 
 
-# Function to decrypt a single cookie value
+# Function to Ravenclaw_decrypt a single cookie value
 def get_decrypt_cookie(encrypted_cookie):
     key = VIDEO_ENCRYPTION_KEY.encode('utf-8')
     iv = INITIALISATION_VECTOR.encode('utf-8')
@@ -22,7 +22,7 @@ def get_decrypt_cookie(encrypted_cookie):
     return decrypted.decode('utf-8')
 
 
-# Function to split and decrypt the cookie string
+# Function to split and Ravenclaw_decrypt the cookie string
 def cookie_splitter(cookie, verbose=False):
     decrypted_cookie = ''
     cookie_parts = cookie.split('&')

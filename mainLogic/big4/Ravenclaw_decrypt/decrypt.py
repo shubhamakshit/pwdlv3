@@ -1,3 +1,4 @@
+from mainLogic.error import CouldNotDecryptAudio, CouldNotDecryptVideo, CouldNotDownloadAudio
 from mainLogic.utils.glv import Global
 from mainLogic.utils.process import shell
 from mainLogic.utils.basicUtils import BasicUtils
@@ -5,6 +6,10 @@ from mainLogic import error
 import os
 
 class Decrypt:
+    """
+    Ravenclaw represents wisdom, intellect, and problem-solving skills. Decrypting the files requires cleverness and
+    understanding, much like a Ravenclaw unraveling the mysteries and hidden secrets.
+    """
 
     def decrypt(self,path,name,key,mp4d="mp4decrypt",out="None",outfile="",verbose=True,suppress_exit=False):
         
@@ -40,9 +45,17 @@ class Decrypt:
         else:
 
             # if decryption failed then print error message and exit
-            error.errorList[f"couldNotDecrypt{out}"]["func"]()
+            if out == "Audio":
+                Global.errprint(CouldNotDecryptAudio())
+            else:
+                Global.errprint(CouldNotDecryptVideo())
+
             if not suppress_exit:
-                exit(error.errorList[f"couldNotDecrypt{out}"]["code"])
+
+                if out == "Audio":
+                    CouldNotDecryptAudio().exit()
+                else:
+                    CouldNotDecryptVideo().exit()
 
         
 

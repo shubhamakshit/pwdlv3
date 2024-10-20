@@ -10,7 +10,7 @@ from mainLogic.utils.gen_utils import generate_safe_folder_name
 from mainLogic.main import Main
 from beta.shellLogic import shell
 from mainLogic.utils import glv_var
-from mainLogic.error import errorList
+from mainLogic.error import errorList, CsvFileNotFound
 
 # Global variables
 glv = Global()
@@ -71,9 +71,13 @@ def download_process(id, name, state, verbose, simulate=False):
 
 def handle_csv_file(csv_file, state, verbose, simulate=False):
     """Handle processing of CSV file."""
-    if not os.path.exists(csv_file):
-        errorList['csvFileNotFound']['func'](csv_file)
-        sys.exit(errorList['csvFileNotFound']['code'])
+    try:
+        if not os.path.exists(csv_file):
+            raise CsvFileNotFound(csv_file)
+    except CsvFileNotFound as e:
+        Global.errprint(e)
+        e.exit()
+
 
     if simulate:
         print("Simulating the download csv process. No files will be downloaded.")
@@ -97,11 +101,13 @@ def main(csv_file=None, id=None, name=None, directory=None, verbose=False, shell
     # calling og check_dependencies function (checkup)
 
     ch = CheckState()
-    state = ch.checkup(EXECUTABLES, directory=directory, verbose=verbose, do_raise=True)
+    state = ch.checkup(EXECUTABLES, directory=directory, verbose=verbose, do_raise=False)
     prefs = state['prefs']
 
     # set the global preferences
     glv_var.vars['prefs'] = prefs
+
+    #Global.dprint(f"Preferences: {glv_var.vars['prefs']}")
 
     if webui_port is not None:
         start_webui(webui_port, glv.vout)

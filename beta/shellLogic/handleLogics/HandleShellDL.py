@@ -1,26 +1,32 @@
-from mainLogic.big4.downloadv2 import Download
+from beta.shellLogic.Plugin import Plugin
+from mainLogic.big4.Ravenclaw_decrypt.key import LicenseKeyFetcher
+from mainLogic.big4.Gryffindor_downloadv2 import Download
 from mainLogic.startup.checkup import CheckState
-from mainLogic.utils.glv import Global
-from mainLogic.main import Main
-from beta.shellLogic import simpleParser
 from mainLogic.utils import glv_var
 from mainLogic import downloader
+from beta.shellLogic import simpleParser
 
-
-class HandleShellDL:
-
+class HandleShellDL(Plugin):
     def __init__(self):
+        super().__init__()
         self.commandList = {
-            "edl":{
+            "edl": {
+                "desc": "Enhanced download with name and ID",
+                "regex": r"edl",
                 "func": self.edownload
             },
-            "dl":{
+            "dl": {
+                "desc": "Download with name and ID",
+                "regex": r"dl",
                 "func": self.download
             }
         }
+        self.register_commands()
 
-    def edownload(self,args=[]):
-        # print(args)
+    def edownload(self, args=[]):
+        """
+        Performs an enhanced download using the provided name and ID.
+        """
         if not args or len(args) < 2:
             print("Please provide a name and id")
             return
@@ -28,19 +34,32 @@ class HandleShellDL:
         name = args[0]
         id = args[1]
 
-        ch =CheckState()
-        state = ch.checkup(glv_var.EXECUTABLES,verbose=False)
+        ch = CheckState()
+        state = ch.checkup(glv_var.EXECUTABLES, verbose=False)
         prefs = state['prefs']
+
+        token = prefs['token']
+        random_id = prefs['random_id']
+
+        fetcher = LicenseKeyFetcher(token, random_id)
+        fetcher.get_key(id)
+
+        cookies = fetcher.cookies
+
 
         Download(
             vsd_path=prefs['vsd'],
             url=Download.buildUrl(id),
             name=name,
+            cookie=cookies,
             tmp_path=prefs['tmpDir'],
             output_path=prefs['dir'],
         ).download()
 
-    def download(self,args=[]):
+    def download(self, args=[]):
+        """
+        Performs a basic download using the provided name and ID.
+        """
         if not args or len(args) < 2:
             print("Please provide a name and id")
             return
@@ -52,11 +71,3 @@ class HandleShellDL:
             id=id,
             name=name,
         )
-
-
-
-
-
-    def parseAndRun(self,command,args=[]):
-        simpleParser.parseAndRun(self.commandList, command, args)
-

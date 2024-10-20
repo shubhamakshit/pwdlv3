@@ -1,11 +1,11 @@
 from mainLogic.utils.basicUtils import BasicUtils
 from mainLogic.utils.os2 import SysFunc
 from mainLogic.utils.glv import Global
-from mainLogic.big4.cleanup import Clean
-from mainLogic.big4.decrypt.key import LicenseKeyFetcher
-from mainLogic.big4.downloadv2 import Download
-from mainLogic.big4.decrypt.decrypt import Decrypt
-from mainLogic.big4.merge import Merge
+from mainLogic.big4.Hufflepuff_cleanup import Clean
+from mainLogic.big4.Ravenclaw_decrypt.key import LicenseKeyFetcher
+from mainLogic.big4.Gryffindor_downloadv2 import Download
+from mainLogic.big4.Ravenclaw_decrypt.decrypt import Decrypt
+from mainLogic.big4.Slytherin_merge import Merge
 import os
 
 
@@ -21,7 +21,6 @@ class Main:
         tmpDir (str): Temporary directory for intermediate files. Defaults to './tmp/'.
         vsdPath (str): Path to the vsd binary. Defaults to 'vsd'.
         ffmpeg (str): Path to the ffmpeg binary. Defaults to 'ffmpeg'.
-        mp4d (str): Path to the mp4decrypt binary. Defaults to 'mp4decrypt'.
         token (str): Auth Token for the process.
         verbose (bool): Flag for verbose output. Defaults to True.
         suppress_exit (bool): Flag to suppress exit on error. Defaults to False.
@@ -95,7 +94,7 @@ class Main:
 
         # 2. Decrypting Files
 
-        Global.sprint("Please wait while we decrypt the files...")
+        Global.sprint("Please wait while we Ravenclaw_decrypt the files...")
 
         decrypt = Decrypt()
 

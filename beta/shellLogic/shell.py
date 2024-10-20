@@ -50,7 +50,11 @@ def main():
             args = user_input.split()[1:]
             if not args: args = []
 
-            logic.execute(command, args)
+            # check if first arg is /? or -h or --help
+            if args and args[0] in ['/?', '-h', '--help']:
+                logic.execute_help(command)
+            else:
+                logic.execute(command, args)
 
         except KeyboardInterrupt:
             continue

@@ -5,6 +5,7 @@ from flask import Blueprint, request, jsonify, send_file
 from beta.api.blueprints.template_routes import prefs
 from beta.api.mr_manager.boss_manager import Boss
 from beta.update import UpdateJSONFile
+from mainLogic.error import TokenInvalid
 from mainLogic.startup.checkup import CheckState
 from mainLogic.utils import glv_var
 from mainLogic.utils.dependency_checker import re_check_dependencies
@@ -135,10 +136,10 @@ def check_token():
         random_id = prefs['random_id']
     else:
         return jsonify({'error': 'Random ID not found'}), 404
-
-    if ch.check_token(token, random_id):
-        return jsonify({'success': 'Token is valid'}), 200
-    else:
+    try:
+        if ch.check_token(token, random_id):
+            return jsonify({'success': 'Token is valid'}), 200
+    except TokenInvalid:
         return jsonify({'error': 'Token is invalid'}), 404
 
 
