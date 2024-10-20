@@ -18,18 +18,17 @@ glv = Global()
 # hardcoding the list of executables required for the script to run
 EXECUTABLES = glv_var.EXECUTABLES
 
+
 def start_shell():
     """Start the shell if requested."""
     shell.main()
 
+
 def start_webui(port, verbose):
     """Start the WebUI if requested."""
     from run import app
-    if not prefs['webui']:
-        Global.errprint("WebUI is not enabled in the preferences. Exiting ...")
-        sys.exit(1)
 
-    if 'webui-port' in prefs and not port == -1:
+    if 'webui-port' in prefs and port == -1 and port <= glv_var.MINIMUM_PORT:
         port = prefs['webui-port']
 
     if port == -1:
@@ -40,6 +39,7 @@ def start_webui(port, verbose):
         Global.dprint(f"Starting WebUI on port {port}")
 
     app.run(host="0.0.0.0", debug=True, port=port)
+
 
 def download_process(id, name, state, verbose, simulate=False):
     """Process a single download or simulate the download."""
@@ -69,6 +69,7 @@ def download_process(id, name, state, verbose, simulate=False):
         errorList['downloadFailed']['func'](name, id)
         sys.exit(errorList['downloadFailed']['code'])
 
+
 def handle_csv_file(csv_file, state, verbose, simulate=False):
     """Handle processing of CSV file."""
     try:
@@ -77,7 +78,6 @@ def handle_csv_file(csv_file, state, verbose, simulate=False):
     except CsvFileNotFound as e:
         Global.errprint(e)
         e.exit()
-
 
     if simulate:
         print("Simulating the download csv process. No files will be downloaded.")
@@ -90,7 +90,9 @@ def handle_csv_file(csv_file, state, verbose, simulate=False):
             name = generate_safe_folder_name(name)
             download_process(id, name, state, verbose)
 
-def main(csv_file=None, id=None, name=None, directory=None, verbose=False, shell=False, webui_port=None, simulate=False):
+
+def main(csv_file=None, id=None, name=None, directory=None, verbose=False, shell=False, webui_port=None,
+         simulate=False):
     global prefs  # Use global keyword to modify global prefs
 
     if shell:
@@ -129,5 +131,3 @@ def main(csv_file=None, id=None, name=None, directory=None, verbose=False, shell
         download_process(id, name, state, glv.vout)
     else:
         sys.exit(1)
-
-
