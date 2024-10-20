@@ -1,4 +1,4 @@
-from mainLogic.utils.sudat import Login
+from mainLogic.startup.Login.sudat import Login
 
 
 class LoginInterface:

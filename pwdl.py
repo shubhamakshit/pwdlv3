@@ -1,6 +1,6 @@
 import argparse
 
-from beta.call_login import LoginInterface
+from mainLogic.startup.Login.call_login import LoginInterface
 from mainLogic import downloader
 from mainLogic.utils import glv_var
 
@@ -18,7 +18,8 @@ def parse_arguments():
     parser.add_argument('--shell', action='store_true', help='Start the shell')
     parser.add_argument('--webui', nargs='?', const=-1, type=int, help='Start the Webui')
     parser.add_argument('--simulate', action='store_true',
-                        help='Simulate the download process. No files will be downloaded. Incompatible wit h --csv-file. Must be used with --id and --name')
+                        help='Simulate the download process. No files will be downloaded. Incompatible wit h '
+                             '--csv-file. Must be used with --id and --name')
     parser.add_argument('--version', action='version', version='%(prog)s 1.0')
     parser.add_argument('--login', action='store_true', help='Login to PhysicsWallah')
     parser.add_argument('--ignore-token', action='store_true', help='Ignore the token.')

@@ -1,8 +1,8 @@
-from beta.call_login import LoginInterface
+from mainLogic.startup.Login.call_login import LoginInterface
 from mainLogic.utils.glv_var import PREFS_FILE
-from mainLogic.utils.sudat import Login
+from mainLogic.startup.Login.sudat import Login
 from beta.update import UpdateJSONFile
-from flask import Flask, jsonify, request, Blueprint
+from flask import jsonify, request, Blueprint
 
 login = Blueprint('login', __name__)
 
