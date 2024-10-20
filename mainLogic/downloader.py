@@ -4,7 +4,6 @@ import sys
 import os
 
 from mainLogic.startup.checkup import CheckState
-#from mainLogic.utils.dependency_checker import check_dependencies  # Import the check_dependencies function
 from mainLogic.utils.glv import Global
 from mainLogic.utils.gen_utils import generate_safe_folder_name
 from mainLogic.main import Main
