@@ -22,3 +22,5 @@ else:
 
 api_webdl_directory = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../webdl'))
 EXECUTABLES = ['ffmpeg', 'mp4decrypt', 'vsd']
+
+MINIMUM_PORT = 1024
