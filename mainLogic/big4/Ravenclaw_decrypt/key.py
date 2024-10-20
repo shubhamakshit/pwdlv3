@@ -3,8 +3,8 @@ import re
 import base64
 import json
 
-from mainLogic.big4.decrypt.heck import cookie_splitter, get_cookiees_from_url
-from mainLogic.big4.downloadv2 import Download
+from mainLogic.big4.Ravenclaw_decrypt.heck import cookie_splitter, get_cookiees_from_url
+from mainLogic.big4.Gryffindor_downloadv2 import Download
 from mainLogic.utils.glv import Global
 from mainLogic.utils.keyUtils import cookies_dict_to_str
 
@@ -102,7 +102,7 @@ class LicenseKeyFetcher:
         if verbose: Global.dprint("Building the URL to get the key...")
 
         try:
-            from mainLogic.big4.decrypt.signedUrl import get_signed_url
+            from mainLogic.big4.Ravenclaw_decrypt.signedUrl import get_signed_url
 
             policy_string = get_signed_url(token=self.token, random_id=self.random_id, id=id, verbose=verbose)['data']
             add_on = cookie_splitter(policy_string, verbose)

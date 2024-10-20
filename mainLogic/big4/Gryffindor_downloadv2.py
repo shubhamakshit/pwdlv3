@@ -2,9 +2,13 @@ import re
 from tabnanny import verbose
 
 from mainLogic import error
+from mainLogic.error import IdNotProvided
 from mainLogic.utils.process import shell
 from mainLogic.utils.glv import Global
-from mainLogic.big4.decrypt import signedUrl
+from mainLogic.big4.Ravenclaw_decrypt import signedUrl
+
+
+
 
 
 def download_color_function(text):
@@ -27,13 +31,16 @@ def download_color_function(text):
 
 
 class Download:
+    """
+    Gryffindor is known for its courage, determination, and taking the first step towards any challenge. Here,
+    downloading the files is like venturing into the unknown, just like a Gryffindor would bravely step forward to
+    start the journey.
+    """
 
     @staticmethod
     def buildUrl(id):
         if id is None:
-            Global.errprint("ID not provided")
-            error.errorList["idNotProvided"]["func"]()
-            exit(error.errorList["idNotProvided"]["code"])
+            IdNotProvided().exit()
 
         url = f"https://d1d34p8vz63oiq.cloudfront.net/{id}/master.mpd"
         return url
@@ -96,7 +103,7 @@ class Download:
             f"{self.url}",
             "--skip-prompts",
             "--raw-prompts",
-            "--no-decrypt",
+            "--no-Ravenclaw_decrypt",
             "--cookies",
             f"{self.cookie}",
             "-d",

@@ -1,9 +1,13 @@
 import os
-from mainLogic.error import errorList
+from mainLogic.error import errorList, OverwriteAbortedByUser
 from mainLogic.utils.process import shell
 from mainLogic.utils.glv import Global
 from mainLogic.utils.os2 import SysFunc
 class Merge:
+    """
+    Slytherin is known for resourcefulness and ambition, ensuring everything is left in a state that suits their
+    needs. The cleanup phase is about efficiency, leaving no trace behind, just like a Slytherin covering their tracks.
+    """
 
     def mergeCommandBuilder(self,ffmpeg_path,input1,input2,output,overwrite=False):
 
@@ -23,8 +27,7 @@ class Merge:
             consent = input("Do you want to continue? (y/n): ")
 
             if consent.lower() != 'y':
-                errorList['overWriteAbortedByUser']['func']()
-                exit(errorList['overWriteAbortedByUser']['code'])
+                OverwriteAbortedByUser().exit()
 
         if verbose:
             Global.dprint(f"Running: {self.mergeCommandBuilder(ffmpeg_path,input1,input2,output,overwrite=True)}")

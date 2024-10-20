@@ -1,6 +1,10 @@
 import os
 from mainLogic.utils.glv import Global
 class Clean:
+    """
+    Hufflepuff values hard work, patience, and dedication. Merging the audio and video files requires careful
+    crafting, a trait that Hufflepuff embodies through its steadfast approach to completing tasks.
+    """
 
     def removeFile(self,file,verbose):
         try:

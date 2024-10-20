@@ -2,7 +2,7 @@ import json
 
 from flask import Blueprint, request, jsonify
 from beta.api.mr_manager.boss_manager import Boss
-from mainLogic.big4.decrypt.key import LicenseKeyFetcher
+from mainLogic.big4.Ravenclaw_decrypt.key import LicenseKeyFetcher
 
 client_manager = Boss.client_manager
 task_manager = Boss.task_manager

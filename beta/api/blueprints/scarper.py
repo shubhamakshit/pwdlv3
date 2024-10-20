@@ -22,7 +22,7 @@ def get_subjects():
     try:
         batch_name = request.args.get('batch_name', batch_api.batch_name)
         batch_api.batch_name = batch_name
-        subjects = batch_api.get_subject_details_khazana()
+        subjects = batch_api.GET_KHAZANA_SUBJECTS()
         return create_response(data=subjects)
     except Exception as e:
         return create_response(error=str(e)), 500
@@ -33,7 +33,7 @@ def get_topics(subject_slug):
     try:
         batch_name = request.args.get('batch_name', batch_api.batch_name)
         batch_api.batch_name = batch_name
-        topics = batch_api.get_batches_of_subject_khazana(subject_slug)
+        topics = batch_api.GET_KHAZANA_BATCHES(subject_slug)
         return create_response(data=topics)
     except Exception as e:
         return create_response(error=str(e)), 500
@@ -44,7 +44,7 @@ def get_subtopics(subject_slug):
     try:
         batch_name = request.args.get('batch_name', batch_api.batch_name)
         batch_api.batch_name = batch_name
-        subtopics = batch_api.get_topics_of_subject_of_a_batch_khazana(subject_slug)
+        subtopics = batch_api.GET_KHAZANA_CHAPTERS(subject_slug)
         return create_response(data=subtopics)
     except Exception as e:
         return create_response(error=str(e)), 500
@@ -61,7 +61,8 @@ def get_lectures():
             return create_response(error="Missing required parameters"), 400
 
         batch_api.batch_name = batch_name
-        lectures = batch_api.get_lectures_of_topic_of_subject_of_a_batch_khazana(
+
+        lectures = batch_api.GET_KHAZANA_LECTURES(
             batch_name, subject_slug, chapter_slug
         )
         return create_response(data=lectures)
@@ -74,7 +75,7 @@ def get_normal_subjects():
     try:
         batch_name = request.args.get('batch_name', batch_api.batch_name)
         batch_api.batch_name = batch_name
-        subjects = batch_api.get_subjects_details()
+        subjects = batch_api.GET_NORMAL_SUBJECTS()
         return create_response(data=subjects)
     except Exception as e:
         Global.errprint(f"Error: {e}")
@@ -92,7 +93,7 @@ def get_normal_chapters(subject_slug):
         Global.sprint(f"subject_slug: {subject_slug}")
         Global.hr()
 
-        chapters = batch_api.get_chapter_slugs(subject_slug)
+        chapters = batch_api.GET_NORMAL_CHAPTERS(subject_slug)
         return create_response(data=chapters)
     except Exception as e:
         return create_response(error=str(e)), 500
@@ -110,11 +111,19 @@ def get_normal_videos():
             return create_response(error="Missing required parameters"), 400
 
         batch_api.batch_name = batch_name
-        videos = batch_api.get_video_data(subject_slug, chapter_slug)
+        videos = batch_api.GET_NORMAL_LECTURES(subject_slug, chapter_slug)
         return create_response(data=videos)
     except Exception as e:
         return create_response(error=str(e)), 500
 
+
+@scraper_blueprint.route('/api/batches')
+def get_batches():
+    try:
+        batches = batch_api.get_batches_force_hard()
+        return create_response(data=batches)
+    except Exception as e:
+        return create_response(error=str(e)), 500
 
 @scraper_blueprint.route('/api/set-token', methods=['POST'])
 def set_token():
