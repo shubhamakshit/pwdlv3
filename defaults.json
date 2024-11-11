@@ -11,5 +11,78 @@
     "webui": true,
     "webui-port": "14325",
     "webui-mode": "debug",
-    "token": "{\"token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MzAwMTAxNjAuMDkyLCJkYXRhIjp7Il9pZCI6IjY0MzE3NTQyNDBlOTc5MDAxODAwMjAyYiIsInVzZXJuYW1lIjoiOTQ3MjUwNzEwMCIsImZpcnN0TmFtZSI6IkFrc2hpdCBTaHViaGFtIiwibGFzdE5hbWUiOiIiLCJvcmdhbml6YXRpb24iOnsiX2lkIjoiNWViMzkzZWU5NWZhYjc0NjhhNzlkMTg5Iiwid2Vic2l0ZSI6InBoeXNpY3N3YWxsYWguY29tIiwibmFtZSI6IlBoeXNpY3N3YWxsYWgifSwiZW1haWwiOiJha3NoaXRzaHViaGFtbWFzQGdtYWlsLmNvbSIsInJvbGVzIjpbIjViMjdiZDk2NTg0MmY5NTBhNzc4YzZlZiJdLCJjb3VudHJ5R3JvdXAiOiJJTiIsInR5cGUiOiJVU0VSIn0sImlhdCI6MTcyOTQwNTM2MH0.T-SqmqIFSd4EaSXKC8OxNp6sYZnRSojD-lz5maCe5e4\",\"refresh_token\":\"35e3c015c72a3d3b44b9d0b261ced03bfb5773169618c0f4e251726d1b40624b\",\"expires_in\":1730010160102,\"randomId\":\"2d86f398-adad-4a5e-8e71-f21665f263ad\"}"
+    "token": {
+        "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MzA5NTk1NDguODA2LCJkYXRhIjp7Il9pZCI6IjY0MzE3NTQyNDBlOTc5MDAxODAwMjAyYiIsInVzZXJuYW1lIjoiOTQ3MjUwNzEwMCIsImZpcnN0TmFtZSI6IkFrc2hpdCBTaHViaGFtIiwibGFzdE5hbWUiOiIiLCJvcmdhbml6YXRpb24iOnsiX2lkIjoiNWViMzkzZWU5NWZhYjc0NjhhNzlkMTg5Iiwid2Vic2l0ZSI6InBoeXNpY3N3YWxsYWguY29tIiwibmFtZSI6IlBoeXNpY3N3YWxsYWgifSwiZW1haWwiOiJha3NoaXRzaHViaGFtbWFzQGdtYWlsLmNvbSIsInJvbGVzIjpbIjViMjdiZDk2NTg0MmY5NTBhNzc4YzZlZiJdLCJjb3VudHJ5R3JvdXAiOiJJTiIsInR5cGUiOiJVU0VSIn0sImlhdCI6MTczMDM1NDc0OH0.znW8uUf7mpRGP0ZoNuS12mtiWVXcdGH20rQQ0dYTITY",
+        "refresh_token": "ed2d6bd6138bf52aba05384640d25ac594a2c0a8e853fa11e19189ea9d0ea75b",
+        "expires_in": 1730959548811,
+        "tokenId": "67231e3c97c89c0e72427a5f",
+        "user": {
+            "status": "Active",
+            "id": "6431754240e979001800202b",
+            "firstName": "Akshit Shubham",
+            "lastName": "",
+            "primaryNumber": "9472507100",
+            "countryCode": "+91",
+            "countryGroup": "IN",
+            "username": "9472507100",
+            "uniqueCode": "9472EYDU",
+            "email": "akshitshubhammas@gmail.com",
+            "isVerifiedEmail": false,
+            "created": "2023-04-08T14:08:02.575Z",
+            "createdAt": "2023-04-08T14:08:02.575Z",
+            "profileId": {
+                "exams": [
+                    "NEET"
+                ],
+                "_id": "6431754240e979001800202d",
+                "created": "2023-04-08T14:08:02.590Z",
+                "createdAt": "2023-04-08T14:08:02.590Z",
+                "class": "11",
+                "programId": "60910f9463f1f5004815a4c0",
+                "wallet": 0,
+                "totalRewards": 0,
+                "coins": {
+                    "bankTransferCoins": 0,
+                    "voucherCoins": 0,
+                    "commonCoins": 0,
+                    "walletCoins": 0,
+                    "totalCoins": 0,
+                    "redeemedCoins": 0
+                },
+                "parentDetails": {},
+                "isProfileCompleted": true,
+                "children": [],
+                "cohortId": "634fd1c40c274c00183c7579",
+                "needCohortUpdate": false,
+                "cohortUpdatedAt": "2023-04-15T09:28:16.616Z"
+            },
+            "dateOfBirth": null,
+            "phones": [],
+            "address": null,
+            "primary": null,
+            "organization": {
+                "_id": "5eb393ee95fab7468a79d189",
+                "status": "Active",
+                "usersCount": 0,
+                "name": "Physicswallah",
+                "website": "physicswallah.com",
+                "createdAt": "2020-05-07T04:51:58.030Z",
+                "updatedAt": "2020-05-07T04:51:58.030Z",
+                "phones": [],
+                "rejectionComments": [],
+                "enrolmentType": "Client",
+                "primaryContact": "5eb393ee95fab7468a79d18b"
+            },
+            "roles": [
+                {
+                    "id": "5b27bd965842f950a778c6ef",
+                    "name": "Student"
+                }
+            ],
+            "androidVersion": 165,
+            "iosVersion": 0,
+            "webVersion": 1925,
+            "isScholar": false
+        }
+    }
 }

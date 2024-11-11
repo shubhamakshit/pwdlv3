@@ -103,7 +103,7 @@ class Download:
             f"{self.url}",
             "--skip-prompts",
             "--raw-prompts",
-            "--no-Ravenclaw_decrypt",
+            "--no-decrypt",
             "--cookies",
             f"{self.cookie}",
             "-d",

@@ -5,3 +5,4 @@ pycryptodome
 flask
 prompt-toolkit
 gunicorn
+tabulate

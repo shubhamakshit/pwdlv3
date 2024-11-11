@@ -1,3 +1,6 @@
+from mainLogic.utils.glv import Global
+
+
 class Endpoint:
     def __init__(self,
                  url=None,
