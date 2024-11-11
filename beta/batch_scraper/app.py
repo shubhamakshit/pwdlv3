@@ -1,11 +1,13 @@
 import json
+from tabnanny import verbose
+
 from mainLogic.utils.Endpoint import Endpoint
 from mainLogic.utils import glv_var
 from mainLogic.utils.glv import Global
 from beta.batch_scraper.Endpoints import Endpoints
 
 class BatchAPI:
-    def __init__(self, batch_name: str, token: str, force=True):
+    def __init__(self, batch_name: str, token: str, force=True, verbose=False):
         self.batch_name = batch_name
         self.token = token
         self.force = force
@@ -27,12 +29,13 @@ class BatchAPI:
 
         response_obj, status_code, response = endpoint.fetch()
 
-        Global.hr()
-        print(f"Debugging at {endpoint.url}")
-        Global.sprint(f"Response: {response}")
-        print(f"Response Status Code: {status_code}")
-        print(f"Response Text: \n{json.dumps(response_obj)}")
-        Global.hr()
+        if verbose:
+            Global.hr()
+            print(f"Debugging at {endpoint.url}")
+            Global.sprint(f"Response: {response}")
+            print(f"Response Status Code: {status_code}")
+            print(f"Response Text: \n{json.dumps(response_obj)}")
+            Global.hr()
 
         if endpoint.post_function:
             return endpoint.post_function(response_obj)
@@ -120,3 +123,9 @@ class BatchAPI:
 
     def get_batches_force_hard(self):
         return self.get_paginated_data(Endpoints.get_batches_force_hard())
+
+    @staticmethod
+    def to_table(list_of_data):
+        headers = list_of_data[0].keys()
+        data = [list(row.values()) for row in list_of_data]
+        return headers, data

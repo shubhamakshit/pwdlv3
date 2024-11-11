@@ -29,6 +29,9 @@ class Plugin:
         """
         Parses and executes the given command if found in the global list.
         """
+        if command not in Plugin.global_command_list:
+            print(f"Command '{command}' not found.")
+            return
         simpleParser.parseAndRun(Plugin.global_command_list, command, args)
 
     def add_command(self, name, desc, regex, func):

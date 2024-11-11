@@ -16,6 +16,7 @@ def parse_arguments():
     parser.add_argument('--dir', type=str, help='Output Directory')
     parser.add_argument('--verbose', action='store_true', help='Verbose Output')
     parser.add_argument('--shell', action='store_true', help='Start the shell')
+    parser.add_argument('--shell-i','-i',action='store_true', help='Start the interactive shell (v2)')
     parser.add_argument('--webui', nargs='?', const=-1, type=int, help='Start the Webui')
     parser.add_argument('--simulate', action='store_true',
                         help='Simulate the download process. No files will be downloaded. Incompatible wit h '
@@ -34,6 +35,9 @@ if __name__ == "__main__":
         LoginInterface.cli()
     if args.ignore_token:
         glv_var.vars['ig_token'] = True
+    if args.shell_i:
+        from beta.shellLogic.shell_var import app
+        app.run()
 
     downloader.main(
         csv_file=args.csv_file,
