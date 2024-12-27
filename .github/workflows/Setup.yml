@@ -9,7 +9,7 @@ jobs:
 
     steps:
     - name: Download setup_pwdlv3.bat
-      run: curl -o setup_pwdlv3.bat https://gist.githubusercontent.com/shubhamakshit/8654b80e9f64c2791d7f8e681cb1b47d/raw/42155f2fa81af3e981473d00a4658863002815c3/setup_pwdlv3.bat
+      run: curl -o setup_pwdlv3.bat https://gist.github.com/shubhamakshit/8654b80e9f64c2791d7f8e681cb1b47d/raw
 
     - name: Run setup_pwdlv3.bat
       run: .\setup_pwdlv3.bat
