@@ -1,18 +1,60 @@
-name: Run pwdlv3 Setup
-
+name: Verify PWDLv3 Setup
 on:
   workflow_dispatch:
 
 jobs:
-  setup_pwdlv3:
+  verify_setup:
     runs-on: windows-latest
-
     steps:
-    - name: Download setup_pwdlv3.bat
-      run: curl -o setup_pwdlv3.bat -L https://gist.githubusercontent.com/shubhamakshit/8654b80e9f64c2791d7f8e681cb1b47d/raw
-
-    - name: Run setup_pwdlv3.bat
-      run: .\setup_pwdlv3.bat
-
-    - name: Verify installation
-      run: pwdl --verbose
+      - name: Download Setup Script
+        run: |
+          curl -o setup_pwdl.bat -L https://gist.githubusercontent.com/shubhamakshit/8654b80e9f64c2791d7f8e681cb1b47d/raw
+          dir setup_pwdl.bat
+          
+      - name: Verify Script Content
+        shell: powershell
+        run: |
+          Write-Host "Checking script content..."
+          Get-Content setup_pwdl.bat
+          
+      - name: Run Setup Script
+        shell: cmd
+        run: |
+          echo "Starting setup..."
+          setup_pwdl.bat
+          echo "Setup completed"
+          
+      - name: Verify Installation
+        shell: powershell
+        run: |
+          Write-Host "Checking environment..."
+          $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
+          
+          Write-Host "Checking PWDL installation..."
+          Get-Command pwdl -ErrorAction SilentlyContinue
+          if ($?) {
+              Write-Host "PWDL command found"
+              pwdl --version
+              pwdl --help
+          } else {
+              Write-Error "PWDL command not found"
+              exit 1
+          }
+          
+          Write-Host "Checking if service is running..."
+          pwdl --verbose
+          
+      - name: Check Dependencies
+        shell: powershell
+        run: |
+          Write-Host "Verifying dependencies..."
+          $deps = @("python", "git", "ffmpeg")
+          foreach ($dep in $deps) {
+              if (Get-Command $dep -ErrorAction SilentlyContinue) {
+                  Write-Host "$dep is installed and accessible"
+                  & $dep --version
+              } else {
+                  Write-Error "$dep is not installed or not in PATH"
+                  exit 1
+              }
+          }
