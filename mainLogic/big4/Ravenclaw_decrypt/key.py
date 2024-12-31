@@ -1,4 +1,3 @@
-import requests
 import re
 import base64
 import json
@@ -7,6 +6,7 @@ from mainLogic.big4.Ravenclaw_decrypt.heck import cookie_splitter, get_cookiees_
 from mainLogic.big4.Gryffindor_downloadv2 import Download
 from mainLogic.utils.glv import Global
 from mainLogic.utils.keyUtils import cookies_dict_to_str
+from mainLogic.utils.Endpoint import Endpoint
 
 class LicenseKeyFetcher:
     def __init__(self, token, random_id):
@@ -14,10 +14,6 @@ class LicenseKeyFetcher:
         self.token = token
         self.random_id = random_id
         self.cookies = None
-
-
-
-
 
     def build_license_url(self, encoded_otp_key):
         return f"https://api.penpencil.co/v1/videos/get-otp?key={encoded_otp_key}&isEncoded=true"
@@ -83,16 +79,17 @@ class LicenseKeyFetcher:
         return result
 
     def extract_kid_from_mpd(self, url):
-        response = requests.get(url)
-        response.raise_for_status()
-        mpd_content = response.text
+        endpoint = Endpoint(url=url, method='GET')
+        response, status_code, _ = endpoint.fetch()
+        if status_code != 200:
+            raise Exception(f"Failed to fetch MPD content. Status code: {status_code}")
+        mpd_content = response
         pattern = r'default_KID="([0-9a-fA-F-]+)"'
         match = re.search(pattern, mpd_content)
         return match.group(1) if match else None
 
     def set_cookies(self, url):
         self.cookies = cookies_dict_to_str(get_cookiees_from_url(url))
-
 
     def get_key(self, id, verbose=True):
         if verbose: Global.hr()
@@ -138,13 +135,14 @@ class LicenseKeyFetcher:
             if verbose: Global.sprint(f"Headers: {json.dumps(headers, indent=4)}")
 
             if verbose: Global.dprint("Making a request to the server to get the license (key)...")
-            response = requests.get(license_url, headers=headers)
+            endpoint = Endpoint(url=license_url, method='GET', headers=headers)
+            response, status_code, _ = endpoint.fetch()
             if verbose: Global.sprint(f"Response: {response}")
 
-            if response.status_code == 200:
-                if 'data' in response.json() and 'otp' in response.json()['data']:
+            if status_code == 200:
+                if 'data' in response and 'otp' in response['data']:
                     if verbose: Global.sprint("Key received successfully!")
-                    key = self.get_key_final(response.json()['data']['otp'])
+                    key = self.get_key_final(response['data']['otp'])
                     if verbose: Global.sprint(f"Key: {key}")
 
                     if verbose:Global.hr()
@@ -156,8 +154,3 @@ class LicenseKeyFetcher:
         except Exception as e:
             Global.errprint(f"An error occurred while getting the key: {e}")
             return None
-
-# Example usage
-# TOKEN = "your_token_here"
-# fetcher = LicenseKeyFetcher(TOKEN)
-# key = fetcher.get_key(video_id)
