@@ -10,6 +10,7 @@ from mainLogic.main import Main
 from beta.shellLogic import shell
 from mainLogic.utils import glv_var
 from mainLogic.error import errorList, CsvFileNotFound
+from mainLogic.utils.glv_var import debugger
 
 # Global variables
 glv = Global()
@@ -35,7 +36,7 @@ def start_webui(port, verbose):
 
     if verbose:
         Global.hr()
-        Global.dprint(f"Starting WebUI on port {port}")
+        debugger.debug(f"Starting WebUI on port {port}")
 
     app.run(host="0.0.0.0", debug=True, port=port)
 
@@ -58,7 +59,7 @@ def download_process(id, name, state, verbose, simulate=False):
             token=prefs['token'],
             random_id=prefs['random_id'],
             mp4d=state['mp4decrypt'],
-            tmpDir=prefs['tmpDir'],
+            tmpDir= state['tmpDir'] if 'tmpDir' in state else prefs['tmpDir'],
             verbose=verbose
         ).process()
     except Exception as e:
@@ -75,7 +76,7 @@ def handle_csv_file(csv_file, state, verbose, simulate=False):
         if not os.path.exists(csv_file):
             raise CsvFileNotFound(csv_file)
     except CsvFileNotFound as e:
-        Global.errprint(e)
+        debugger.error(e)
         e.exit()
 
     if simulate:
@@ -90,7 +91,7 @@ def handle_csv_file(csv_file, state, verbose, simulate=False):
             download_process(id, name, state, verbose)
 
 
-def main(csv_file=None, id=None, name=None, directory=None, verbose=False, shell=False, webui_port=None,
+def main(csv_file=None, id=None, name=None, directory=None, verbose=False, shell=False, webui_port=None,tmp_dir=None,
          simulate=False):
     global prefs  # Use global keyword to modify global prefs
 
@@ -102,13 +103,13 @@ def main(csv_file=None, id=None, name=None, directory=None, verbose=False, shell
     # calling og check_dependencies function (checkup)
 
     ch = CheckState()
-    state = ch.checkup(EXECUTABLES, directory=directory, verbose=verbose, do_raise=False)
+    state = ch.checkup(EXECUTABLES, directory=directory,tmp_dir=tmp_dir, verbose=verbose, do_raise=False)
     prefs = state['prefs']
 
     # set the global preferences
     glv_var.vars['prefs'] = prefs
 
-    #Global.dprint(f"Preferences: {glv_var.vars['prefs']}")
+    #debugger.debug(f"Preferences: {glv_var.vars['prefs']}")
 
     if webui_port is not None:
         start_webui(webui_port, glv.vout)

@@ -1,5 +1,6 @@
 import requests
 from mainLogic.utils.glv import Global
+from mainLogic.utils.glv_var import debugger
 
 
 def get_signed_url(token, random_id, id, verbose=True):
@@ -8,9 +9,9 @@ def get_signed_url(token, random_id, id, verbose=True):
 
     if verbose:
         Global.hr()
-        Global.sprint("Getting the signed URL for the video...")
-        Global.dprint(f"ID: {id}")
-        Global.sprint("Building the URL to get the signed URL...")
+        debugger.success("Getting the signed URL for the video...")
+        debugger.debug(f"ID: {id}")
+        debugger.success("Building the URL to get the signed URL...")
 
     url = "https://api.penpencil.co/v3/files/send-analytics-data"
 
@@ -18,7 +19,7 @@ def get_signed_url(token, random_id, id, verbose=True):
         "url": f"https://d1d34p8vz63oiq.cloudfront.net/{id}/master.mpd"
     })
 
-    if verbose: Global.dprint(f"Payload: {payload}")
+    if verbose: debugger.debug(f"Payload: {payload}")
 
     headers = {
         'accept': '*/*',
@@ -44,7 +45,7 @@ def get_signed_url(token, random_id, id, verbose=True):
 
     response = requests.request("POST", url, headers=headers, data=payload)
 
-    if verbose: Global.sprint(f"Response: {json.dumps(response.json(), indent=8)}"); Global.hr()
+    if verbose: debugger.success(f"Response: {json.dumps(response.json(), indent=8)}"); Global.hr()
 
     return response.json()
 

@@ -3,6 +3,7 @@ from tabnanny import verbose
 
 from mainLogic import error
 from mainLogic.error import IdNotProvided
+from mainLogic.utils.glv_var import debugger
 from mainLogic.utils.process import shell
 from mainLogic.utils.glv import Global
 from mainLogic.big4.Ravenclaw_decrypt import signedUrl
@@ -67,7 +68,7 @@ class Download:
 
         if verbose:
             Global.hr()
-            Global.sprint("Download initialized")
+            debugger.success("Download initialized")
 
     def perform_cleanup(self):
         import shutil
@@ -78,7 +79,7 @@ class Download:
         audio_enc_path = self.output_path + '/' + self.name + "-Audio-enc.mp4"
 
         if self.verbose:
-            Global.dprint(f"Performing cleanup, moving files to {self.output_path}")
+            debugger.debug(f"Performing cleanup, moving files to {self.output_path}")
 
         shutil.move(audio_path, video_enc_path)
         shutil.move(video_path, audio_enc_path)
@@ -86,9 +87,9 @@ class Download:
         try:
             shutil.rmtree(self.tmp_path)
             if self.verbose:
-                Global.sprint(f"Removed temporary directory: {self.tmp_path}")
+                debugger.success(f"Removed temporary directory: {self.tmp_path}")
         except Exception as e:
-            Global.errprint(f"Could not remove tmp directory: {e}")
+            debugger.error(f"Could not remove tmp directory: {e}")
 
         return video_enc_path, audio_enc_path
 
@@ -111,7 +112,7 @@ class Download:
         ]
 
         if self.verbose:
-            Global.sprint(f"Running command: {' '.join(command)}")
+            debugger.success(f"Running command: {' '.join(command)}")
 
         # Run the command with shell
         shell(

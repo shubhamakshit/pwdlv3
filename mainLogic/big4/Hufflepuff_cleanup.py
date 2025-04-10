@@ -1,5 +1,8 @@
 import os
 from mainLogic.utils.glv import Global
+from mainLogic.utils.glv_var import debugger
+
+
 class Clean:
     """
     Hufflepuff values hard work, patience, and dedication. Merging the audio and video files requires careful
@@ -7,11 +10,13 @@ class Clean:
     """
 
     def removeFile(self,file,verbose):
+        from mainLogic.utils.glv_var import debugger
         try:
             os.remove(file)
-            if verbose: Global.sprint(f"Removed file: {file}")
+            if verbose: debugger.success(f"Removed file: {file}")
         except:
-            Global.errprint(f"Could not remove file: {file}")
+            from mainLogic.utils.glv_var import debugger
+            debugger.error(f"Could not remove file: {file}")
 
     def remove(self,path,file,verbose=True):
 
@@ -23,19 +28,19 @@ class Clean:
 
         if verbose:
             Global.hr()
-            Global.dprint("Removing TemporaryDL Files...")
+            debugger.debug("Removing TemporaryDL Files...")
             Global.hr()
 
-        if verbose: Global.dprint("Removing Audio...")    
+        if verbose: debugger.debug("Removing Audio...")    
         self.removeFile(audio_enc,verbose)
 
-        if verbose: Global.dprint("Removing Video...")
+        if verbose: debugger.debug("Removing Video...")
         self.removeFile(video_enc,verbose)
 
-        if verbose: Global.dprint("Removing Dncrypted Audio...")
+        if verbose: debugger.debug("Removing Dncrypted Audio...")
         self.removeFile(audio,verbose)
 
-        if verbose: Global.dprint("Removing Dncrypted Video...")
+        if verbose: debugger.debug("Removing Dncrypted Video...")
         self.removeFile(video,verbose)
 
         

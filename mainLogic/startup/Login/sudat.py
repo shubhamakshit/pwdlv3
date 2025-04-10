@@ -1,6 +1,6 @@
 import os
 import sys
-
+from mainLogic.utils.glv_var import debugger
 import requests
 
 from mainLogic.utils import glv_var
@@ -22,12 +22,13 @@ class Login:
             'randomid': 'a3e290fa-ea36-4012-9124-8908794c33aa',
         }
 
-    def __init__(self, username):
+    def __init__(self, username,debug=False):
         self.username = username
         self.password = None
         self.token = None
         self.token_url = "https://api.penpencil.co/v3/oauth/token"
         self.wa_otp = "https://api.penpencil.co/v1/users/get-otp?smsType=1"
+        self.debug = debug
         self.otp = "https://api.penpencil.co/v1/users/get-otp?smsType=0"
         self.headers = {
             'accept': 'application/json, text/plain, */*',
@@ -39,12 +40,18 @@ class Login:
             'randomid': 'a3e290fa-ea36-4012-9124-8908794c33aa',
         }
 
-    def gen_otp(self, otp_type="wa"):
+    # change phone to wa for whatsapp 
+    def gen_otp(self, otp_type="phone"):
         payload = {
             "username": self.username,
             "countryCode": "+91",
             "organizationId": "5eb393ee95fab7468a79d189"
         }
+
+        if self.debug:
+            debugger.debug("Debug Mode: OTP Generation")
+            return True
+
 
         if otp_type == "wa":
             url = self.wa_otp
@@ -60,6 +67,33 @@ class Login:
             return False
 
     def login(self, otp):
+
+        if self.debug:
+            # generate {"randomId":,"token":,"refresh_token":,"expires_in":} with random values
+
+            debugger.debug("Generating random token for debugging purposes")
+
+            import json
+            import random
+            import string
+
+            def random_string(length):
+                letters = string.ascii_letters
+                return ''.join(random.choice(letters) for i in range(length))
+
+            self.token = {
+                "randomId": random_string(10),
+                "token": random_string(10),
+                "refresh_token": random_string(10),
+                "expires_in": random.randint(1, 100)
+            }
+
+            return True
+
+
+
+
+
         payload = {
             "username": self.username,
             "otp": otp,
@@ -75,10 +109,10 @@ class Login:
         if response.status_code == 200 or response.status_code == 201:
             self.token = response.json().get('data')
 
-            from mainLogic.utils.dependency_checker import re_check_dependencies
-            re_check_dependencies()
+            #from mainLogic.utils.dependency_checker import re_check_dependencies
+            #re_check_dependencies()
 
-            Global.sprint(f"""
+            debugger.success(f"""
             Login Successful!
             Token: {self.token}
             Reloaded Preferences!

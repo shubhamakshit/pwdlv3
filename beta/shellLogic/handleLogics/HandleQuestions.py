@@ -72,15 +72,15 @@ class HandleQuestions(Plugin):
             p_Dat.append([subject['englishName'], subject['subjectId']])
 
         Global.hr()
-        Global.sprint(f"Exams: {subjects_dat['exams']}")
-        Global.sprint(f"ExamCategorie: {subjects_dat['examCategory']}")
+        debugger.success(f"Exams: {subjects_dat['exams']}")
+        debugger.success(f"ExamCategorie: {subjects_dat['examCategory']}")
         Global.hr()
 
         if not subject_id:
             print(tabulate(p_Dat, headers=headers, tablefmt='grid'))
 
         if subject_id and not chapter_id:
-            Global.sprint(f"Getting chapters for subject {subject_id}")
+            debugger.success(f"Getting chapters for subject {subject_id}")
             chapters_dat = qApi.GET_CHAPTERS(subject_id=subject_id)
 
             headers = ['Chapter Name', 'Chapter ID', 'Class ID', 'Easy', 'Medium', 'Hard']
@@ -96,7 +96,7 @@ class HandleQuestions(Plugin):
             Global.hr()
 
         if chapter_id and subject_id:
-            Global.sprint(f"Getting questions for subject {subject_id} and chapter {chapter_id}")
+            debugger.success(f"Getting questions for subject {subject_id} and chapter {chapter_id}")
             questions_dat = qApi.GET_QUESTION(subject_id=subject_id, chapters=[
                 {'chapterId': chapter_id, 'classId': 'oyhh7ve8217so92jw81tefbyp'}], difficulty_level=[3],
                                               questions_count=90)

@@ -2,7 +2,6 @@ import os.path
 
 from flask import Blueprint, request, jsonify, send_file
 
-from beta.api.blueprints.template_routes import prefs
 from beta.api.mr_manager.boss_manager import Boss
 from beta.update import UpdateJSONFile
 from mainLogic.error import TokenInvalid
@@ -10,7 +9,7 @@ from mainLogic.startup.checkup import CheckState
 from mainLogic.utils import glv_var
 from mainLogic.utils.dependency_checker import re_check_dependencies
 from mainLogic.utils.glv import Global
-from mainLogic.utils.glv_var import PREFS_FILE
+from mainLogic.utils.glv_var import PREFS_FILE, debugger
 from mainLogic.utils.os2 import SysFunc
 from updater import check_for_updates, pull_latest_changes as pull
 
@@ -150,8 +149,8 @@ def change_to_old_token_scheme():
     try:
         re_check_dependencies()
 
-        Global.sprint(f"Changed token scheme to old")
-        Global.errprint(f"Current token: {glv_var.vars['prefs']['token']}")
+        debugger.success(f"Changed token scheme to old")
+        debugger.error(f"Current token: {glv_var.vars['prefs']['token']}")
 
     except Exception as e:
         return jsonify({'error': f"Error: {e}"}), 500

@@ -1,4 +1,5 @@
 from mainLogic.utils.basicUtils import BasicUtils
+from mainLogic.utils.glv_var import debugger
 from mainLogic.utils.os2 import SysFunc
 from mainLogic.utils.glv import Global
 from mainLogic.big4.Hufflepuff_cleanup import Clean
@@ -65,7 +66,7 @@ class Main:
         """
 
         if self.verbose:
-            Global.dprint("Starting Main Process... for ID: " + self.id)
+            debugger.debug("Starting Main Process... for ID: " + self.id)
 
         TOKEN = self.token
         RANDOM_ID = self.random_id
@@ -89,12 +90,12 @@ class Main:
                                 verbose=self.verbose,
                                 progress_callback=self.progress_callback).download()
 
-        Global.sprint("Download completed.")
-        if self.verbose: Global.sprint(f"Audio: {audio}\nVideo: {video}")
+        debugger.success("Download completed.")
+        if self.verbose: debugger.success(f"Audio: {audio}\nVideo: {video}")
 
         # 2. Decrypting Files
 
-        Global.sprint("Please wait while we Ravenclaw_decrypt the files...")
+        debugger.success("Please wait while we Ravenclaw_decrypt the files...")
 
         decrypt = Decrypt()
 

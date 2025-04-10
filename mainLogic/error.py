@@ -1,16 +1,18 @@
 import traceback
 
+from mainLogic.utils.Debugger import Debugger
 from mainLogic.utils.glv import Global
 import colorama
 from colorama import Fore, Style
 import traceback
 
+debugger = Debugger(enabled=True,show_location=True)
 
 
 errorList = {
     "unknownError": {
         "code": 100,
-        "func": lambda: Global.errprint("Unknown error. Exiting..."),
+        "func": lambda: debugger.error("Unknown error. Exiting..."),
         "message_template": "An unknown error has occurred. Please check the logs for details."
     },
     "noError": {
@@ -20,107 +22,107 @@ errorList = {
     },
     "defaultsNotFound": {
         "code": 1,
-        "func": lambda: Global.errprint("defaults.json not found. Exiting..."),
+        "func": lambda: debugger.error("defaults.json not found. Exiting..."),
         "message_template": "The configuration file defaults.json is missing. Please restore it."
     },
     "dependencyNotFound": {
         "code": 2,
-        "func": lambda x=None: Global.errprint(f"{'Dependency' if x is None else x} not found. Exiting..."),
+        "func": lambda x=None: debugger.error(f"{'Dependency' if x is None else x} not found. Exiting..."),
         "message_template": "{dependency} is required but was not found. Please install it."
     },
     "dependencyNotFoundInPrefs": {
         "code": 3,
-        "func": lambda x=None: Global.errprint(f"{'Dependency' if x is None else x} not found in default settings. Exiting..."),
+        "func": lambda x=None: debugger.error(f"{'Dependency' if x is None else x} not found in default settings. Exiting..."),
         "message_template": "{dependency} is not configured in the settings. Check your preferences."
     },
     "csvFileNotFound": {
         "code": 4,
-        "func": lambda fileName: Global.errprint(f"CSV file {fileName} not found. Exiting..."),
+        "func": lambda fileName: debugger.error(f"CSV file {fileName} not found. Exiting..."),
         "message_template": "The CSV file {fileName} is missing. Ensure it is in the correct directory."
     },
     "downloadFailed": {
         "code": 5,
-        "func": lambda name, id: Global.errprint(f"Download failed for {name} with id {id}. (Main.process exited) Exiting..."),
+        "func": lambda name, id: debugger.error(f"Download failed for {name} with id {id}. (Main.process exited) Exiting..."),
         "message_template": "Failed to download {name} (ID: {id}). Please try again."
     },
     "couldNotMakeDir": {
         "code": 6,
-        "func": lambda dirName: Global.errprint(f"Could not make directory {dirName}. Exiting..."),
+        "func": lambda dirName: debugger.error(f"Could not make directory {dirName}. Exiting..."),
         "message_template": "Unable to create the directory {dirName}. Check permissions."
     },
     "tokenNotFound": {
         "code": 7,
-        "func": lambda: Global.errprint("Token not found in default settings. Exiting..."),
+        "func": lambda: debugger.error("Token not found in default settings. Exiting..."),
         "message_template": "Authentication token not found in the configuration."
     },
     "tokenInvalid": {
         "code": 8,
-        "func": lambda: Global.errprint("Token invalid. Exiting..."),
+        "func": lambda: debugger.error("Token invalid. Exiting..."),
         "message_template": "The provided token is invalid. Please verify your credentials."
     },
     "overWriteAbortedByUser": {
         "code": 9,
-        "func": lambda: Global.errprint("Overwrite aborted by user. Exiting..."),
+        "func": lambda: debugger.error("Overwrite aborted by user. Exiting..."),
         "message_template": "Overwrite operation was cancelled by the user."
     },
     "cantLoadFile": {
         "code": 22,
-        "func": lambda fileName: Global.errprint(f"Can't load file {fileName}"),
+        "func": lambda fileName: debugger.error(f"Can't load file {fileName}"),
         "message_template": "Unable to load the file {fileName}. Check if it exists."
     },
     "flareNotStarted": {
         "code": 23,
-        "func": lambda: Global.errprint("Flare is not started. Start the flare server first."),
+        "func": lambda: debugger.error("Flare is not started. Start the flare server first."),
         "message_template": "Flare server is not running. Please start it before proceeding."
     },
     "requestFailedDueToUnknownReason": {
         "code": 24,
-        "func": lambda status_code: Global.errprint("Request failed due to unknown reason. Status Code: " + str(status_code)),
+        "func": lambda status_code: debugger.error("Request failed due to unknown reason. Status Code: " + str(status_code)),
         "message_template": "The request encountered an unknown issue (Status Code: {status_code})."
     },
     "keyExtractionFailed": {
         "code": 25,
-        "func": lambda id: Global.errprint(f"Key extraction failed for id -> {id}. Exiting..."),
+        "func": lambda id: debugger.error(f"Key extraction failed for id -> {id}. Exiting..."),
         "message_template": "Failed to extract key for ID: {id}. Please verify the input."
     },
     "keyNotProvided": {
         "code": 26,
-        "func": lambda: Global.errprint("Key not provided. Exiting..."),
+        "func": lambda: debugger.error("Key not provided. Exiting..."),
         "message_template": "No key was provided for the operation. Please input a key."
     },
     "idNotProvided": {
         "code": 45,
-        "func": lambda: Global.errprint("ID not provided. Exiting..."),
+        "func": lambda: debugger.error("ID not provided. Exiting..."),
         "message_template": "No ID was provided for the operation. Please input an ID"
     },
     "couldNotDownloadAudio": {
         "code": 27,
-        "func": lambda id: Global.errprint(f"Could not download audio for id -> {id} Exiting..."),
+        "func": lambda id: debugger.error(f"Could not download audio for id -> {id} Exiting..."),
         "message_template": "Audio download failed for ID: {id}. Please check your connection."
     },
     "couldNotDownloadVideo": {
         "code": 28,
-        "func": lambda id: Global.errprint(f"Could not download video for id -> {id} Exiting..."),
+        "func": lambda id: debugger.error(f"Could not download video for id -> {id} Exiting..."),
         "message_template": "Video download failed for ID: {id}. Ensure the source is available."
     },
     "couldNotDecryptAudio": {
         "code": 29,
-        "func": lambda: Global.errprint("Could not Ravenclaw_decrypt audio. Exiting..."),
+        "func": lambda: debugger.error("Could not Ravenclaw_decrypt audio. Exiting..."),
         "message_template": "Audio decryption failed. Check the audio file integrity."
     },
     "couldNotDecryptVideo": {
         "code": 30,
-        "func": lambda: Global.errprint("Could not Ravenclaw_decrypt video. Exiting..."),
+        "func": lambda: debugger.error("Could not Ravenclaw_decrypt video. Exiting..."),
         "message_template": "Video decryption failed. Ensure the video file is valid."
     },
     "methodPatched": {
         "code": 31,
-        "func": lambda: Global.errprint("Method is patched. Exiting..."),
+        "func": lambda: debugger.error("Method is patched. Exiting..."),
         "message_template": "The method you are trying to use has been patched and is no longer available."
     },
     "couldNotExtractKey": {
         "code": 32,
-        "func": lambda: Global.errprint("Could not extract key. Exiting..."),
+        "func": lambda: debugger.error("Could not extract key. Exiting..."),
         "message_template": "Key extraction process encountered an error. Please review the input parameters."
     },
 }
@@ -141,7 +143,7 @@ class PwdlError(Exception):
         return f"Pwdlv3: {self.message} Failed with code {self.code}"
 
     def exit(self):
-        Global.errprint(self.__str__())
+        debugger.error(self.__str__())
         exit(self.code)
 
 class UnknownError(PwdlError):

@@ -1,5 +1,5 @@
 from mainLogic.utils.glv import Global
-from mainLogic.utils.glv_var import PREFS_FILE
+from mainLogic.utils.glv_var import PREFS_FILE, debugger
 from beta.update import UpdateJSONFile
 class TokenUpdate:
 
@@ -7,8 +7,8 @@ class TokenUpdate:
 
         self.file_path = PREFS_FILE
         # hard coding 'defaults.json' as to ../../defaults.json
-        #Global.errprint("Warning! This is a beta feature. Use at your own risk.")
-        #Global.errprint("Hard Coded to use 'defaults.json' as to ../../defaults.json (in Global.PREFERENCES_FILE)")
+        #debugger.error("Warning! This is a beta feature. Use at your own risk.")
+        #debugger.error("Hard Coded to use 'defaults.json' as to ../../defaults.json (in Global.PREFERENCES_FILE)")
         self.commandList = {
             "tkn-up":{
                 "func": self.update
@@ -19,16 +19,16 @@ class TokenUpdate:
         if args:
             u = UpdateJSONFile(self.file_path)
             u.update('token',args[0])
-            Global.sprint("Token updated successfully.")
+            debugger.success("Token updated successfully.")
         else:
-            Global.errprint("Please provide a token to update.")
+            debugger.error("Please provide a token to update.")
 
     def parseAndRun(self,command,args=[]):
         # simpleParser.parseAndRun(self.commandList, command, args)
         if command in self.commandList:
             self.commandList[command]["func"](args)
         else:
-            Global.errprint("Command not found.")
+            debugger.error("Command not found.")
 
 
 

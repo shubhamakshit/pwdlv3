@@ -3,6 +3,7 @@
 from flask import Blueprint, jsonify, request
 from beta.batch_scraper.app import BatchAPI  # Assuming the original code is in a file named BatchAPI.py
 from mainLogic.utils.glv import Global
+from mainLogic.utils.glv_var import debugger
 
 # Initialize the blueprint
 scraper_blueprint = Blueprint('scraper', __name__)
@@ -78,7 +79,7 @@ def get_normal_subjects():
         subjects = batch_api.GET_NORMAL_SUBJECTS()
         return create_response(data=subjects)
     except Exception as e:
-        Global.errprint(f"Error: {e}")
+        debugger.error(f"Error: {e}")
         return create_response(error=str(e)), 500
 
 @scraper_blueprint.route('/normal/chapters/<subject_slug>', methods=['GET'])
@@ -89,8 +90,8 @@ def get_normal_chapters(subject_slug):
         batch_api.batch_name = batch_name
 
         Global.hr()
-        Global.sprint(f"batch_name: {batch_api.batch_name}")
-        Global.sprint(f"subject_slug: {subject_slug}")
+        debugger.success(f"batch_name: {batch_api.batch_name}")
+        debugger.success(f"subject_slug: {subject_slug}")
         Global.hr()
 
         chapters = batch_api.GET_NORMAL_CHAPTERS(subject_slug)

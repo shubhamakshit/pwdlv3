@@ -1,5 +1,7 @@
 # defining some variables that can be used in the preferences file
 import os
+
+from mainLogic.utils.Debugger import Debugger
 from mainLogic.utils.basicUtils import BasicUtils
 
 vars = {
@@ -10,14 +12,18 @@ vars = {
             # the startup folder, we don't need to go one level up
             "$script": BasicUtils.abspath(os.path.dirname(__file__) + (
                 '/../..' if not os.path.exists(os.path.dirname(__file__) + '../pwdl.py') else '')),
-            "$home": os.path.expanduser("~"),
+            "$home": os.path.expanduser("~") if os.name == 'posix' else os.getenv('USERPROFILE'),
         }
+
+debugger = Debugger(enabled=True,show_location=True)
+
 env_file = os.getenv('PWDL_PREF_FILE')
+sys_verbose = os.getenv('PWDL_VERBOSE')
 if env_file and os.path.exists(env_file):
-    print(f"Using preferences file: {env_file}")
+    if sys_verbose: print(f"Using preferences file: {env_file}")
     PREFS_FILE = env_file
 else:
-    print(f"Using default preferences file: {os.path.join(vars['$script'], 'defaults.json')}")
+    if sys_verbose: print(f"Using default preferences file: {os.path.join(vars['$script'], 'defaults.json')}")
     PREFS_FILE = os.path.join(vars["$script"], 'defaults.json')
 
 api_webdl_directory = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../webdl'))
