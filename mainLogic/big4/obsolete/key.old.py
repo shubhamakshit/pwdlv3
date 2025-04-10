@@ -9,10 +9,10 @@
 #
 # def log_info(id, verbose, attempt=0):
 #     if verbose:
-#         Global.dprint("Starting the script for key extraction" +( f" Retry: {attempt}" if attempt > 0 else ""))
-#         Global.sprint(f'id -> {id}')
-#         Global.sprint("Sending request to the server")
-#         Global.dprint(f"Hardcoded URL: request.get -> http://studyrays.site/drmplayer.php?v=https://d1d34p8vz63oiq"
+#         debugger.debug("Starting the script for key extraction" +( f" Retry: {attempt}" if attempt > 0 else ""))
+#         debugger.success(f'id -> {id}')
+#         debugger.success("Sending request to the server")
+#         debugger.debug(f"Hardcoded URL: request.get -> http://studyrays.site/drmplayer.php?v=https://d1d34p8vz63oiq"
 #                       f".cloudfront.net/{id}/master.mpd")
 #
 #
@@ -82,5 +82,5 @@
 #             return key
 #         else:
 #             if verbose:
-#                 Global.sprint("protData variable not found in the script. Retrying!")
+#                 debugger.success("protData variable not found in the script. Retrying!")
 #     return -1

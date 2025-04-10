@@ -41,7 +41,7 @@ class DL:
 
         # command to download the file
         command = f'{nm3Path} {url} --save-dir {directory} {"--tmp-dir "+tmpDir if not tmpDir == "/*auto*/" else "" } --save-name {name}  -s{identifier} best'
-        if verbose: Global.sprint(f"Command to download: {command}")
+        if verbose: debugger.success(f"Command to download: {command}")
 
         # Download the audio file using the id
         code = shell(f'{command}',
@@ -69,7 +69,7 @@ class DL:
             error.errorList["idNotProvided"]["func"]()
             exit(error.errorList["idNotProvided"]["code"])
 
-        if name == None: name = id; Global.dprint(f"Name not provided, using id as name: {name}")
+        if name == None: name = id; debugger.debug(f"Name not provided, using id as name: {name}")
 
         # removing limitations of relative path
         if not tmpDir == "/*auto*/": BasicUtils.abspath(tmpDir)
@@ -77,16 +77,16 @@ class DL:
 
         if verbose:
             Global.hr()
-            Global.dprint(f"ID: {id}")
-            Global.dprint(f"Name: {name}")
-            Global.dprint(f"Directory: {directory}")
-            Global.dprint(f"TmpDir: {tmpDir}")
-            Global.dprint(f"Nm3Path: {nm3Path}")
+            debugger.debug(f"ID: {id}")
+            debugger.debug(f"Name: {name}")
+            debugger.debug(f"Directory: {directory}")
+            debugger.debug(f"TmpDir: {tmpDir}")
+            debugger.debug(f"Nm3Path: {nm3Path}")
             Global.hr()
-            Global.dprint(f"Starting DL...")
+            debugger.debug(f"Starting DL...")
 
         # section to download audio 
-        Global.hr(); Global.dprint("Downloading Audio..."); Global.hr()
+        Global.hr(); debugger.debug("Downloading Audio..."); Global.hr()
         self.dlAudio(id,
                      name,
                      directory,
@@ -96,7 +96,7 @@ class DL:
                      progress_callback=progress_callback)
 
         # section to download video
-        Global.hr(); Global.dprint("Downloading Video..."); Global.hr()
+        Global.hr(); debugger.debug("Downloading Video..."); Global.hr()
         self.dlVideo(id,
                      name,
                      directory,

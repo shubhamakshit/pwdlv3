@@ -1,5 +1,6 @@
 import os
 from mainLogic.error import errorList, OverwriteAbortedByUser
+from mainLogic.utils.glv_var import debugger
 from mainLogic.utils.process import shell
 from mainLogic.utils.glv import Global
 from mainLogic.utils.os2 import SysFunc
@@ -18,19 +19,19 @@ class Merge:
 
         input1,input2,output = SysFunc.modify_path(input1),SysFunc.modify_path(input2),SysFunc.modify_path(output)
 
-        if verbose: Global.hr();Global.dprint('Attempting ffmpeg merge')
-        # if verbose: Global.dprint(f'{ffmpeg_path} -i {input1} -i {input2} -c copy {output}')
+        if verbose: Global.hr();debugger.debug('Attempting ffmpeg merge')
+        # if verbose: debugger.debug(f'{ffmpeg_path} -i {input1} -i {input2} -c copy {output}')
 
         if os.path.exists(output):
 
-            Global.errprint("Warninbg: Output file already exists. Overwriting...")
+            debugger.error("Warninbg: Output file already exists. Overwriting...")
             consent = input("Do you want to continue? (y/n): ")
 
             if consent.lower() != 'y':
                 OverwriteAbortedByUser().exit()
 
         if verbose:
-            Global.dprint(f"Running: {self.mergeCommandBuilder(ffmpeg_path,input1,input2,output,overwrite=True)}")
+            debugger.debug(f"Running: {self.mergeCommandBuilder(ffmpeg_path,input1,input2,output,overwrite=True)}")
             shell(self.mergeCommandBuilder(ffmpeg_path,input1,input2,output,overwrite=True),filter='.*')
         else:
             shell(self.mergeCommandBuilder(ffmpeg_path,input1,input2,output,overwrite=True), stderr="", stdout="")

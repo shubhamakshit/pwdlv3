@@ -5,6 +5,7 @@ import json
 from mainLogic.big4.Ravenclaw_decrypt.heck import cookie_splitter, get_cookiees_from_url
 from mainLogic.big4.Gryffindor_downloadv2 import Download
 from mainLogic.utils.glv import Global
+from mainLogic.utils.glv_var import debugger
 from mainLogic.utils.keyUtils import cookies_dict_to_str
 from mainLogic.utils.Endpoint import Endpoint
 
@@ -94,9 +95,9 @@ class LicenseKeyFetcher:
     def get_key(self, id, verbose=True):
         if verbose: Global.hr()
 
-        if verbose: Global.dprint("Beginning to get the key for the video... & Audio :) ")
-        if verbose: Global.dprint(f"ID: {id}")
-        if verbose: Global.dprint("Building the URL to get the key...")
+        if verbose: debugger.debug("Beginning to get the key for the video... & Audio :) ")
+        if verbose: debugger.debug(f"ID: {id}")
+        if verbose: debugger.debug("Building the URL to get the key...")
 
         try:
             from mainLogic.big4.Ravenclaw_decrypt.signedUrl import get_signed_url
@@ -108,49 +109,49 @@ class LicenseKeyFetcher:
             self.url = url
             self.set_cookies(url)
 
-            if verbose: Global.sprint(f"URL: {url}")
+            if verbose: debugger.success(f"URL: {url}")
             if verbose:
                 Global.hr()
-                Global.sprint(f"Cookies: {self.cookies}")
+                debugger.success(f"Cookies: {self.cookies}")
 
-            if verbose: Global.dprint("Extracting the KID from the MPD file...")
+            if verbose: debugger.debug("Extracting the KID from the MPD file...")
             kid = self.extract_kid_from_mpd(url).replace("-", "")
-            if verbose: Global.sprint(f"KID: {kid}")
+            if verbose: debugger.success(f"KID: {kid}")
 
-            if verbose: Global.dprint("Encrypting the KID to get the key...")
+            if verbose: debugger.debug("Encrypting the KID to get the key...")
             otp_key = self.b64_encode(self.xor_encrypt(kid))
-            if verbose: Global.sprint(f"OTP Key: {otp_key}")
+            if verbose: debugger.success(f"OTP Key: {otp_key}")
 
-            if verbose: Global.dprint("Encoding the OTP key to hex...")
+            if verbose: debugger.debug("Encoding the OTP key to hex...")
             encoded_otp_key_step1 = otp_key.encode('utf-8').hex()
             encoded_otp_key = self.insert_zeros(encoded_otp_key_step1)
-            if verbose: Global.sprint(f"Encoded OTP Key: {encoded_otp_key}")
+            if verbose: debugger.success(f"Encoded OTP Key: {encoded_otp_key}")
 
-            if verbose: Global.dprint("Building the license URL...")
+            if verbose: debugger.debug("Building the license URL...")
             license_url = self.build_license_url(encoded_otp_key)
-            if verbose: Global.sprint(f"License URL: {license_url}")
+            if verbose: debugger.success(f"License URL: {license_url}")
 
-            if verbose: Global.dprint("Getting the headers...")
+            if verbose: debugger.debug("Getting the headers...")
             headers = self.get_otp_headers()
-            if verbose: Global.sprint(f"Headers: {json.dumps(headers, indent=4)}")
+            if verbose: debugger.success(f"Headers: {json.dumps(headers, indent=4)}")
 
-            if verbose: Global.dprint("Making a request to the server to get the license (key)...")
+            if verbose: debugger.debug("Making a request to the server to get the license (key)...")
             endpoint = Endpoint(url=license_url, method='GET', headers=headers)
             response, status_code, _ = endpoint.fetch()
-            if verbose: Global.sprint(f"Response: {response}")
+            if verbose: debugger.success(f"Response: {response}")
 
             if status_code == 200:
                 if 'data' in response and 'otp' in response['data']:
-                    if verbose: Global.sprint("Key received successfully!")
+                    if verbose: debugger.success("Key received successfully!")
                     key = self.get_key_final(response['data']['otp'])
-                    if verbose: Global.sprint(f"Key: {key}")
+                    if verbose: debugger.success(f"Key: {key}")
 
                     if verbose:Global.hr()
                     return (kid,key)
             else:
-                Global.errprint("Could not get the key from the server. Exiting...")
+                debugger.error("Could not get the key from the server. Exiting...")
                 return None
 
         except Exception as e:
-            Global.errprint(f"An error occurred while getting the key: {e}")
+            debugger.error(f"An error occurred while getting the key: {e}")
             return None

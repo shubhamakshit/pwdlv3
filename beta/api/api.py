@@ -1,18 +1,20 @@
 import os
-from flask import Flask
-from mainLogic.utils.glv import Global
-from mainLogic.utils.glv_var import vars
-from beta.api.mr_manager.boss_manager import Boss
 
-from beta.api.blueprints.api_pref_manager import api_prefs
-from beta.api.blueprints.template_routes import template_blueprint
-from beta.api.blueprints.session_lodge import session_lodge
-from beta.api.blueprints.while_dl_and_post_dl import dl_and_post_dl
-from beta.api.blueprints.leagacy_create_task import legacy_create_task
-from beta.api.blueprints.client_info_routes import client_info
+from flask import Flask
+
 from beta.api.blueprints.admin_routes import admin
-from beta.api.blueprints.scarper import scraper_blueprint
+from beta.api.blueprints.api_pref_manager import api_prefs
+from beta.api.blueprints.client_info_routes import client_info
+from beta.api.blueprints.leagacy_create_task import legacy_create_task
 from beta.api.blueprints.login import login
+from beta.api.blueprints.scarper import scraper_blueprint
+from beta.api.blueprints.session_lodge import session_lodge
+from beta.api.blueprints.template_routes import template_blueprint
+from beta.api.blueprints.while_dl_and_post_dl import dl_and_post_dl
+from beta.api.mr_manager.boss_manager import Boss
+from mainLogic.utils.glv import Global
+from mainLogic.utils.glv_var import debugger
+
 app = Flask(__name__)
 
 # Initialize ClientManager and TaskManager
@@ -24,9 +26,9 @@ try:
     if not os.path.exists(OUT_DIR):
         os.makedirs(OUT_DIR)
 except Exception as e:
-    Global.errprint(f"Could not create output directory {OUT_DIR}")
-    Global.sprint(f"Defaulting to './' ")
-    Global.errprint(f"Error: {e}")
+    debugger.error(f"Could not create output directory {OUT_DIR}")
+    debugger.success(f"Defaulting to './' ")
+    debugger.error(f"Error: {e}")
     OUT_DIR = './'
 
 

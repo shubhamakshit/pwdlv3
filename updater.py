@@ -4,7 +4,7 @@ import sys
 from mainLogic.utils.process import shell
 from mainLogic.utils.glv import Global
 from mainLogic.error import errorList
-from mainLogic.utils.glv_var import vars
+from mainLogic.utils.glv_var import vars, debugger
 
 defaults = [
     "defaults.json",
@@ -19,12 +19,12 @@ def check_git_availability():
     try:
         subprocess.run(['git', '--version'], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     except subprocess.CalledProcessError:
-        Global.errprint("Git is not available. Please install Git to use this script.")
+        debugger.error("Git is not available. Please install Git to use this script.")
         sys.exit(errorList["gitNotAvailable"]["code"])
 
 def check_for_updates():
     """Check for updates."""
-    Global.sprint("Checking for updates...")
+    debugger.success("Checking for updates...")
     check_git_availability()
     code, output = shell(UPDATE_CHECK_CODE.split(), return_out=True, cwd=vars["$script"])
     output = "\n".join(output)
@@ -42,25 +42,25 @@ def run_git_command(args):
 
 def pull_latest_changes():
     """Pull the latest changes from the remote repository."""
-    Global.sprint("Pulling the latest changes from the remote repository...")
+    debugger.success("Pulling the latest changes from the remote repository...")
     code, output = run_git_command(["git", "pull"])
-    Global.sprint(output)
+    debugger.success(output)
     return code
 
 def untrack_defaults():
     """Untrack the default files."""
-    Global.sprint("Untracking defaults...")
+    debugger.success("Untracking defaults...")
     return run_git_command(UNTRACK_DEFAULTS.split())
 
 def stash_and_pull():
     """Stash local changes and pull the latest changes."""
-    Global.sprint("Stashing local changes...")
+    debugger.success("Stashing local changes...")
     code, output = run_git_command(["git", "stash"])
     if code == 0:
-        Global.sprint("Successfully stashed changes. Pulling latest changes...")
+        debugger.success("Successfully stashed changes. Pulling latest changes...")
         return pull_latest_changes()
     else:
-        Global.errprint("Failed to stash changes. Exiting...")
+        debugger.error("Failed to stash changes. Exiting...")
         sys.exit(errorList["gitStashError"]["code"])
 
 def main():
@@ -69,30 +69,30 @@ def main():
         code = pull_latest_changes()
 
         if code == 0:
-            Global.sprint("Please restart the script.")
+            debugger.success("Please restart the script.")
         else:
-            Global.errprint(f"Error occurred while pulling the latest changes (exit code {code}).")
+            debugger.error(f"Error occurred while pulling the latest changes (exit code {code}).")
             answer = input("Do you want to stash your changes and try pulling again? (y/n): ").strip().lower()
             if answer == 'y':
                 stash_code = stash_and_pull()
                 if stash_code == 0:
-                    Global.sprint("Please restart the script.")
+                    debugger.success("Please restart the script.")
                 else:
-                    Global.errprint("Failed to pull after stashing. Exiting...")
+                    debugger.error("Failed to pull after stashing. Exiting...")
                     sys.exit(errorList["gitPullError"]["code"])
             else:
-                Global.errprint("User opted not to stash changes. Exiting...")
+                debugger.error("User opted not to stash changes. Exiting...")
                 sys.exit(errorList["gitPullError"]["code"])
     else:
-        Global.sprint("No updates found.")
+        debugger.success("No updates found.")
         sys.exit(errorList["noError"]["code"])
 
 def get_latest_origin_hash():
     """Get the latest origin commit hash."""
-    Global.sprint("Getting the latest origin hash...")
+    debugger.success("Getting the latest origin hash...")
     code, output = run_git_command(["git", "ls-remote", "origin", "HEAD"])
     commit_hash = output.split()[0]
-    Global.sprint(f"Latest origin hash: {commit_hash}")
+    debugger.success(f"Latest origin hash: {commit_hash}")
     return commit_hash
 
 def parse_git_log(log_data):
@@ -115,10 +115,10 @@ def parse_git_log(log_data):
 
 def get_info_by_commit_hash(commit_hash):
     """Get information for a specific commit."""
-    Global.sprint(f"Getting information for commit: {commit_hash}")
+    debugger.success(f"Getting information for commit: {commit_hash}")
     code, output = run_git_command(["git", "log", "-1", commit_hash])
     commit_info = parse_git_log(output)
-    Global.sprint(commit_info)
+    debugger.success(commit_info)
     return commit_info
 
 if __name__ == "__main__":

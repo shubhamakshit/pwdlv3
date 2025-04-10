@@ -1,5 +1,6 @@
 from mainLogic.error import CouldNotDecryptAudio, CouldNotDecryptVideo, CouldNotDownloadAudio
 from mainLogic.utils.glv import Global
+from mainLogic.utils.glv_var import debugger
 from mainLogic.utils.process import shell
 from mainLogic.utils.basicUtils import BasicUtils
 from mainLogic import error
@@ -17,7 +18,7 @@ class Decrypt:
 
         # making path absolute if not already absolute
         path = BasicUtils.abspath(path)
-        Global.dprint(f"Decrypting {out}...")
+        debugger.debug(f"Decrypting {out}...")
 
         # during various tests
         # it was found that the decrypted audio file is named as <name>.en.m4a 
@@ -32,7 +33,7 @@ class Decrypt:
 
         decrypt_command = f'{mp4d} --key 1:{key} {path}/{name}.{extension} {path}/{"" if not outfile else outfile+"-" }{out}.mp4'
 
-        if verbose: Global.dprint(f"{out} Decryption Started..."); Global.dprint(f'{decrypt_command}')
+        if verbose: debugger.debug(f"{out} Decryption Started..."); debugger.debug(f'{decrypt_command}')
 
         
 
@@ -41,14 +42,14 @@ class Decrypt:
 
         # simple check to see if the decryption was successful or not
         if code == 0:
-            Global.dprint(f"{out} Decrypted Successfully")
+            debugger.debug(f"{out} Decrypted Successfully")
         else:
 
             # if decryption failed then print error message and exit
             if out == "Audio":
-                Global.errprint(CouldNotDecryptAudio())
+                debugger.error(CouldNotDecryptAudio())
             else:
-                Global.errprint(CouldNotDecryptVideo())
+                debugger.error(CouldNotDecryptVideo())
 
             if not suppress_exit:
 

@@ -1,4 +1,7 @@
+from beta.util import extract_uuid, generate_safe_file_name
 from mainLogic.utils.Endpoint import Endpoint
+from mainLogic.utils.glv_var import debugger
+
 
 class Endpoints:
     DEFAULT_HEADERS = {
@@ -74,6 +77,20 @@ class Endpoints:
         } for video in data['data']] if isinstance(data, dict) and 'data' in data else []
 
     @staticmethod
+    def post_function_videos_simple(data):
+
+        try:
+            return [{
+                'name': generate_safe_file_name(video['topic']),
+                'url': extract_uuid(video['url'])[0],
+            } for video in data['data']] if isinstance(data, dict) and 'data' in data else []
+        except Exception as e:
+            debugger.error(f"Error in post_function_videos_simple: {e}")
+            return []
+
+
+
+    @staticmethod
     def post_function_batches(data):
         return [{
             'slug': batch['batchId']['slug'],
@@ -143,12 +160,12 @@ class Endpoints:
         )
 
     @staticmethod
-    def GET_NORMAL_LECTURES_EP(batch_name, subject_slug, chapter_slug):
+    def GET_NORMAL_LECTURES_EP(batch_name, subject_slug, chapter_slug,simple=False):
         return Endpoint(
             url=f"https://api.penpencil.co/v2/batches/{batch_name}/subject/{subject_slug}/contents?page={{page}}&contentType=videos&tag={chapter_slug}",
             method='GET',
             headers=Endpoints.DEFAULT_HEADERS.copy(),
-            post_function=Endpoints.post_function_videos
+            post_function=Endpoints.post_function_videos if not simple else Endpoints.post_function_videos_simple
         )
 
     @staticmethod

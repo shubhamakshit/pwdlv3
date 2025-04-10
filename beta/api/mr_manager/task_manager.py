@@ -3,6 +3,7 @@ import threading
 import uuid
 
 from mainLogic.utils.glv import Global
+from mainLogic.utils.glv_var import debugger
 
 
 class TaskManager:
@@ -23,7 +24,7 @@ class TaskManager:
     def create_task(self, client_id, session_id, target, *args, inactive=False):
         Global.hr()
         task_id = str(uuid.uuid4())
-        Global.sprint(f"Args: {args}")
+        debugger.success(f"Args: {args}")
         args_dict = args[0]
         try:
             name = args_dict['name']
@@ -80,7 +81,7 @@ class TaskManager:
         task_id = task_info['task_id']
         try:
             progress_callback = lambda progress: self._update_progress(task_id, progress)
-            Global.dprint(json.dumps([task_id, [*args], str(progress_callback)],indent=4))
+            debugger.debug(json.dumps([task_id, [*args], str(progress_callback)],indent=4))
             target(task_id, *args, progress_callback)
             with self.lock:
                 self.tasks[task_id]['url'] = f'/get-file/{task_id}/{self.tasks[task_id]["name"]}'

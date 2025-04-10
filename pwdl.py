@@ -3,6 +3,8 @@ import argparse
 from mainLogic.startup.Login.call_login import LoginInterface
 from mainLogic import downloader
 from mainLogic.utils import glv_var
+from mainLogic.utils.Debugger import Debugger
+from mainLogic.utils.glv_var import debugger
 
 
 def parse_arguments():
@@ -16,7 +18,9 @@ def parse_arguments():
     parser.add_argument('--dir', type=str, help='Output Directory')
     parser.add_argument('--verbose', action='store_true', help='Verbose Output')
     parser.add_argument('--shell', action='store_true', help='Start the shell')
+    parser.add_argument("--command",default="",help="Command to execute in shell")
     parser.add_argument('--shell-i','-i',action='store_true', help='Start the interactive shell (v2)')
+    parser.add_argument('--tmp-dir', type=str, help='Temporary Directory')
     parser.add_argument('--webui', nargs='?', const=-1, type=int, help='Start the Webui')
     parser.add_argument('--simulate', action='store_true',
                         help='Simulate the download process. No files will be downloaded. Incompatible wit h '
@@ -33,6 +37,17 @@ if __name__ == "__main__":
 
     if args.login:
         LoginInterface.cli()
+
+    if args.command:
+        from beta.shellLogic import logic
+        command = args.command.split()[0]
+        args = args.command.split()[1:]
+        logic.execute(
+            command,
+            args
+        )
+        exit(0)
+
     if args.ignore_token:
         glv_var.vars['ig_token'] = True
     if args.shell_i:
@@ -44,6 +59,7 @@ if __name__ == "__main__":
         id=args.id,
         name=args.name,
         directory=args.dir,
+        tmp_dir=args.tmp_dir,
         verbose=args.verbose,
         shell=args.shell,
         webui_port=args.webui,

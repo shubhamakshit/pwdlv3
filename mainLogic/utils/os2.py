@@ -2,6 +2,7 @@ import platform
 import os
 from mainLogic import error
 from mainLogic.error import CouldNotMakeDir, DependencyNotFound
+from mainLogic.utils.glv_var import debugger
 from mainLogic.utils.process import shell
 from mainLogic.utils.glv import Global
 
@@ -19,13 +20,13 @@ class SysFunc:
     def create_dir(self, dirName, verbose=False):
         try:
             if not os.path.exists(dirName):
-                if verbose: Global.dprint(f"Creating directory {dirName}")
+                if verbose: debugger.debug(f"Creating directory {dirName}")
                 os.makedirs(dirName)
         except:
-            if verbose: Global.errprint(f"Could not make directory {dirName}. Exiting...")
+            if verbose: debugger.error(f"Could not make directory {dirName}. Exiting...")
             CouldNotMakeDir(dirName).exit()
 
-        if verbose: Global.dprint(f"Directory {dirName} created")
+        if verbose: debugger.debug(f"Directory {dirName} created")
 
     def clear(self):
         if self.os == 0:
@@ -118,6 +119,6 @@ class SysFunc:
             else:
                 os.chdir(os.path.expanduser("~"))
         except Exception as e:
-            Global.errprint(f"Could not change directory : {e}")
+            debugger.error(f"Could not change directory : {e}")
 
 

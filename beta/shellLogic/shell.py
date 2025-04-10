@@ -21,7 +21,7 @@ class CustomCompleter(Completer):
             for completion in self.file_completer.get_completions(document, complete_event):
                 yield completion
 
-def main():
+def main(command_list=[]):
     # Initialize Prompt Toolkit session
     session = PromptSession()
 
@@ -37,6 +37,17 @@ def main():
     custom_completer = CustomCompleter()
 
     from beta.shellLogic import logic
+
+    if command_list:
+        if len(command_list) == 1:
+            command = command_list[0]
+            args = []
+        else:
+            command = command_list[0]
+            args = command_list[1:]
+
+        logic.execute(command, args)
+
 
     # Command-line interface loop
     while True:

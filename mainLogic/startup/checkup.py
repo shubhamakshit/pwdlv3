@@ -2,6 +2,7 @@ import os
 from mainLogic import error
 from mainLogic.error import DependencyNotFound, TokenInvalid, TokenNotFound, CouldNotMakeDir
 from mainLogic.utils import glv_var
+from mainLogic.utils.glv_var import debugger
 from mainLogic.utils.os2 import SysFunc
 from mainLogic.utils.glv import Global
 
@@ -15,7 +16,24 @@ class CheckState:
     def __init__(self) -> None:
         self.default_random_id = "a3e290fa-ea36-4012-9124-8908794c33aa"
 
-    def post_checkup(self, prefs, verbose=True):
+
+
+    def setup_tmp_dir(self, tmp_dir,verbose=True):
+        """Sets up the temporary directory."""
+
+
+        if not os.path.exists(tmp_dir):
+            try:
+                os.makedirs(tmp_dir)
+                if verbose:
+                    debugger.success(f"TmpDir created at {tmp_dir}")
+            except OSError:
+                print(CouldNotMakeDir(tmp_dir))
+                debugger.error("Failed to create TmpDir, falling back to default.")
+                tmp_dir = './tmp/'
+        return tmp_dir
+
+    def post_checkup(self, prefs, skip_tmp_dir=False,verbose=True):
         """
         Post Checkup Function
         1. Setting up the tmpDir
@@ -24,13 +42,10 @@ class CheckState:
         """
         # Setting up tmpDir
         tmpDir = SysFunc.modify_path(prefs.get('tmpDir', './tmp/'))
-        if not os.path.exists(tmpDir):
-            try:
-                os.makedirs(tmpDir)
-            except OSError:
-                print(CouldNotMakeDir(tmpDir))
-                Global.errprint("Failed to create TmpDir, falling back to default.")
-                tmpDir = './tmp/'
+
+        if not skip_tmp_dir:
+            tmpDir = self.setup_tmp_dir(tmpDir)
+
 
         # Setting up output directory
         if not prefs.get('dir'):
@@ -44,7 +59,7 @@ class CheckState:
             OUT_DIRECTORY = os.path.abspath(out_dir)
             
         except Exception as e:
-            Global.errprint(f"Error: {e}, falling back to default output directory.")
+            debugger.error(f"Error: {e}, falling back to default output directory.")
             OUT_DIRECTORY = './'
 
         # Setting up horizontal rule
@@ -71,7 +86,7 @@ class CheckState:
 
             except json.JSONDecodeError as e:
                 if verbose:
-                    Global.errprint(f"Error decoding token data: {e}")
+                    debugger.error(f"Error decoding token data: {e}")
                 raise TokenInvalid()
 
         if "token" in token_data:
@@ -84,7 +99,7 @@ class CheckState:
 
         else:
             if verbose:
-                Global.errprint("Invalid Token Data")
+                debugger.error("Invalid Token Data")
             raise TokenInvalid()
 
         return token, random_id
@@ -95,10 +110,10 @@ class CheckState:
         """Checks the validity of a token using LicenseKeyFetcher."""
         if verbose:
             Global.hr()
-            Global.dprint("Checking Token...")
-            Global.dprint(f"Token: {token}")
-            Global.dprint(f"Random ID: {random_id}")
-            Global.dprint(f"ID: {id}")
+            debugger.debug("Checking Token...")
+            debugger.debug(f"Token: {token}")
+            debugger.debug(f"Random ID: {random_id}")
+            debugger.debug(f"ID: {id}")
 
         from mainLogic.big4.Ravenclaw_decrypt.key import LicenseKeyFetcher
         lc_fetcher = LicenseKeyFetcher(token=token, random_id=random_id)
@@ -106,11 +121,20 @@ class CheckState:
         try:
             return lc_fetcher.get_key(id, verbose=verbose)
         except Exception as e:
-            Global.errprint(f"An error occurred while getting the key: {e}")
+            debugger.error(f"An error occurred while getting the key: {e}")
             raise TokenInvalid()
 
-    def checkup(self, executable, directory="./", verbose=True, do_raise=False):
+    def checkup(self, executable, directory="./",tmp_dir=None, verbose=True, do_raise=False):
         state = {}
+
+        if tmp_dir:
+            debugger.info("Setting up tmpDir to " + tmp_dir)
+            tmp_dir = self.setup_tmp_dir(tmp_dir, verbose)
+            state['tmpDir'] = tmp_dir
+
+
+
+
         prefs = self.load_preferences(verbose)
 
         if self.is_method_patched(prefs, do_raise):
@@ -141,11 +165,11 @@ class CheckState:
                         key = self.check_token(token, random_id, verbose=verbose)
                         if key:
                             if verbose:
-                                Global.sprint("Token Valid")
+                                debugger.success("Token Valid")
                             prefs['key'] = key
                         else:
                             if verbose:
-                                Global.errprint("Token Invalid! Please run pwdl --login")
+                                debugger.error("Token Invalid! Please run pwdl --login")
 
 
                     except TokenInvalid:
@@ -157,7 +181,7 @@ class CheckState:
                 self.raise_or_exit("tokenNotFound", do_raise)
 
         else:
-            Global.errprint("Token not found But ignoring it")
+            debugger.error("Token not found But ignoring it")
 
 
         state['prefs'] = prefs
@@ -191,7 +215,7 @@ class CheckState:
                 not_found.append(exe)
             else:
                 if verbose:
-                    Global.sprint(f"{exe} found.")
+                    debugger.success(f"{exe} found.")
                 state[exe] = exe
 
         if not_found:
@@ -203,22 +227,22 @@ class CheckState:
         """Handles the case where some executables are not found."""
         if verbose:
             Global.hr()
-            Global.dprint("Following dependencies were not found on path. Checking in default settings...")
-            Global.dprint(not_found)
+            debugger.debug("Following dependencies were not found on path. Checking in default settings...")
+            debugger.debug(not_found)
             Global.hr()
 
         for exe in not_found:
             if verbose:
-                Global.dprint(f"Checking for {exe} in default settings...")
+                debugger.debug(f"Checking for {exe} in default settings...")
 
             exe_path = prefs.get(exe)
             if exe_path:
                 exe_path = exe_path.strip()
                 if not os.path.exists(exe_path):
-                    Global.errprint(f"{exe} not found at {exe_path}")
+                    debugger.error(f"{exe} not found at {exe_path}")
                     self.raise_or_exit("dependencyNotFoundInPrefs", do_raise, exe)
                 if verbose:
-                    Global.sprint(f"{exe} found at {exe_path}")
+                    debugger.success(f"{exe} found at {exe_path}")
                 state[exe] = exe_path
             else:
                 self.raise_or_exit("dependencyNotFoundInPrefs", do_raise, exe)

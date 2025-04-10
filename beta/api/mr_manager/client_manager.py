@@ -2,6 +2,7 @@ import json
 import os
 
 from mainLogic.utils.glv import Global
+from mainLogic.utils.glv_var import debugger
 
 
 class ClientManager:
@@ -149,7 +150,7 @@ class ClientManager:
 
             # Delete the tasks from session_id_2
             for task_id in tasks_to_delete:
-                Global.dprint(f"Deleting task {task_id}")
+                debugger.debug(f"Deleting task {task_id}")
                 del self.clients[client_id]['sessions'][session_id_2]['tasks'][task_id]
 
             # Move tasks from session_id_2 to session_id_1

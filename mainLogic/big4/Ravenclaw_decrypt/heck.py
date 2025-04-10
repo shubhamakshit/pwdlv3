@@ -1,6 +1,7 @@
 from Crypto.Cipher import AES
 from base64 import b64decode
 from mainLogic.utils.glv import Global
+from mainLogic.utils.glv_var import debugger
 
 # Constants (keys should be of correct length for AES, e.g., 16, 24, or 32 bytes)
 VIDEO_ENCRYPTION_KEY = 'pw3c199c2911cb437a907b1k0907c17n'
@@ -31,7 +32,7 @@ def cookie_splitter(cookie, verbose=False):
         key, encrypted_value = cookie_parts[i].split('=', 1)
         decrypted_value = get_decrypt_cookie(encrypted_value)
 
-        if verbose: Global.dprint(f"Decrypted {key}: {decrypted_value}")
+        if verbose: debugger.debug(f"Decrypted {key}: {decrypted_value}")
 
         decrypted_cookie += f"{key}={decrypted_value}&"
 

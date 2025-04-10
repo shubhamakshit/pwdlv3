@@ -5,6 +5,7 @@ import os
 import shutil
 
 from mainLogic.utils.glv import Global
+from mainLogic.utils.glv_var import debugger
 
 
 def shell(command, filter=None, verbose=False, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
@@ -18,7 +19,7 @@ def shell(command, filter=None, verbose=False, stdout=subprocess.PIPE, stderr=su
     try:
         if verbose:
             Global.hr()
-            Global.dprint(f"Running command: {command}")
+            debugger.debug(f"Running command: {command}")
             Global.hr()
 
         process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding='utf-8',
@@ -65,7 +66,7 @@ def shell(command, filter=None, verbose=False, stdout=subprocess.PIPE, stderr=su
         return_code_value = process.wait()
 
         if verbose:
-            Global.dprint(f"Return code: {return_code_value}")
+            debugger.debug(f"Return code: {return_code_value}")
             Global.hr()
 
         if inline_progress:

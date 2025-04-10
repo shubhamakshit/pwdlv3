@@ -5,6 +5,7 @@ from beta.question_scraper.Endpoints import Endpoints
 from mainLogic.utils import glv_var
 from mainLogic.utils.Endpoint import Endpoint
 from mainLogic.utils.glv import Global
+from mainLogic.utils.glv_var import debugger
 
 
 class QuestionsAPI:
@@ -17,15 +18,15 @@ class QuestionsAPI:
 
     def dataFromAPI(self, endpoint: Endpoint):
         if self.force:
-            Global.errprint("Forced to get token from stored prefs")
+            debugger.error("Forced to get token from stored prefs")
             try:
                 self.token = glv_var.vars['prefs']['token']
                 self.random_id = glv_var.vars['prefs']['random_id']
             except Exception as e:
-                Global.errprint(f"Error: {e}")
+                debugger.error(f"Error: {e}")
                 self.token = None
                 raise ValueError("Token not found in prefs")
-            Global.sprint(f"New Token: {self.token}")
+            debugger.success(f"New Token: {self.token}")
 
         if self.token and 'Authorization' not in endpoint.headers:
             endpoint.headers['Authorization'] = f'Bearer {self.token}'
@@ -34,8 +35,8 @@ class QuestionsAPI:
             endpoint.headers['randomid'] = self.random_id
 
         if self.verbose:
-            Global.sprint(f"Headers: {endpoint.headers}")
-            Global.sprint(f"Payload: {endpoint.payload}")
+            debugger.success(f"Headers: {endpoint.headers}")
+            debugger.success(f"Payload: {endpoint.payload}")
 
 
         response_obj, status_code, response = endpoint.fetch()
@@ -43,7 +44,7 @@ class QuestionsAPI:
         if self.verbose:
             Global.hr()
             print(f"Debugging at {endpoint.url}")
-            Global.sprint(f"Response: {response}")
+            debugger.success(f"Response: {response}")
             print(f"Response Status Code: {status_code}")
             print(f"Response Text: \n{json.dumps(response_obj)}")
             Global.hr()

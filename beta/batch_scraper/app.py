@@ -5,6 +5,8 @@ from mainLogic.utils.Endpoint import Endpoint
 from mainLogic.utils import glv_var
 from mainLogic.utils.glv import Global
 from beta.batch_scraper.Endpoints import Endpoints
+from mainLogic.utils.glv_var import debugger
+
 
 class BatchAPI:
     def __init__(self, batch_name: str, token: str, force=True, verbose=False):
@@ -15,14 +17,14 @@ class BatchAPI:
 
     def dataFromAPI(self, endpoint: Endpoint):
         if self.force:
-            Global.errprint("Forced to get token from stored prefs")
+            debugger.error("Forced to get token from stored prefs")
             try:
                 self.token = glv_var.vars['prefs']['token']
             except Exception as e:
-                Global.errprint(f"Error: {e}")
+                debugger.error(f"Error: {e}")
                 self.token = None
                 raise ValueError("Token not found in prefs")
-            Global.sprint(f"New Token: {self.token}")
+            debugger.success(f"New Token: {self.token}")
 
         if self.token and 'Authorization' not in endpoint.headers:
             endpoint.headers['Authorization'] = f'Bearer {self.token}'
@@ -32,7 +34,7 @@ class BatchAPI:
         if verbose:
             Global.hr()
             print(f"Debugging at {endpoint.url}")
-            Global.sprint(f"Response: {response}")
+            debugger.success(f"Response: {response}")
             print(f"Response Status Code: {status_code}")
             print(f"Response Text: \n{json.dumps(response_obj)}")
             Global.hr()
@@ -84,7 +86,7 @@ class BatchAPI:
             sub_topic_response = sub_topic_response['data']
         else:
             # Error handling
-            Global.errprint(f"No data found in response @ khazana lectures: {sub_topic_response}")
+            debugger.error(f"No data found in response @ khazana lectures: {sub_topic_response}")
             return []
 
 
@@ -94,7 +96,7 @@ class BatchAPI:
 
 
         if not sub_topic_id:
-            Global.errprint("No sub-topic ID found")
+            debugger.error("No sub-topic ID found")
             return []
 
         Global.hr()
@@ -116,9 +118,9 @@ class BatchAPI:
             Endpoints.GET_NORMAL_CHAPTERS_EP(self.batch_name, subject_slug)
         )
 
-    def GET_NORMAL_LECTURES(self, subject_slug, chapter_slug):
+    def GET_NORMAL_LECTURES(self, subject_slug, chapter_slug, simple=False):
         return self.get_paginated_data(
-            Endpoints.GET_NORMAL_LECTURES_EP(self.batch_name, subject_slug, chapter_slug)
+            Endpoints.GET_NORMAL_LECTURES_EP(self.batch_name, subject_slug, chapter_slug,simple=simple)
         )
 
     def get_batches_force_hard(self):
@@ -126,6 +128,10 @@ class BatchAPI:
 
     @staticmethod
     def to_table(list_of_data):
-        headers = list_of_data[0].keys()
-        data = [list(row.values()) for row in list_of_data]
-        return headers, data
+        try:
+            headers = list_of_data[0].keys()
+            data = [list(row.values()) for row in list_of_data]
+            return headers, data
+        except Exception as e:
+            debugger.error(f"Error: {e}")
+            return [], []
