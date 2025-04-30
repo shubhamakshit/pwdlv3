@@ -1,5 +1,8 @@
 import platform
 import os
+import re
+from re import Pattern
+
 from mainLogic import error
 from mainLogic.error import CouldNotMakeDir, DependencyNotFound
 from mainLogic.utils.glv_var import debugger
@@ -112,13 +115,90 @@ class SysFunc:
                 total_size += os.path.getsize(fp)
         return total_size / (1024 * 1024)
 
-    def cd(self, dir=None):
-        try:
-            if dir:
-                os.chdir(dir)
+
+    import os
+    import re
+    from typing import Pattern
+
+    @staticmethod
+    def concatenate_mp4_segments(
+            directory: str,
+            output_dir: str = None,
+            output_filename: str = "output.mp4",
+            init_regex: str = r"^init\.mp4$",
+            segment_regex: str = r"^(\d+)\.mp4$",
+            cleanup: bool = False
+    ) -> None:
+        """
+        Concatenates init.mp4 followed by numbered .mp4 files in order.
+
+        Args:
+            directory (str): Path to directory containing video segments.
+            output_dir (str): Directory to save the output file. If None, uses segments directory.
+            output_filename (str): Name of the output file (default: "output.mp4").
+            init_regex (str): Regex pattern to find init segment.
+            segment_regex (str): Regex pattern to find numbered segments (must have a capture group for number).
+            cleanup (bool): Whether to remove init and segment files after successful concatenation.
+        """
+
+        init_pattern: Pattern = re.compile(init_regex)
+        segment_pattern: Pattern = re.compile(segment_regex)
+
+        # Set output directory to segments directory if not specified
+        if output_dir is None:
+            output_dir = directory
+
+        # Create output directory if it doesn't exist
+        os.makedirs(output_dir, exist_ok=True)
+
+        # Combine output directory and filename
+        output_file = os.path.join(output_dir, output_filename)
+
+        init_path = None
+        segments = []
+        segment_files = []  # Store all files for potential cleanup
+
+        for filename in os.listdir(directory):
+            if init_pattern.match(filename):
+                init_path = os.path.join(directory, filename)
+                segment_files.append(init_path)
             else:
-                os.chdir(os.path.expanduser("~"))
+                match = segment_pattern.match(filename)
+                if match:
+                    segment_number = int(match.group(1))
+                    file_path = os.path.join(directory, filename)
+                    segments.append((segment_number, file_path))
+                    segment_files.append(file_path)
+
+        if not init_path:
+            raise FileNotFoundError(f"No init segment found with pattern: {init_regex}")
+
+        segments.sort()  # Sort by numeric order
+
+        try:
+            with open(output_file, "wb") as outfile:
+                # Write init.mp4
+                with open(init_path, "rb") as f:
+                    outfile.write(f.read())
+
+                # Write each segment in order
+                for num, path in segments:
+                    with open(path, "rb") as f:
+                        outfile.write(f.read())
+
+            print(f"Concatenation complete. Output saved to: {output_file}")
+            return os.path.abspath(output_file)
+
+            # Clean up files if requested
+            if cleanup:
+                for file_path in segment_files:
+                    try:
+                        os.remove(file_path)
+                        #print(f"Removed: {file_path}")
+                    except OSError as e:
+                        print(f"Error removing {file_path}: {e}")
+                print("Cleanup completed.")
+
         except Exception as e:
-            debugger.error(f"Could not change directory : {e}")
-
-
+            print(f"Error during concatenation: {e}")
+            raise

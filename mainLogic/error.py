@@ -125,6 +125,11 @@ errorList = {
         "func": lambda: debugger.error("Could not extract key. Exiting..."),
         "message_template": "Key extraction process encountered an error. Please review the input parameters."
     },
+    "adaptationSetIsNotVideo": {
+        "code": 33,
+        "func": lambda: debugger.error("Adaptation set is not video. Exiting..."),
+        "message_template": "The provided adaptation set does not contain video data."
+    }
 }
 
 
@@ -283,4 +288,10 @@ class CouldNotExtractKey(PwdlError):
         super().__init__(errorList["couldNotExtractKey"]["message_template"],
                          errorList["couldNotExtractKey"]["code"],
                          errorList["couldNotExtractKey"]["func"])
+
+class AdaptationSetIsNotVideo(PwdlError):
+    def __init__(self):
+        super().__init__(errorList["adaptationSetIsNotVideo"]["message_template"],
+                         errorList["adaptationSetIsNotVideo"]["code"],
+                         errorList["adaptationSetIsNotVideo"]["func"])
 

@@ -1,15 +1,9 @@
 import re
-from tabnanny import verbose
 
-from mainLogic import error
 from mainLogic.error import IdNotProvided
 from mainLogic.utils.glv_var import debugger
 from mainLogic.utils.process import shell
 from mainLogic.utils.glv import Global
-from mainLogic.big4.Ravenclaw_decrypt import signedUrl
-
-
-
 
 
 def download_color_function(text):
@@ -39,12 +33,15 @@ class Download:
     """
 
     @staticmethod
-    def buildUrl(id):
-        if id is None:
-            IdNotProvided().exit()
+    def buildUrl(id, signature, legacy=False):
+        if legacy:
+            if id is None:
+                IdNotProvided().exit()
 
-        url = f"https://d1d34p8vz63oiq.cloudfront.net/{id}/master.mpd"
-        return url
+            url = f"https://d1d34p8vz63oiq.cloudfront.net/{id}/master.mpd"
+            return url
+        else:
+            return f"{id}{signature}"
 
     def __init__(self,
                  vsd_path,
@@ -108,7 +105,9 @@ class Download:
             "--cookies",
             f"{self.cookie}",
             "-d",
-            f'{self.tmp_path}'
+            f'{self.tmp_path}',
+            f"-t",
+            f"10"
         ]
 
         if self.verbose:

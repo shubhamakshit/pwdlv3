@@ -1,21 +1,33 @@
 # scraper_blueprint.py
 
 from flask import Blueprint, jsonify, request
-from beta.batch_scraper.app import BatchAPI  # Assuming the original code is in a file named BatchAPI.py
+from beta.batch_scraper_2.Endpoints import Endpoints
 from mainLogic.utils.glv import Global
-from mainLogic.utils.glv_var import debugger
+from mainLogic.utils.glv_var import debugger,vars
 
 # Initialize the blueprint
 scraper_blueprint = Blueprint('scraper', __name__)
 
 # Initialize BatchAPI with a default token. The token can be updated later via the '/api/set-token' route.
-batch_api = BatchAPI("12th-neet-khazana-370407", token=None)
+batch_api = Endpoints().set_token(vars['prefs'].get('token',{}).get("token",""))
 
 def create_response(data=None, error=None):
     response = {"data": data}
     if error is not None:
         response["error"] = error
     return jsonify(response)
+
+
+def renamer(data,old_key,new_key):
+    new_data = []
+    for element in data:
+        try:
+            element[new_key] = element.pop(old_key)
+        except Exception as e:
+            debugger.error(f"Error renaming f{old_key} to {new_key}: {e}")
+        new_data.append(element)
+
+    return new_data
 
 @scraper_blueprint.route('/subjects', methods=['GET'])
 @scraper_blueprint.route('/api/subjects', methods=['GET'])
@@ -74,10 +86,11 @@ def get_lectures():
 @scraper_blueprint.route('/api/normal/subjects', methods=['GET'])
 def get_normal_subjects():
     try:
-        batch_name = request.args.get('batch_name', batch_api.batch_name)
-        batch_api.batch_name = batch_name
-        subjects = batch_api.GET_NORMAL_SUBJECTS()
-        return create_response(data=subjects)
+        batch_name = request.args.get('batch_name')
+        # batch_api.batch_name = batch_name
+        # subjects = batch_api.GET_NORMAL_SUBJECTS()
+        details = batch_api.process("details",batch_name=batch_name)
+        return create_response(data=renamer(details,'subject','name'))
     except Exception as e:
         debugger.error(f"Error: {e}")
         return create_response(error=str(e)), 500
@@ -86,17 +99,23 @@ def get_normal_subjects():
 @scraper_blueprint.route('/api/normal/chapters/<subject_slug>', methods=['GET'])
 def get_normal_chapters(subject_slug):
     try:
-        batch_name = request.args.get('batch_name', batch_api.batch_name)
-        batch_api.batch_name = batch_name
+        batch_name = request.args.get('batch_name')
+        # batch_api.batch_name = batch_name
 
         Global.hr()
-        debugger.success(f"batch_name: {batch_api.batch_name}")
+        debugger.success(f"batch_name: {batch_name}")
         debugger.success(f"subject_slug: {subject_slug}")
         Global.hr()
 
-        chapters = batch_api.GET_NORMAL_CHAPTERS(subject_slug)
+
+        chapters = batch_api.process("subject",batch_name=batch_name,subject_name=subject_slug)
+
+        debugger.success(f"chapters: {chapters}")
+
         return create_response(data=chapters)
     except Exception as e:
+
+        debugger.error(e)
         return create_response(error=str(e)), 500
 
 @scraper_blueprint.route('/normal/lectures', methods=['GET'])
@@ -104,16 +123,15 @@ def get_normal_chapters(subject_slug):
 @scraper_blueprint.route('/api/normal/videos', methods=['GET'])
 def get_normal_videos():
     try:
-        batch_name = request.args.get('batch_name', batch_api.batch_name)
+        batch_name = request.args.get('batch_name',)
         subject_slug = request.args.get('subject_slug')
         chapter_slug = request.args.get('chapter_slug')
 
         if not all([subject_slug, chapter_slug]):
             return create_response(error="Missing required parameters"), 400
 
-        batch_api.batch_name = batch_name
-        videos = batch_api.GET_NORMAL_LECTURES(subject_slug, chapter_slug)
-        return create_response(data=videos)
+        videos = batch_api.process("chapter",batch_name=batch_name,subject_name=subject_slug,chapter_name=chapter_slug)
+        return create_response(data=renamer(videos,'topic','name'))
     except Exception as e:
         return create_response(error=str(e)), 500
 

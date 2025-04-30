@@ -2,8 +2,9 @@ import re
 import base64
 import json
 
-from mainLogic.big4.Ravenclaw_decrypt.heck import cookie_splitter, get_cookiees_from_url
-from mainLogic.big4.Gryffindor_downloadv2 import Download
+from beta.batch_scraper_2.Endpoints import Endpoints
+from mainLogic.big4.Ravenclaw_decrypt.heck import get_cookiees_from_url
+from mainLogic.big4.obsolete.Obsolete_Gryffindor_downloadv2 import Download
 from mainLogic.utils.glv import Global
 from mainLogic.utils.glv_var import debugger
 from mainLogic.utils.keyUtils import cookies_dict_to_str
@@ -92,7 +93,7 @@ class LicenseKeyFetcher:
     def set_cookies(self, url):
         self.cookies = cookies_dict_to_str(get_cookiees_from_url(url))
 
-    def get_key(self, id, verbose=True):
+    def get_key(self, id, batch_name,khazana_topic_name=None,khazana_url=None, verbose=True):
         if verbose: Global.hr()
 
         if verbose: debugger.debug("Beginning to get the key for the video... & Audio :) ")
@@ -100,12 +101,21 @@ class LicenseKeyFetcher:
         if verbose: debugger.debug("Building the URL to get the key...")
 
         try:
-            from mainLogic.big4.Ravenclaw_decrypt.signedUrl import get_signed_url
+            #from mainLogic.big4.Ravenclaw_decrypt.signedUrl import get_signed_url
 
-            policy_string = get_signed_url(token=self.token, random_id=self.random_id, id=id, verbose=verbose)['data']
-            add_on = cookie_splitter(policy_string, verbose)
+            # policy_string = get_signed_url(token=self.token, random_id=self.random_id, id=id, verbose=verbose)['data']
+            # add_on = cookie_splitter(policy_string, verbose)
 
-            url = Download.buildUrl(id)+f"{add_on}"
+            if not khazana_topic_name and not khazana_url:
+                url_op = Endpoints(verbose=True).set_token(self.token).process("lecture",lecture_id=id,batch_name=batch_name)
+            else:
+                url_op = Endpoints(verbose=True).set_token(self.token).process("lecture",khazana=True,program_name=batch_name,topic_name=khazana_topic_name,lecture_id=id,lecture_url=khazana_url)
+            url = url_op['url']
+            signature = url_op['signedUrl']
+
+            url = Download.buildUrl(url,signature)
+            #url = f"{url}"+f"{add_on}"
+
             self.url = url
             self.set_cookies(url)
 

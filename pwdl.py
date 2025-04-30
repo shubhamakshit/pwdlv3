@@ -28,6 +28,8 @@ def parse_arguments():
     parser.add_argument('--version', action='version', version='%(prog)s 1.0')
     parser.add_argument('--login', action='store_true', help='Login to PhysicsWallah')
     parser.add_argument('--ignore-token', action='store_true', help='Ignore the token.')
+    parser.add_argument("--new-dl","-L",action='store_true',help="New Downloader")
+    parser.add_argument("--batch-name","-B",type=str,help="Batch Id")
 
     return parser.parse_args()
 
@@ -58,6 +60,7 @@ if __name__ == "__main__":
         csv_file=args.csv_file,
         id=args.id,
         name=args.name,
+        batch_name=args.batch_name,
         directory=args.dir,
         tmp_dir=args.tmp_dir,
         verbose=args.verbose,

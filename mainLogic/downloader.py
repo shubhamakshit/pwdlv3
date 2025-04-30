@@ -41,7 +41,7 @@ def start_webui(port, verbose):
     app.run(host="0.0.0.0", debug=True, port=port)
 
 
-def download_process(id, name, state, verbose, simulate=False):
+def download_process(id, name,batch_name, state, verbose, simulate=False):
     """Process a single download or simulate the download."""
     if simulate:
         print("Simulating the download process. No files will be downloaded.")
@@ -50,18 +50,103 @@ def download_process(id, name, state, verbose, simulate=False):
         return
 
     try:
+
+        if verbose: debugger.info("Entered Level ~ download_process in downloader.py ")
+
+        try:
+            _id = id
+        except Exception as e:
+            print(f"Error with 'id': {e}")
+            _id = None
+
+        try:
+            _name = generate_safe_folder_name(name)
+        except Exception as e:
+            print(f"Error with 'name': {e}")
+            _name = None
+
+        try:
+            _batch_name = batch_name
+        except Exception as e:
+            print(f"Error with 'batch_name': {e}")
+            _batch_name = None
+
+        try:
+            _directory = prefs['dir']
+        except Exception as e:
+            print(f"Error with 'directory': {e}")
+            _directory = None
+
+        try:
+            _ffmpeg = state['ffmpeg']
+        except Exception as e:
+            print(f"Error with 'ffmpeg': {e}")
+            _ffmpeg = None
+
+        try:
+            _vsdPath = state['vsd']
+        except Exception as e:
+            print(f"Error with 'vsdPath': {e}")
+            _vsdPath = None
+
+        try:
+            _token = prefs['token']
+        except Exception as e:
+            print(f"Error with 'token': {e}")
+            _token = None
+
+        try:
+            _random_id = prefs['random_id']
+        except Exception as e:
+            print(f"Error with 'random_id': {e}")
+            _random_id = None
+
+        try:
+            _mp4d = state['mp4decrypt']
+        except Exception as e:
+            print(f"Error with 'mp4decrypt': {e}")
+            _mp4d = None
+
+        try:
+            _tmpDir = state['tmpDir'] if 'tmpDir' in state else prefs['tmpDir']
+        except Exception as e:
+            print(f"Error with 'tmpDir': {e}")
+            _tmpDir = None
+
+        try:
+            _verbose = verbose
+        except Exception as e:
+            print(f"Error with 'verbose': {e}")
+            _verbose = None
+
         Main(
-            id=id,
-            name=generate_safe_folder_name(name),
-            directory=prefs['dir'],
-            ffmpeg=state['ffmpeg'],
-            vsdPath=state['vsd'],
-            token=prefs['token'],
-            random_id=prefs['random_id'],
-            mp4d=state['mp4decrypt'],
-            tmpDir= state['tmpDir'] if 'tmpDir' in state else prefs['tmpDir'],
-            verbose=verbose
+            id=_id,
+            name=_name,
+            batch_name=_batch_name,
+            directory=_directory,
+            ffmpeg=_ffmpeg,
+            vsdPath=_vsdPath,
+            token=_token,
+            random_id=_random_id,
+            mp4d=_mp4d,
+            tmpDir=_tmpDir,
+            verbose=_verbose
         ).process()
+
+
+        # Main(
+        #     id=id,
+        #     name=generate_safe_folder_name(name),
+        #     batch_name=batch_name,
+        #     directory=prefs['dir'],
+        #     ffmpeg=state['ffmpeg'],
+        #     vsdPath=state['vsd'],
+        #     token=prefs['token'],
+        #     random_id=prefs['random_id'],
+        #     mp4d=state['mp4decrypt'],
+        #     tmpDir= state['tmpDir'] if 'tmpDir' in state else prefs['tmpDir'],
+        #     verbose=verbose
+        # ).process()
     except Exception as e:
         if verbose:
             Global.hr()
@@ -70,7 +155,7 @@ def download_process(id, name, state, verbose, simulate=False):
         sys.exit(errorList['downloadFailed']['code'])
 
 
-def handle_csv_file(csv_file, state, verbose, simulate=False):
+def handle_csv_file(csv_file, state, batch_name,verbose, simulate=False):
     """Handle processing of CSV file."""
     try:
         if not os.path.exists(csv_file):
@@ -91,7 +176,8 @@ def handle_csv_file(csv_file, state, verbose, simulate=False):
             download_process(id, name, state, verbose)
 
 
-def main(csv_file=None, id=None, name=None, directory=None, verbose=False, shell=False, webui_port=None,tmp_dir=None,
+def main(csv_file=None, id=None, name=None,batch_name=None, directory=None, verbose=False, shell=False, webui_port=None,tmp_dir=None,
+         new_downloader=False,
          simulate=False):
     global prefs  # Use global keyword to modify global prefs
 
@@ -126,8 +212,14 @@ def main(csv_file=None, id=None, name=None, directory=None, verbose=False, shell
         sys.exit(3)
 
     if csv_file:
-        handle_csv_file(csv_file, state, glv.vout)
+        handle_csv_file(csv_file, state,batch_name, glv.vout)
     elif id and name:
-        download_process(id, name, state, glv.vout)
+        download_process(
+            id=id,
+            name=generate_safe_folder_name(name),
+            batch_name=batch_name,
+            state=state,
+            verbose=glv.vout
+        )
     else:
         sys.exit(1)
