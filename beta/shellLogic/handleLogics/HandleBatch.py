@@ -1,7 +1,5 @@
 import argparse
-import csv
-import sys
-from beta.batch_scraper.app import BatchAPI
+from beta.obsolete.batch_scraper.app import BatchAPI
 from beta.shellLogic.Plugin import Plugin
 from mainLogic.utils.dependency_checker import re_check_dependencies
 from mainLogic.utils.glv_var import debugger

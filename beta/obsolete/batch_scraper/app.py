@@ -4,7 +4,7 @@ from tabnanny import verbose
 from mainLogic.utils.Endpoint import Endpoint
 from mainLogic.utils import glv_var
 from mainLogic.utils.glv import Global
-from beta.batch_scraper.Endpoints import Endpoints
+from beta.obsolete.batch_scraper.Endpoints import Endpoints
 from mainLogic.utils.glv_var import debugger
 
 
@@ -58,6 +58,7 @@ class BatchAPI:
                 break
 
             all_data.extend(response)
+
             page += 1
 
             if paginated_endpoint.url == endpoint.url:

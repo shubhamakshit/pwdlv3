@@ -12,7 +12,7 @@ class Decrypt:
     understanding, much like a Ravenclaw unraveling the mysteries and hidden secrets.
     """
 
-    def decrypt(self,path,name,key,mp4d="mp4decrypt",out="None",outfile="",verbose=True,suppress_exit=False):
+    def decrypt(self,path,name,key,mp4d="mp4decrypt",out="None",outfile="",outdir="",verbose=True,suppress_exit=False):
         
         Global.hr()
 
@@ -31,7 +31,15 @@ class Decrypt:
         # extension = "m4a" if out == "Audio" else "mp4"
         extension = "mp4" # temporary fix
 
-        decrypt_command = f'{mp4d} --key 1:{key} {path}/{name}.{extension} {path}/{"" if not outfile else outfile+"-" }{out}.mp4'
+        file = f'{"" if not outfile else outfile+"-" }{out}.mp4'
+
+        file = os.path.join(
+            outdir if outdir else path,
+            file
+        )
+
+
+        decrypt_command = f'{mp4d} --key 1:{key} {path}/{name}.{extension} {file}'
 
         if verbose: debugger.debug(f"{out} Decryption Started..."); debugger.debug(f'{decrypt_command}')
 
@@ -43,6 +51,7 @@ class Decrypt:
         # simple check to see if the decryption was successful or not
         if code == 0:
             debugger.debug(f"{out} Decrypted Successfully")
+            return os.path.abspath(file)
         else:
 
             # if decryption failed then print error message and exit
@@ -61,9 +70,9 @@ class Decrypt:
         
 
     # decrypts audio
-    def decryptAudio(self,path,name,key,mp4d="mp4decrypt",outfile='None',verbose=True,suppress_exit=False):
-        self.decrypt(path,name,key,mp4d,"Audio",outfile,verbose,suppress_exit=suppress_exit)
+    def decryptAudio(self,path,name,key,mp4d="mp4decrypt",outfile='None',outdir=None,verbose=True,suppress_exit=False):
+        return self.decrypt(path,name,key,mp4d,"Audio",outfile,outdir,verbose,suppress_exit=suppress_exit)
 
     # decrypts video
-    def decryptVideo(self,path,name,key,mp4d="mp4decrypt",outfile='None',verbose=True,suppress_exit=False):
-        self.decrypt(path,name,key,mp4d,"Video",outfile,verbose,suppress_exit=suppress_exit)
+    def decryptVideo(self,path,name,key,mp4d="mp4decrypt",outfile='None',outdir=None,verbose=True,suppress_exit=False):
+        return self.decrypt(path,name,key,mp4d,"Video",outfile,outdir,verbose,suppress_exit=suppress_exit)

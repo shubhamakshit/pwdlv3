@@ -1,13 +1,14 @@
+from mainLogic.big4.Gryffindor_downloadv3 import DownloaderV3
 from mainLogic.utils.basicUtils import BasicUtils
 from mainLogic.utils.glv_var import debugger
 from mainLogic.utils.os2 import SysFunc
-from mainLogic.utils.glv import Global
 from mainLogic.big4.Hufflepuff_cleanup import Clean
 from mainLogic.big4.Ravenclaw_decrypt.key import LicenseKeyFetcher
-from mainLogic.big4.Gryffindor_downloadv2 import Download
 from mainLogic.big4.Ravenclaw_decrypt.decrypt import Decrypt
 from mainLogic.big4.Slytherin_merge import Merge
 import os
+
+from mainLogic.utils.MPDParser import MPDParser
 
 
 class Main:
@@ -31,6 +32,7 @@ class Main:
     def __init__(self,
                  id,
                  name=None,
+                 batch_name=None,
                  directory="./",
                  tmpDir="/*auto*/",
                  vsdPath='nm3',
@@ -43,11 +45,17 @@ class Main:
 
         self.id = id
         self.name = name if name else id
-        self.directory = directory
+        self.batch_name = batch_name if batch_name else id
+        self.directory = directory if directory else "./"
         self.tmpDir = BasicUtils.abspath(tmpDir) if tmpDir != '/*auto*/' else BasicUtils.abspath('./tmp/')
 
         # Create tmp directory if it does not exist
-        os2.create_dir(self.tmpDir, verbose=verbose)
+        try:
+            os2.create_dir(self.tmpDir, verbose=verbose)
+        except Exception as e:
+            if verbose:
+                debugger.error(f"Error creating tmp directory: {e}")
+                self.tmpDir = "./"
 
         self.vsd = vsdPath if vsdPath != 'vsd' else 'vsd'
         self.ffmpeg = BasicUtils.abspath(ffmpeg) if ffmpeg != 'ffmpeg' else 'ffmpeg'
@@ -72,26 +80,47 @@ class Main:
         RANDOM_ID = self.random_id
         fetcher = LicenseKeyFetcher(TOKEN, RANDOM_ID)
         try:
-            key = fetcher.get_key(self.id, verbose=self.verbose)[1]
+            if self.verbose: debugger.debug(f"Fetching License Key for ID: {self.id} and Batch Name: {self.batch_name}")
+            key = fetcher.get_key(id=self.id,batch_name=self.batch_name, verbose=self.verbose)[1]
             cookies = fetcher.cookies
         except Exception as e:
             raise TypeError(f"ID is invalid (if the token is valid) ")
 
+        urls = MPDParser(fetcher.url).pre_process().parse().get_segment_urls()
 
         # 1. Downloading Files (New Download Method using VSD)
 
-        audio, video = Download(self.vsd,
-                                fetcher.url,
-                                self.name,
-                                self.tmpDir,
-                                self.directory,
-                                cookie=fetcher.cookies,
-                                color=self.color,
-                                verbose=self.verbose,
-                                progress_callback=self.progress_callback).download()
+        download_out_dir = os.path.join(self.tmpDir, self.id)
+
+        results = DownloaderV3(
+            tmp_dir=self.tmpDir,
+            out_dir=download_out_dir,
+            verbose=self.verbose,
+            progress_callback=self.progress_callback,
+            show_progress_bar=True,
+            max_workers=16,
+            audio_dir="audio",
+            video_dir="video",
+        ).download_all(urls)
+
+        for media_type, result in results.items():
+            debugger.info(f"\n{media_type.upper()} Download Summary:")
+            debugger.info(f"Init file: {result.init_file}")
+            debugger.info(f"Segments directory: {result.segments_dir}")
+            debugger.info(f"Total segments: {result.total_segments}")
+            debugger.info(f"Successfully downloaded: {result.successful_segments}")
+            debugger.info(f"Failed segments: {result.failed_segments}")
+            results[media_type].encoded_file = SysFunc.concatenate_mp4_segments(str(result.segments_dir),output_filename=f"{self.name}-{media_type.title()}-enc.mp4",cleanup=True)
+
+
+        audio = results["audio"].encoded_file
+        video = results["video"].encoded_file
+
 
         debugger.success("Download completed.")
         if self.verbose: debugger.success(f"Audio: {audio}\nVideo: {video}")
+
+
 
         # 2. Decrypting Files
 
@@ -99,10 +128,18 @@ class Main:
 
         decrypt = Decrypt()
 
-        decrypt.decryptAudio(self.directory, f'{self.name}-Audio-enc', key, mp4d=self.mp4d, outfile=self.name,
-                             verbose=self.verbose, suppress_exit=self.suppress_exit)
-        decrypt.decryptVideo(self.directory, f'{self.name}-Video-enc', key, mp4d=self.mp4d, outfile=self.name,
-                             verbose=self.verbose, suppress_exit=self.suppress_exit)
+        decrypted_audio = decrypt.decryptAudio(
+            results["audio"].segments_dir,
+            f'{self.name}-Audio-enc',
+            key, mp4d=self.mp4d, outfile=self.name,outdir=self.directory,
+            verbose=self.verbose, suppress_exit=self.suppress_exit)
+
+
+        decrypted_video = decrypt.decryptVideo(
+            results["video"].segments_dir,
+            f'{self.name}-Video-enc',
+            key, mp4d=self.mp4d, outfile=self.name,outdir=self.directory,
+            verbose=self.verbose, suppress_exit=self.suppress_exit)
 
         # Call the progress callback for decryption completion
         if self.progress_callback:
@@ -112,7 +149,24 @@ class Main:
                 "next": "merging"
             })
 
+        if self.verbose:
+            debugger.success(f"Audio file: {decrypted_audio}")
+            debugger.success(f"Video file: {decrypted_video}")
+
         # 3. Merging Files
+
+        #Move files form download_out_dir/<media_type>/{self.name}-<media_type.title()>.mp4 to out dir
+        try:
+            import shutil
+            #shutil.move(decrypted_audio, self.directory)
+            #shutil.move(decrypted_video, self.directory)
+
+            if self.verbose:
+                debugger.info(f"Now removing ")
+            shutil.rmtree(download_out_dir, ignore_errors=True)
+        except Exception as e:
+            debugger.error(f"Failed to remove temp dir {download_out_dir}")
+
 
         merge = Merge()
         merge.ffmpegMerge(f"{self.directory}/{self.name}-Video.mp4",

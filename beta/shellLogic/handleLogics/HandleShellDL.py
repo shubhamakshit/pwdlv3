@@ -1,10 +1,10 @@
 from beta.shellLogic.Plugin import Plugin
 from mainLogic.big4.Ravenclaw_decrypt.key import LicenseKeyFetcher
-from mainLogic.big4.Gryffindor_downloadv2 import Download
+from mainLogic.big4.obsolete.Obsolete_Gryffindor_downloadv2 import Download
 from mainLogic.startup.checkup import CheckState
 from mainLogic.utils import glv_var
 from mainLogic import downloader
-from beta.shellLogic import simpleParser
+
 
 class HandleShellDL(Plugin):
     def __init__(self):
@@ -44,12 +44,13 @@ class HandleShellDL(Plugin):
         fetcher = LicenseKeyFetcher(token, random_id)
         fetcher.get_key(id)
 
+        url = fetcher.url
         cookies = fetcher.cookies
 
 
         Download(
             vsd_path=prefs['vsd'],
-            url=Download.buildUrl(id),
+            url=url,
             name=name,
             cookie=cookies,
             tmp_path=prefs['tmpDir'],

@@ -106,7 +106,7 @@ class CheckState:
 
 
 
-    def check_token(self, token, random_id, id="90dbede8-66a8-40e8-82ce-a2048b5c063d", verbose=False):
+    def check_token(self, token, random_id, id="680c85b0c9d776d19b869d3f",batch_name="65d75d320531c20018ade9bb", verbose=False):
         """Checks the validity of a token using LicenseKeyFetcher."""
         if verbose:
             Global.hr()
@@ -119,7 +119,7 @@ class CheckState:
         lc_fetcher = LicenseKeyFetcher(token=token, random_id=random_id)
 
         try:
-            return lc_fetcher.get_key(id, verbose=verbose)
+            return lc_fetcher.get_key(id, batch_name,verbose=verbose)
         except Exception as e:
             debugger.error(f"An error occurred while getting the key: {e}")
             raise TokenInvalid()
