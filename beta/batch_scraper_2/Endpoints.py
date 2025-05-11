@@ -10,9 +10,11 @@ class Endpoints:
         self.verbose = verbose
         self.DEFAULT_HEADERS = {
             'client-id': '5eb393ee95fab7468a79d189',
-            'randomid': '0dfbfa85-1ad3-4633-862a-ca6510a1cdb0',
+            'randomid': 'dbacc4f3-9024-491d-b2d3-72bd4b6ee281',
             'client-type': 'WEB',
         }
+        self.token = None
+        self.random_id = None
 
         class API:
             def __init__(self, outer):
@@ -32,6 +34,9 @@ class Endpoints:
             def url_chapter(self, batch_name, subject_name, chapter_name):
                 return f"{self.base}/{self.v2}/batches/{batch_name}/subject/{subject_name}/contents?limit={self.hard_limit}&contentType=videos&tag={chapter_name}"
 
+            def url_notes(self, batch_name, subject_name, chapter_name):
+                return f"{self.base}/{self.v2}/batches/{batch_name}/subject/{subject_name}/contents?limit={self.hard_limit}&contentType=notes&tag={chapter_name}"
+
             def url_lecture(self, lecture_id, batch_name):
                 return f"https://api.penpencil.co/{self.v1}/videos/video-url-details?type=BATCHES&childId={lecture_id}&parentId={batch_name}&reqType=query&videoContainerType=DASH"
 
@@ -39,7 +44,7 @@ class Endpoints:
                 try:
                     data = response
                     debugger.debug(f"Processing response:")
-                    debugger.var_dict(data)
+                    debugger.info(data)
                     for key in keys_to_extract:
                         if isinstance(data, dict) and key in data:
                             data = data[key]
@@ -71,8 +76,13 @@ class Endpoints:
                 # topic name is actually chapyter name
                 return f"{self.base}/{self.v1}/programs/{program_name}/subjects/{subject_name}/chapters/{teacher_name}/topics/{topic_name}/contents/sub-topic?page=1&limit={self.hard_limit}"
 
+            def url_chapter(self,program_name,subject_name,teacher_name,topic_name,sub_topic_name):
+                return f"{self.base}/{self.v2}/programs/contents?programId={program_name}&subjectId={subject_name}&chapterId={teacher_name}&topicId={topic_name}&subTopicId={sub_topic_name}&page=1&limit={self.hard_limit}"
+
             def url_lecture(self,program_name,topic_name,lecture_id,lecture_url):
-                return f"{self.base}/{self.v1}/videos/video-url-details?type=RECORDED&videoContainerType=DASH&reqType=query&childId={lecture_id}&parentId={program_name}&videoUrl={lecture_url}&secondaryParentId={topic_name}"
+                return (f"{self.base}/{self.v1}/videos/video-url-details?type=RECORDED&videoContainerType=DASH&reqType"
+                        f"=query&childId={lecture_id}&parentId={program_name}&"
+                        f"videoUrl={lecture_url}&secondaryParentId={topic_name}")
 
 
         self.API = API(self)
@@ -88,6 +98,7 @@ class Endpoints:
             "details": Lambert(self.API.url_details, ["data", "subjects"], ["batch_name"]),
             "subject": Lambert(self.API.url_subject, ["data"], ["batch_name", "subject_name"]),
             "chapter": Lambert(self.API.url_chapter, ["data"], ["batch_name", "subject_name", "chapter_name"]),
+            "notes"  : Lambert(self.API.url_notes, ["data",], ["batch_name", "subject_name", "chapter_name"]),
             "lecture": Lambert(self.API.url_lecture, ["data"], ["batch_name","lecture_id"]),
         }
 
@@ -96,19 +107,24 @@ class Endpoints:
             "subject"   :   Lambert(self.Khazana.url_subject, ["data"], ["program_name", "subject_name"]),
             "topics"    :   Lambert(self.Khazana.url_topics, ["data"], ["program_name", "subject_name", "teacher_name"]),
             "sub_topic" :   Lambert(self.Khazana.url_sub_topic, ["data"], ["program_name", "subject_name", "teacher_name", "topic_name"]),
-            "chapter"   :   Lambert(self.Khazana.url_sub_topic, ["data"], ["program_name", "subject_name", "teacher_name", "topic_name"]),
+            "chapter"   :   Lambert(self.Khazana.url_chapter, ["data"], ["program_name", "subject_name", "teacher_name", "topic_name","sub_topic_name"]),
             "lecture"   :   Lambert(self.Khazana.url_lecture, ["data"], ["program_name", "topic_name", "lecture_id", "lecture_url"]),
 
 
         }
 
 
-    def set_token(self, token):
+    def set_token(self, token, random_id=None):
         self.token = token
         self.DEFAULT_HEADERS.setdefault('Authorization', 'Bearer ' + self.token)
+        if random_id:
+            self.random_id = random_id
+            self.DEFAULT_HEADERS['randomid'] = self.random_id
         if self.verbose:
             debugger.debug("Authorization token set successfully.")
         return self
+
+
 
     def process(self, type: str,khazana=False, **kwargs):
         lambert = self.data_logs[type] if not khazana else self.khazana_logs[type]

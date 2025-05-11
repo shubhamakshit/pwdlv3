@@ -1,7 +1,7 @@
 import os
 import requests
 from urllib.parse import urlparse, unquote
-from typing import Dict, Optional, Callable, List, Tuple
+from typing import Dict, Optional, Callable, List, Tuple, Any
 from pathlib import Path
 import concurrent.futures
 from threading import Lock
@@ -9,8 +9,6 @@ from mainLogic.error import debugger
 from tqdm import tqdm
 from dataclasses import dataclass
 from datetime import datetime
-import shutil
-import time
 
 @dataclass
 class DownloadResult:
@@ -21,66 +19,21 @@ class DownloadResult:
     failed_segments: List[int]
     encoded_file: str = ""
 
-class TerminalOutput:
-    """Split terminal output into two sections: progress bars and log messages"""
-    def __init__(self, verbose: bool = False):
-        self.verbose = verbose
-        self.terminal_width = shutil.get_terminal_size().columns
-        self.lock = Lock()
-        self.log_messages = []
-        self.max_log_lines = 10  # Number of recent log messages to show
-
-    def log(self, message: str, level: str = "INFO"):
-        """Add a log message to the queue"""
-        with self.lock:
-            timestamp = datetime.utcnow().strftime("%H:%M:%S")
-            self.log_messages.append(f"[{timestamp}] [{level}] {message}")
-            if len(self.log_messages) > self.max_log_lines:
-                self.log_messages.pop(0)
-
-            if self.verbose:
-                self._refresh_display()
-
-    def _refresh_display(self):
-        """Refreshes the terminal display with the current state"""
-        if not self.verbose:
-            return
-
-        # Clear previous output (move cursor up and clear lines)
-        print("\033[2J\033[H", end="")  # Clear screen and move cursor to top
-
-        # Print divider
-        print("=" * self.terminal_width)
-        print("LOG MESSAGES:")
-        print("-" * self.terminal_width)
-
-        # Print recent log messages
-        for msg in self.log_messages:
-            debugger.debug(msg)
-
-        # Print bottom divider
-        print("=" * self.terminal_width)
-
 class ProgressTracker:
-    def __init__(self, total_segments: int, media_type: str, terminal_output: TerminalOutput, show_tqdm: bool = True):
+    def __init__(self, total_segments: int, media_type: str, show_tqdm: bool = True):
         self.total = total_segments
         self.current = 0
         self.media_type = media_type
         self.lock = Lock()
         self.failed_segments = []
-        self.terminal_output = terminal_output
-
-        # Store progress bar position information
-        self.pbar = None
         if show_tqdm:
-            position = 0 if media_type == "audio" else 1
             self.pbar = tqdm(
                 total=total_segments,
                 desc=f"{media_type.capitalize()} Progress",
                 unit='segment',
-                position=position,
-                leave=True
             )
+        else:
+            self.pbar = None
 
     def update(self, segment_num: int, success: bool = True) -> Dict:
         with self.lock:
@@ -90,13 +43,6 @@ class ProgressTracker:
 
             if self.pbar:
                 self.pbar.update(1)
-
-            # Log the update
-            msg = f"{self.media_type} segment {segment_num} {'✓' if success else '✗'}"
-            if not success:
-                self.terminal_output.log(msg, "ERROR")
-            elif self.terminal_output.verbose:
-                self.terminal_output.log(msg, "DEBUG")
 
             return {
                 "type": self.media_type,
@@ -112,6 +58,29 @@ class ProgressTracker:
     def close(self):
         if self.pbar:
             self.pbar.close()
+
+class CombinedProgressTracker:
+    def __init__(self, callback: Optional[Callable[[Dict], None]] = None):
+        self.callback = callback
+        self.lock = Lock()
+        self.audio_data = {}
+        self.video_data = {}
+
+    def update(self, progress_info: Dict):
+        with self.lock:
+            media_type = progress_info["type"]
+
+            if media_type == "audio":
+                self.audio_data = progress_info
+            elif media_type == "video":
+                self.video_data = progress_info
+
+            if self.callback:
+                combined_data = {
+                    "audio": self.audio_data,
+                    "video": self.video_data
+                }
+                self.callback(combined_data)
 
 class DownloaderV3:
     def __init__(
@@ -139,7 +108,7 @@ class DownloaderV3:
             directory.mkdir(parents=True, exist_ok=True)
 
         self.debugger = debugger
-        self.terminal = TerminalOutput(verbose)
+        self.combined_tracker = None
 
     def _get_file_name_from_url(self, url: str, index: int = 0, media_type: str = "") -> str:
         parsed_url = urlparse(url)
@@ -160,10 +129,8 @@ class DownloaderV3:
                 return True
             except Exception as e:
                 if attempt == retry_count - 1:
-                    self.terminal.log(f"Failed to download {url}: {str(e)}", "ERROR")
                     self.debugger.error(f"Failed to download {url}: {str(e)}")
                     return False
-                self.terminal.log(f"Retry {attempt + 1}/{retry_count} for {url}", "WARNING")
                 self.debugger.warning(f"Retry {attempt + 1}/{retry_count} for {url}")
         return False
 
@@ -173,14 +140,16 @@ class DownloaderV3:
         success = self._download_segment(url, output_path)
         progress_info = progress_tracker.update(segment_num, success)
 
-        if self.progress_callback:
+        # If we have a combined tracker, use it instead of direct callback
+        if self.combined_tracker:
+            self.combined_tracker.update(progress_info)
+        elif self.progress_callback:
             self.progress_callback(progress_info)
 
         return success
 
     def _download_media(self, media_data: Dict, media_type: str, output_dir: Path) -> DownloadResult:
         if not media_data or "segments" not in media_data:
-            self.terminal.log(f"No {media_type} data provided", "WARNING")
             self.debugger.warning(f"No {media_type} data provided")
             return DownloadResult(None, output_dir, 0, 0, [])
 
@@ -190,7 +159,6 @@ class DownloaderV3:
         progress_tracker = ProgressTracker(
             total_segments,
             media_type,
-            self.terminal,
             self.show_progress_bar
         )
 
@@ -199,13 +167,8 @@ class DownloaderV3:
             init_filename = self._get_file_name_from_url(media_data["init"], 0, media_type)
             init_file_path = output_dir / init_filename
             if not self._download_segment(media_data["init"], init_file_path):
-                self.terminal.log(f"Failed to download {media_type} init segment", "ERROR")
                 self.debugger.error(f"Failed to download {media_type} init segment")
                 return DownloadResult(None, output_dir, total_segments, 0, list(range(1, total_segments + 1)))
-
-            self.terminal.log(f"Downloaded {media_type} init segment: {init_filename}", "INFO")
-            if self.verbose:
-                self.debugger.info(f"Downloaded {media_type} init segment: {init_filename}")
 
         # Prepare segment download tasks
         download_tasks = []
@@ -230,12 +193,6 @@ class DownloaderV3:
                 if future.result():
                     successful_segments += 1
 
-        # Final status update
-        self.terminal.log(
-            f"{media_type.capitalize()} download complete: {successful_segments}/{total_segments} segments successful",
-            "INFO"
-        )
-
         progress_tracker.close()
 
         return DownloadResult(
@@ -248,33 +205,32 @@ class DownloaderV3:
 
     def download_audio(self, urls: Dict) -> DownloadResult:
         if not urls.get("audio"):
-            self.terminal.log("No audio URLs provided", "WARNING")
             self.debugger.warning("No audio URLs provided")
             return DownloadResult(None, self.audio_dir, 0, 0, [])
-
-        self.terminal.log("Starting audio download", "INFO")
         return self._download_media(urls["audio"], "audio", self.audio_dir)
 
     def download_video(self, urls: Dict) -> DownloadResult:
         if not urls.get("video"):
-            self.terminal.log("No video URLs provided", "WARNING")
             self.debugger.warning("No video URLs provided")
             return DownloadResult(None, self.video_dir, 0, 0, [])
-
-        self.terminal.log("Starting video download", "INFO")
         return self._download_media(urls["video"], "video", self.video_dir)
 
     def download_all(self, urls: Dict) -> Dict[str, DownloadResult]:
-        self.terminal.log("Starting download of all media", "INFO")
+        # Create a combined progress tracker if we have a callback
+        if self.progress_callback:
+            self.combined_tracker = CombinedProgressTracker(self.progress_callback)
 
-        with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
-            audio_future = executor.submit(self.download_audio, urls)
-            video_future = executor.submit(self.download_video, urls)
+        try:
+            with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
+                audio_future = executor.submit(self.download_audio, urls)
+                video_future = executor.submit(self.download_video, urls)
 
-            results = {
-                "audio": audio_future.result(),
-                "video": video_future.result()
-            }
+                results = {
+                    "audio": audio_future.result(),
+                    "video": video_future.result()
+                }
+        finally:
+            # Reset the combined tracker to avoid affecting future downloads
+            self.combined_tracker = None
 
-        self.terminal.log("All downloads completed", "INFO")
         return results
