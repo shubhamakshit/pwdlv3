@@ -27,9 +27,13 @@ def parse_arguments():
                              '--csv-file. Must be used with --id and --name')
     parser.add_argument('--version', action='version', version='%(prog)s 1.0')
     parser.add_argument('--login', action='store_true', help='Login to PhysicsWallah')
+
     parser.add_argument('--ignore-token', action='store_true', help='Ignore the token.')
     parser.add_argument("--new-dl","-L",action='store_true',help="New Downloader")
     parser.add_argument("--batch-name","-B",type=str,help="Batch Id")
+    parser.add_argument("--topic-name","-T",type=str,help="Topic name ")
+    parser.add_argument("--lecture-url","-U",type=str,help="Lecture URL")
+
 
     return parser.parse_args()
 
@@ -56,11 +60,15 @@ if __name__ == "__main__":
         from beta.shellLogic.shell_var import app
         app.run()
 
+
+
     downloader.main(
         csv_file=args.csv_file,
         id=args.id,
         name=args.name,
         batch_name=args.batch_name,
+        topic_name=args.topic_name,
+        lecture_url=args.lecture_url,
         directory=args.dir,
         tmp_dir=args.tmp_dir,
         verbose=args.verbose,

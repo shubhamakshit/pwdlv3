@@ -27,6 +27,6 @@ else:
     PREFS_FILE = os.path.join(vars["$script"], 'defaults.json')
 
 api_webdl_directory = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../webdl'))
-EXECUTABLES = ['ffmpeg', 'mp4decrypt', 'vsd']
+EXECUTABLES = ['ffmpeg', 'mp4decrypt']
 
 MINIMUM_PORT = 1024

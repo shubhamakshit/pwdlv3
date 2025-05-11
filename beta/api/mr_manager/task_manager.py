@@ -29,9 +29,12 @@ class TaskManager:
         try:
             name = args_dict['name']
             id = args_dict['id']
+            batch_name = args_dict.get('batch_name', None)
+            topic_name = args_dict.get('topic_name', None)
+            lecture_url = args_dict.get('lecture_url', None)
             out_dir = args_dict['out_dir']
         except KeyError:
-            raise ValueError('name, id, and out_dir are required in args')
+            raise ValueError('name, id, batch_name and out_dir are required in args')
 
         client_id = args_dict.get('client_id', client_id)
         session_id = args_dict.get('session_id', session_id)
@@ -45,6 +48,9 @@ class TaskManager:
             'name': name,
             'out_dir': out_dir,
             'id': id,
+            'batch_name': batch_name,
+            'topic_name': topic_name,
+            'lecture_url': lecture_url,
             'client_id': client_id,
             'session_id': session_id
         }
@@ -71,7 +77,11 @@ class TaskManager:
                 if self.tasks[task_id]['status'] == 'created':
                     task_info = self.tasks[task_id]
                     target = self._get_target_function(task_id)  # Replace with your actual logic to retrieve the target function
-                    thread = threading.Thread(target=self._run_task, args=(task_info, target, task_info['name'], task_info['id'], task_info['out_dir'], task_info['client_id'], task_info['session_id']))
+                    thread = threading.Thread(target=self._run_task,
+                                              args=(
+                                                  task_info, target,
+                                                  task_info['name'],task_info['id'], task_info['batch_name'],task_info['topic_name'],task_info['lecture_url'],
+                                                  task_info['out_dir'], task_info['client_id'], task_info['session_id']))
                     thread.start()
                     self.tasks[task_id]['status'] = 'running'
                 else:
@@ -80,6 +90,7 @@ class TaskManager:
     def _run_task(self, task_info, target, *args):
         task_id = task_info['task_id']
         try:
+
             progress_callback = lambda progress: self._update_progress(task_id, progress)
             debugger.debug(json.dumps([task_id, [*args], str(progress_callback)],indent=4))
             target(task_id, *args, progress_callback)
@@ -88,6 +99,7 @@ class TaskManager:
                 self.tasks[task_id]['status'] = 'completed'
                 self.client_manager.update_task(self.tasks[task_id])
         except Exception as e:
+            debugger.info(f"Failed with error {e}")
             with self.lock:
                 self.tasks[task_id]['status'] = 'failed'
                 self.tasks[task_id]['error'] = str(e)

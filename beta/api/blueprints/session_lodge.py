@@ -36,9 +36,14 @@ def create_session(client_id, session_id):
         sess_name = generate_random_word()
         print(f"Generated session name: {sess_name}")
         client_manager.set_session_name(client_id, session_id, sess_name)
+
+
     data = request.json
     ids = data.get('ids', [])
     names = data.get('names', [])
+    batch_names = data.get('batch_names', [])
+    topic_names = data.get('topic_names', [])
+    lecture_urls = data.get('lecture_urls', [])
 
 
     if not ids or not names:
@@ -46,6 +51,9 @@ def create_session(client_id, session_id):
 
     if len(ids) != len(names):
         return jsonify({'error': 'ids and names must be of equal length'}), 400
+
+    if len(ids) != len(batch_names):
+        return jsonify({'error': 'ids and batch_names must be of equal length'}), 400
 
     names_safe = [generate_safe_folder_name(name) for name in names]
     names = names_safe
@@ -55,10 +63,14 @@ def create_session(client_id, session_id):
     for i in range(len(ids)):
         id = ids[i]
         name = names[i]
+        batch_name = batch_names[i]
         print(f"Creating task for {name} with id {id}")
         args = {
             'name': name,
             'id': id,
+            'batch_name': batch_name,
+            'topic_name': topic_names[i] if i < len(topic_names) else None,
+            'lecture_url': lecture_urls[i] if i < len(lecture_urls) else None,
             'out_dir': OUT_DIR,
             'client_id': client_id,
             'session_id': session_id

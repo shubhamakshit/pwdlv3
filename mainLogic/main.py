@@ -33,19 +33,23 @@ class Main:
                  id,
                  name=None,
                  batch_name=None,
+                 topic_name=None,
+                 lecture_url=None,
                  directory="./",
                  tmpDir="/*auto*/",
                  vsdPath='nm3',
                  ffmpeg="ffmpeg",
                  mp4d="mp4decrypt",
-                 color=True,
+                 tui=True,
                  token=None, random_id=None, verbose=True, suppress_exit=False, progress_callback=None):
 
         os2 = SysFunc()
 
         self.id = id
         self.name = name if name else id
-        self.batch_name = batch_name if batch_name else id
+        self.batch_name = batch_name
+        self.topic_name = topic_name
+        self.lecture_url = lecture_url
         self.directory = directory if directory else "./"
         self.tmpDir = BasicUtils.abspath(tmpDir) if tmpDir != '/*auto*/' else BasicUtils.abspath('./tmp/')
 
@@ -60,7 +64,7 @@ class Main:
         self.vsd = vsdPath if vsdPath != 'vsd' else 'vsd'
         self.ffmpeg = BasicUtils.abspath(ffmpeg) if ffmpeg != 'ffmpeg' else 'ffmpeg'
         self.mp4d = BasicUtils.abspath(mp4d) if mp4d != 'mp4decrypt' else 'mp4decrypt'
-        self.color = color
+        self.tui = tui
 
         self.token = token
         self.random_id = random_id
@@ -81,7 +85,11 @@ class Main:
         fetcher = LicenseKeyFetcher(TOKEN, RANDOM_ID)
         try:
             if self.verbose: debugger.debug(f"Fetching License Key for ID: {self.id} and Batch Name: {self.batch_name}")
-            key = fetcher.get_key(id=self.id,batch_name=self.batch_name, verbose=self.verbose)[1]
+            if self.verbose and self.topic_name:
+                debugger.debug(f"Fetching License Key for Topic Name: {self.topic_name} and Lecture URL: {self.lecture_url}")
+            key = fetcher.get_key(
+                id=self.id,batch_name=self.batch_name,khazana_topic_name=self.topic_name,khazana_url=self.lecture_url,
+                verbose=self.verbose)[1]
             cookies = fetcher.cookies
         except Exception as e:
             raise TypeError(f"ID is invalid (if the token is valid) ")
@@ -92,7 +100,7 @@ class Main:
 
         download_out_dir = os.path.join(self.tmpDir, self.id)
 
-        results = DownloaderV3(
+        downloader = DownloaderV3(
             tmp_dir=self.tmpDir,
             out_dir=download_out_dir,
             verbose=self.verbose,
@@ -101,7 +109,14 @@ class Main:
             max_workers=16,
             audio_dir="audio",
             video_dir="video",
-        ).download_all(urls)
+        )
+
+        from tui import update_downloader_v3_with_tui
+
+        if self.tui:
+            downloader = update_downloader_v3_with_tui(downloader)
+        results = downloader.download_all(urls)
+
 
         for media_type, result in results.items():
             debugger.info(f"\n{media_type.upper()} Download Summary:")
@@ -142,12 +157,12 @@ class Main:
             verbose=self.verbose, suppress_exit=self.suppress_exit)
 
         # Call the progress callback for decryption completion
-        if self.progress_callback:
-            self.progress_callback({
-                "progress": 90,
-                "str": "decryption-completed",
-                "next": "merging"
-            })
+        # if self.progress_callback:
+        #     self.progress_callback({
+        #         "progress": 90,
+        #         "str": "decryption-completed",
+        #         "next": "merging"
+        #     })
 
         if self.verbose:
             debugger.success(f"Audio file: {decrypted_audio}")
@@ -175,20 +190,20 @@ class Main:
                           ffmpeg_path=self.ffmpeg, verbose=self.verbose)
 
         # Call the progress callback for merge completion
-        if self.progress_callback:
-            self.progress_callback({
-                "progress": 99,
-                "str": "merge-completed",
-                "next": "cleanup"
-            })
+        # if self.progress_callback:
+        #     self.progress_callback({
+        #         "progress": 99,
+        #         "str": "merge-completed",
+        #         "next": "cleanup"
+        #     })
 
         # 4. Cleanup
         clean = Clean()
         clean.remove(self.directory, f'{self.name}', self.verbose)
 
-        if self.progress_callback:
-            self.progress_callback({
-                "progress": 100,
-                "str": "cleanup-completed",
-                "next": "done"
-            })
+        # if self.progress_callback:
+        #     self.progress_callback({
+        #         "progress": 100,
+        #         "str": "cleanup-completed",
+        #         "next": "done"
+        #     })
