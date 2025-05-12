@@ -13,9 +13,14 @@ class LoginInterface:
         return bool(re.match(r'^\d{10}$', num))
 
     @staticmethod
-    def cli(debug=False):
+    def cli(phone=None,debug=False):
 
-        ph_num = input("Enter your 10 digit phone number: ") if not debug else "1234567890"
+        whatsapp = False
+        if phone and phone[:2] == "wa":
+            whatsapp = True
+            phone = phone[2:]
+
+        ph_num = phone if phone else (input("Enter your 10 digit phone number: ") if not debug else "1234567890")
 
         if not LoginInterface.check_valid_10_dig_number(ph_num):
             print("Please enter a valid 10 digit phone number.")
@@ -23,7 +28,7 @@ class LoginInterface:
 
         lg = Login(ph_num, debug=debug)
 
-        if lg.gen_otp():
+        if lg.gen_otp(otp_type="wa" if whatsapp else "phone"):
             if lg.login(input("Enter the OTP: ")):
 
                 token = lg.token

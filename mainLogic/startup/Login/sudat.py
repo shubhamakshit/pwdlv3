@@ -82,7 +82,7 @@ class Login:
                 return ''.join(random.choice(letters) for i in range(length))
 
             self.token = {
-                "randomId": random_string(10),
+                "randomId": "a3e290fa-ea36-4012-9124-8908794c33aa",
                 "token": random_string(10),
                 "refresh_token": random_string(10),
                 "expires_in": random.randint(1, 100)

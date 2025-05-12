@@ -27,6 +27,8 @@ def parse_arguments():
                              '--csv-file. Must be used with --id and --name')
     parser.add_argument('--version', action='version', version='%(prog)s 1.0')
     parser.add_argument('--login', action='store_true', help='Login to PhysicsWallah')
+    parser.add_argument('--phone', type=str, help='Phone number for login (optional)')
+
 
     parser.add_argument('--ignore-token', action='store_true', help='Ignore the token.')
     parser.add_argument("--new-dl","-L",action='store_true',help="New Downloader")
@@ -43,6 +45,8 @@ if __name__ == "__main__":
 
     if args.login:
         LoginInterface.cli()
+    elif args.phone:
+        LoginInterface.cli(args.phone)
 
     if args.command:
         from beta.shellLogic import logic
