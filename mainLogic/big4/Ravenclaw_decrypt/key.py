@@ -34,7 +34,7 @@ class LicenseKeyFetcher:
             "origin": "https://www.pw.live",
             "pragma": "no-cache",
             "priority": "u=1, i",
-            "randomid": "180ff4c6-9ec3-4329-b1b5-1ad2f6746795",
+            "randomid": "a3e290fa-ea36-4012-9124-8908794c33aa",
             "referer": "https://www.pw.live/",
             "sec-ch-ua": "\"Google Chrome\";v=\"125\", \"Chromium\";v=\"125\", \"Not.A/Brand\";v=\"24\"",
             "sec-ch-ua-mobile": "?0",

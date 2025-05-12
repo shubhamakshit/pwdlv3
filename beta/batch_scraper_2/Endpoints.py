@@ -114,7 +114,7 @@ class Endpoints:
         }
 
 
-    def set_token(self, token, random_id="180ff4c6-9ec3-4329-b1b5-1ad2f6746795"):
+    def set_token(self, token, random_id="a3e290fa-ea36-4012-9124-8908794c33aa"):
         self.token = token
         self.DEFAULT_HEADERS.setdefault('Authorization', 'Bearer ' + self.token)
         if random_id:
