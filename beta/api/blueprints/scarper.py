@@ -1,3 +1,4 @@
+import json
 import urllib.parse
 
 import urllib3
@@ -11,14 +12,18 @@ from mainLogic.utils import glv_var
 scraper_blueprint = Blueprint('scraper', __name__)
 
 # Initialize BatchAPI with a default token. The token can be updated later via the '/api/set-token' route.
+
 try:
+
     batch_api = Endpoints().set_token(vars['prefs'].get('token',{}).get("token",""))
 except Exception as e:
     # get token via check_Dependencies
+
     re_check_dependencies()
-    debugger.debug(glv_var.vars['prefs'])
-    access_token = glv_var.vars['prefs'].get('token_config',{})
-    batch_api = Endpoints().set_token(access_token.get("token",""),access_token.get("randomId",""))
+    token = glv_var.vars["prefs"].get("token_config",{})
+    #debugger.debug(f"Token config: {token}")
+    access_token = token["access_token"]
+    batch_api = Endpoints().set_token(access_token)
 
 def create_response(data=None, error=None):
     response = {"data": data}
