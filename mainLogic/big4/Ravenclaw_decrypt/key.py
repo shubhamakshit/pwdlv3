@@ -107,9 +107,9 @@ class LicenseKeyFetcher:
             # add_on = cookie_splitter(policy_string, verbose)
 
             if not khazana_topic_name and not khazana_url:
-                url_op = Endpoints(verbose=True).set_token(self.token).process("lecture",lecture_id=id,batch_name=batch_name)
+                url_op = Endpoints(verbose=True).set_token(self.token,self.random_id).process("lecture",lecture_id=id,batch_name=batch_name)
             else:
-                url_op = Endpoints(verbose=True).set_token(self.token).process("lecture",khazana=True,program_name=batch_name,topic_name=khazana_topic_name,lecture_id=id,lecture_url=khazana_url)
+                url_op = Endpoints(verbose=True).set_token(self.token,self.random_id).process("lecture",khazana=True,program_name=batch_name,topic_name=khazana_topic_name,lecture_id=id,lecture_url=khazana_url)
             url = url_op['url']
             signature = url_op['signedUrl']
 

@@ -10,7 +10,7 @@ class Endpoints:
         self.verbose = verbose
         self.DEFAULT_HEADERS = {
             'client-id': '5eb393ee95fab7468a79d189',
-            'randomid': 'dbacc4f3-9024-491d-b2d3-72bd4b6ee281',
+            # 'randomid': 'dbacc4f3-9024-491d-b2d3-72bd4b6ee281',
             'client-type': 'WEB',
         }
         self.token = None
@@ -114,7 +114,7 @@ class Endpoints:
         }
 
 
-    def set_token(self, token, random_id=None):
+    def set_token(self, token, random_id="180ff4c6-9ec3-4329-b1b5-1ad2f6746795"):
         self.token = token
         self.DEFAULT_HEADERS.setdefault('Authorization', 'Bearer ' + self.token)
         if random_id:
