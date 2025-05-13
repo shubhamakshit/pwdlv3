@@ -9,6 +9,9 @@ class DB:
 
 
     def __init__(self,uri):
+        import dns.resolver
+        dns.resolver.default_resolver=dns.resolver.Resolver(configure=False)
+        dns.resolver.default_resolver.nameservers=['8.8.8.8']
         self.uri = uri
         self.client = MongoClient(uri, server_api=ServerApi('1'))
         self.db = self.client["OPCluster"]
