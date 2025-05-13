@@ -12,3 +12,9 @@ Jinja2~=3.1.6
 xmltodict~=0.14.2
 prompt_toolkit~=3.0.51
 isodate~=0.7.2
+flask-cors~=5.0.1
+urllib3~=2.4.0
+pymongo
+prompt_toolkit~=3.0.51
+rich~=14.0.0
+tqdm~=4.67.1

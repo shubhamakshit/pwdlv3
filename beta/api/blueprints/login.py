@@ -1,5 +1,5 @@
 from mainLogic.startup.Login.call_login import LoginInterface
-from mainLogic.utils.glv_var import PREFS_FILE
+from mainLogic.utils.glv_var import PREFS_FILE, debugger
 from mainLogic.startup.Login.sudat import Login
 from beta.update import UpdateJSONFile
 from flask import jsonify, request, Blueprint
@@ -42,6 +42,10 @@ def verify_otp():
     else:
         u = UpdateJSONFile(PREFS_FILE)
         u.update('token',lg.token)
+        try:
+            u.update("user_update_index",u.data.get("user_update_index",0)+1)
+        except Exception as e:
+            debugger.error(f" Error updating user_update_index: {e}")
         return jsonify({'success': 'OTP verified successfully','token':lg.token}), 200
 
 
