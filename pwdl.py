@@ -66,9 +66,8 @@ if __name__ == "__main__":
         app.run()
 
     try:
-        if args.sync:
-            from beta.Syncer.main import Syncer
-            sync = Syncer()
+        from beta.Syncer.main import Syncer
+        sync = Syncer()
     except Exception as e:
         debugger.error(f"Error in Syncer: {e}")
         pass

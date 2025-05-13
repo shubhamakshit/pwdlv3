@@ -110,4 +110,3 @@ class Syncer:
         debugger.debug(f"Token updated in DB with update index: {update_index}")
         debugger.error(f"Token updated. Please restart the app to sync the token.")
 
-Syncer()
