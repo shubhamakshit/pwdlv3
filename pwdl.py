@@ -65,7 +65,13 @@ if __name__ == "__main__":
         from beta.shellLogic.shell_var import app
         app.run()
 
-
+    try:
+        if args.sync:
+            from beta.Syncer.main import Syncer
+            sync = Syncer()
+    except Exception as e:
+        debugger.error(f"Error in Syncer: {e}")
+        pass
 
     downloader.main(
         csv_file=args.csv_file,
