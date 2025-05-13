@@ -31,6 +31,7 @@ def parse_arguments():
 
 
     parser.add_argument('--ignore-token', action='store_true', help='Ignore the token.')
+    parser.add_argument('--sync', action='store_true', help='Sync the token.')
     parser.add_argument("--new-dl","-L",action='store_true',help="New Downloader")
     parser.add_argument("--batch-name","-B",type=str,help="Batch Id")
     parser.add_argument("--topic-name","-T",type=str,help="Topic name ")
