@@ -42,6 +42,11 @@ class LoginInterface:
 
                 from mainLogic.utils.glv_var import PREFS_FILE
                 u = UpdateJSONFile(PREFS_FILE, debug=debug)
+                u.update('token',lg.token)
+                try:
+                    u.update("user_update_index",u.data.get("user_update_index",0)+1)
+                except Exception as e:
+                    debugger.error(f" Error updating user_update_index: {e}")
 
                 # convert to json(dict) if possible
 
