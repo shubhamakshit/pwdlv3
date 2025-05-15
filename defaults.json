@@ -1,24 +1,89 @@
 {
-    "webui-del-time": "30",
-    "cloudfront_id": "d1d34p8vz63oi",
+    "cloudfront_id": "d1d34p8vz63oiq",
     "patched": false,
-    "os-info": "winx64",
-    "tmpDir": "%temp%",
+    "user_id": "rumouroid",
+    "user_update_index": 3,
+    "os-info": "linux",
+    "tmpDir": "/tmp",
     "verbose": false,
-    "vsd": "$script/bin/vsd.exe",
+    "vsd": "$script/bin/vsd",
     "ffmpeg": "$script/bin/ffmpeg",
-    "mp4decrypt": "$script/bin/mp4decrypt.exe",
+    "mp4decrypt": "$script/bin/mp4decrypt",
+    "webui-del-time": 45,
     "webui": true,
-    "webui-port": "14325",
-    "hell-volhard-zelensky": [
-        "2",
-        "1"
-    ],
-    "webui-mode": "debug",
+    "webui-port": "5000",
     "token": {
-        "expires_in": 1746984223858,
-        "randomId": "dbacc4f3-9024-491d-b2d3-72bd4b6ee281",
-        "refresh_token": "7f30e05493a747627ebf36b687b78f122dcdd58e7b681a743fb938247a68abd9",
-        "token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE3NDY5ODQyMjMuODU0LCJkYXRhIjp7Il9pZCI6IjY0MzE3NTQyNDBlOTc5MDAxODAwMjAyYiIsInVzZXJuYW1lIjoiOTQ3MjUwNzEwMCIsImZpcnN0TmFtZSI6IkFrc2hpdCBTaHViaGFtIiwibGFzdE5hbWUiOiIiLCJvcmdhbml6YXRpb24iOnsiX2lkIjoiNWViMzkzZWU5NWZhYjc0NjhhNzlkMTg5Iiwid2Vic2l0ZSI6InBoeXNpY3N3YWxsYWguY29tIiwibmFtZSI6IlBoeXNpY3N3YWxsYWgifSwiZW1haWwiOiJha3NoaXRzaHViaGFtbWFzQGdtYWlsLmNvbSIsInJvbGVzIjpbIjViMjdiZDk2NTg0MmY5NTBhNzc4YzZlZiJdLCJjb3VudHJ5R3JvdXAiOiJJTiIsInR5cGUiOiJVU0VSIn0sImlhdCI6MTc0NjM3OTQyM30.YJEtV82r-_xdxdQ5xuqH9aXhQl42xWWTYmVtAm34liA"
+        "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE3NDc5MDMyMjcuMTE5LCJkYXRhIjp7Il9pZCI6IjY0MzE3NTQyNDBlOTc5MDAxODAwMjAyYiIsInVzZXJuYW1lIjoiOTQ3MjUwNzEwMCIsImZpcnN0TmFtZSI6IkFrc2hpdCBTaHViaGFtIiwibGFzdE5hbWUiOiIiLCJvcmdhbml6YXRpb24iOnsiX2lkIjoiNWViMzkzZWU5NWZhYjc0NjhhNzlkMTg5Iiwid2Vic2l0ZSI6InBoeXNpY3N3YWxsYWguY29tIiwibmFtZSI6IlBoeXNpY3N3YWxsYWgifSwiZW1haWwiOiJha3NoaXRzaHViaGFtbWFzQGdtYWlsLmNvbSIsInJvbGVzIjpbIjViMjdiZDk2NTg0MmY5NTBhNzc4YzZlZiJdLCJjb3VudHJ5R3JvdXAiOiJJTiIsInR5cGUiOiJVU0VSIn0sImlhdCI6MTc0NzI5ODQyN30.wGzI6Mzdqqsrl5sand-xktIpmtjTpf2mYrxcJ4uNEno",
+        "refresh_token": "8170c4711cf610d69126c44e1eca6e3f4edef328d692f714435739f8a63cca34",
+        "expires_in": 1747903227125,
+        "tokenId": "6825a87b5bdfa4b3c62e57b6",
+        "user": {
+            "status": "Active",
+            "id": "6431754240e979001800202b",
+            "firstName": "Akshit Shubham",
+            "lastName": "",
+            "primaryNumber": "9472507100",
+            "countryCode": "+91",
+            "countryGroup": "IN",
+            "username": "9472507100",
+            "uniqueCode": "9472EYDU",
+            "email": "akshitshubhammas@gmail.com",
+            "isVerifiedEmail": false,
+            "created": "2023-04-08T14:08:02.575Z",
+            "createdAt": "2023-04-08T14:08:02.575Z",
+            "profileId": {
+                "exams": [
+                    "NEET"
+                ],
+                "_id": "6431754240e979001800202d",
+                "created": "2023-04-08T14:08:02.590Z",
+                "createdAt": "2023-04-08T14:08:02.590Z",
+                "class": "11",
+                "programId": "60910f9463f1f5004815a4c0",
+                "wallet": 0,
+                "totalRewards": 0,
+                "coins": {
+                    "bankTransferCoins": 0,
+                    "voucherCoins": 0,
+                    "commonCoins": 0,
+                    "walletCoins": 0,
+                    "totalCoins": 0,
+                    "redeemedCoins": 0
+                },
+                "parentDetails": {},
+                "isProfileCompleted": true,
+                "children": [],
+                "cohortId": "634fd1c40c274c00183c7579",
+                "needCohortUpdate": false,
+                "cohortUpdatedAt": "2023-04-15T09:28:16.616Z"
+            },
+            "dateOfBirth": null,
+            "phones": [],
+            "address": null,
+            "primary": null,
+            "organization": {
+                "_id": "5eb393ee95fab7468a79d189",
+                "status": "Active",
+                "usersCount": 0,
+                "name": "Physicswallah",
+                "website": "physicswallah.com",
+                "createdAt": "2020-05-07T04:51:58.030Z",
+                "updatedAt": "2020-05-07T04:51:58.030Z",
+                "phones": [],
+                "rejectionComments": [],
+                "enrolmentType": "Client",
+                "primaryContact": "5eb393ee95fab7468a79d18b"
+            },
+            "roles": [
+                {
+                    "id": "5b27bd965842f950a778c6ef",
+                    "name": "Student"
+                }
+            ],
+            "androidVersion": 165,
+            "iosVersion": 0,
+            "webVersion": 1925,
+            "isScholar": false
+        }
     }
 }
