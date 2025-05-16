@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}Video Error{% endblock %}
+
+{% block content %}
+    {# Map reason to icon, color and message #}
+    {% set status_configs = {
+        'deleted': {
+            'icon': 'fa-circle-xmark',
+            'color': 'var(--color-destructive)',
+            'text': 'The video has been deleted.'
+        },
+        'incomplete': {
+            'icon': 'fa-hourglass-half',
+            'color': 'var(--color-warning)',
+            'text': 'Processing of the video is incomplete.'
+        },
+        'failed': {
+            'icon': 'fa-circle-exclamation',
+            'color': 'var(--color-destructive)',
+            'text': 'Processing of the video failed.'
+        },
+        'not_found':{
+            'icon': 'fa-circle-xmark',
+            'color': 'var(--color-destructive)',
+            'text': 'The video was not found.'
+        }
+    } %}
+
+    {# Get the configuration for the current reason, or use defaults #}
+    {% set config = status_configs.get(reason, {
+        'icon': 'fa-circle-exclamation',
+        'color': 'var(--color-warning)',
+        'text': reason if reason else 'Unknown error'
+    }) %}
+
+    <div class="error-card">
+        <div class="error-header">
+            <div class="error-icon-wrapper" style="background-color: {{ config.color }}20;">
+                <i class="fas {{ config.icon }}" style="color: {{ config.color }};"></i>
+            </div>
+            <h1>Video Unavailable</h1>
+        </div>
+
+        <div class="error-message">
+            <p>The video you requested could not be found or is currently unavailable.</p>
+            <p class="reason"><strong>{{ config.text }}</strong></p>
+        </div>
+
+        <div class="task-id">
+            <span>Task ID:</span> {{ task_id }}
+        </div>
+
+        {% if video_details and video_details.items() %}
+            <div class="details-section">
+                <div class="details-header">
+                    <h2>Details</h2>
+                    <div class="details-divider"></div>
+                </div>
+
+                <dl class="details-list">
+                    {% for key, value in video_details.items() %}
+                        <div class="details-item">
+                            <dt>{{ key }}</dt>
+                            <dd>
+                                {% if value is mapping or (value is iterable and value is not string) %}
+                                    <pre>{{ value | tojson(indent=2) }}</pre>
+                                {% else %}
+                                    {{ value }}
+                                {% endif %}
+                            </dd>
+                        </div>
+                    {% endfor %}
+                </dl>
+            </div>
+        {% endif %}
+
+        <a href="/" class="primary-button">Go Home</a>
+    </div>
+{% endblock %}

@@ -88,6 +88,13 @@ class ClientManager:
         else:
             return self.clients[client_id]['sessions'][session_id]['tasks']
 
+    def get_task(self,task_id):
+        for client_id in self.clients:
+            for session_id in self.clients[client_id]['sessions']:
+                if task_id in self.clients[client_id]['sessions'][session_id]['tasks']:
+                    return self.clients[client_id]['sessions'][session_id]['tasks'][task_id]
+        return None
+
     def update_task(self, task_info):
         client_id = task_info['client_id']
         session_id = task_info['session_id']
@@ -116,6 +123,14 @@ class ClientManager:
             return self.clients[client_id]
         else:
             print(f"Client with ID {client_id} does not exist.")
+            return None
+
+    def get_progress(self,task_id):
+        task = self.get_task(task_id)
+        if task:
+            return task
+        else:
+            debugger.error(f"Task with ID {task_id} does not exist.")
             return None
 
     def set_session_name(self, client_id, session_id, name):
