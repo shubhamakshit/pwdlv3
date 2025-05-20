@@ -1,0 +1,18 @@
+{
+  "cloudfront_id": "d1d34p8vz63oiq",
+  "patched": false,
+  "user_id": "temp",
+  "user_update_index": -1,
+  "os-info": "linux",
+  "tmpDir": "/tmp",
+  "verbose": false,
+  "vsd": "$script/bin/vsd",
+  "ffmpeg": "",
+  "mp4decrypt": "$script/bin/mp4decrypt",
+  "webui-del-time": 45,
+  "webui": true,
+  "webui-port": "5000",
+  "token": {
+    "l": 1488
+  }
+}
