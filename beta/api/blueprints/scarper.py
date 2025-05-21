@@ -22,8 +22,20 @@ except Exception as e:
     re_check_dependencies()
     token = glv_var.vars["prefs"].get("token_config",{})
     #debugger.debug(f"Token config: {token}")
-    access_token = token["access_token"]
-    batch_api = Endpoints().set_token(access_token)
+    try:
+        access_token = token["access_token"]
+    except Exception as e:
+        debugger.error(f"Error getting access token: {e}")
+        try:
+            access_token = token["token"]
+        except Exception as e:
+            debugger.error(f"Error getting access token: {e}")
+    
+    random_id = token.get("random_id",None)
+    if random_id is None:
+        batch_api = Endpoints().set_token(access_token)
+    else:
+        batch_api = Endpoints().set_token(access_token,random_id=random_id)
 
 def create_response(data=None, error=None):
     response = {"data": data}
@@ -202,6 +214,21 @@ def get_notes(batch_name, subject_name, chapter_name):
         return create_response(data=renamer(notes,'topic','name'))
     except Exception as e:
 
+        debugger.error(f"Error: {e}")
+        return create_response(error=str(e)), 500
+    
+@scraper_blueprint.route('/api/batches/<batch_name>/<subject_name>/<chapter_name>/dpp_pdf', methods=['GET'])
+def get_dpp_pdf(batch_name, subject_name, chapter_name):
+    try:
+        debugger.success(f"batch_name: {batch_name}")
+        debugger.success(f"batch_api.token: {batch_api.token}")
+        debugger.success(f"batch_api.random_id: {batch_api.random_id}")
+
+        # batch_api.batch_name = batch_name
+        # subjects = batch_api.GET_BATCH(batch_name)
+        dpp_pdf = batch_api.process("dpp_pdf",batch_name=batch_name,subject_name=subject_name,chapter_name=chapter_name)
+        return create_response(data=renamer(dpp_pdf,'topic','name'))
+    except Exception as e:
         debugger.error(f"Error: {e}")
         return create_response(error=str(e)), 500
 

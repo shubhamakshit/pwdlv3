@@ -40,6 +40,9 @@ class Endpoints:
             def url_lecture(self, lecture_id, batch_name):
                 return f"https://api.penpencil.co/{self.v1}/videos/video-url-details?type=BATCHES&childId={lecture_id}&parentId={batch_name}&reqType=query&videoContainerType=DASH"
 
+            def url_dpp_pdf(self, batch_name, subject_name, chapter_name):
+                return f"{self.base}/{self.v2}/batches/{batch_name}/subject/{subject_name}/contents?page=1&contentType=DppNotes&tag={chapter_name}&limit={self.hard_limit}"
+
             def post_process(self, response: dict, keys_to_extract: List[str]):
                 try:
                     data = response
@@ -100,6 +103,7 @@ class Endpoints:
             "chapter": Lambert(self.API.url_chapter, ["data"], ["batch_name", "subject_name", "chapter_name"]),
             "notes"  : Lambert(self.API.url_notes, ["data",], ["batch_name", "subject_name", "chapter_name"]),
             "lecture": Lambert(self.API.url_lecture, ["data"], ["batch_name","lecture_id"]),
+            "dpp_pdf": Lambert(self.API.url_dpp_pdf, ["data"], ["batch_name", "subject_name", "chapter_name"]),
         }
 
         self.khazana_logs= {
