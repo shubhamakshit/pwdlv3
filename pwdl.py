@@ -82,7 +82,6 @@ if __name__ == "__main__":
     except Exception as e:
         debugger.error("Faild to update ")
         debugger.error(e)
-    excpet:
 
     downloader.main(
         csv_file=args.csv_file,
