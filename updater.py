@@ -328,7 +328,7 @@ class GitUpdater:
         except subprocess.CalledProcessError as e:
             debugger.error(f"Failed to pop stash: {e}")
             return False
-    
+
     def update(self, remote: str = "origin", branch: str = None, 
                force: bool = False, stash_changes: bool = True) -> bool:
         """
@@ -352,7 +352,7 @@ class GitUpdater:
         
         # Save current state for potential rollback and script context
         previous_state = self.save_current_state()
-        update_success = False # Flag to track overall success for return value
+        update_successful = False # Flag to track overall success for return value of this method
         stashed_anything = False # Track if we actually stashed changes
 
         try:
@@ -363,14 +363,17 @@ class GitUpdater:
                     if self.stash_changes(): # Call stash_changes and check its return
                         stashed_anything = True
                     else:
-                        debugger.error("Failed to stash changes")
+                        debugger.error("Failed to stash changes.")
+                        # If stashing failed and not forced, we must return here
                         if not force:
-                            return False # Cannot proceed without stashing or force
-                elif not force:
-                    debugger.warning("Force update enabled, proceeding despite local changes")
-                else:
-                    debugger.error("Local changes detected. Use force=True or stash_changes=True")
+                            return False 
+                        else:
+                            debugger.warning("Force update enabled, proceeding despite failed stash.")
+                elif not force: # local changes, no stash, not forced -> fail
+                    debugger.error("Local changes detected. Use force=True or stash_changes=True to proceed.")
                     return False
+                else: # local changes, no stash, but forced -> proceed
+                    debugger.warning("Force update enabled, proceeding despite local changes (discarding them).")
             
             # Fetch updates
             if not self.fetch_updates(remote):
@@ -380,40 +383,47 @@ class GitUpdater:
             has_updates, commits_behind = self.check_for_updates(remote, branch)
             
             if not has_updates:
-                debugger.info("Repository is already up to date")
-                update_success = True # Consider 'already up to date' a success
+                debugger.info("Repository is already up to date. No Git operation needed.")
+                # We reached here, so conceptually the "update check" was successful
+                # and the state is desired.
+                update_successful = True 
             else:
                 debugger.info(f"Updating repository ({commits_behind} commits behind)...")
                 
                 # Perform the update
                 if force:
-                    debugger.warning("Performing force update...")
+                    debugger.warning("Performing force update (hard reset)...")
                     self._run_git_command(["reset", "--hard", f"{remote}/{branch}"])
                 else:
-                    self._run_git_command(["merge", f"{remote}/{branch}"])
+                    debugger.info("Performing merge update...")
+                    self._run_git_command(["merge", "--ff-only", f"{remote}/{branch}"]) # Use --ff-only for cleaner updates
                 
                 debugger.success(f"Successfully updated to latest {remote}/{branch}")
-                
-                # Show what changed
                 self.show_recent_commits(5)
+                update_successful = True # Mark success after successful git operation
             
-            update_success = True # Mark success if we reached here (either updated or already up-to-date)
-            return True
+            # If we reach here, the try block completed without raising a subprocess.CalledProcessError
+            # The update_successful flag should correctly reflect if an actual update occurred
+            # or if it was already up-to-date.
+            return True # Indicates the update attempt itself completed successfully (either updated or no update needed)
             
         except subprocess.CalledProcessError as e:
-            debugger.error(f"Update failed: {e}")
+            debugger.error(f"Git command failed during update: {e}")
+            return False # Indicate failure in the update attempt
+        except Exception as e:
+            debugger.critical(f"An unexpected error occurred during update: {e}")
             return False
         finally:
-            # Execute post-update script regardless of success/failure of the Git command itself
+            # This block always executes regardless of try/except block return/exception
             current_commit = self.get_current_commit() # Get current commit for context
+            debugger.info("Running post-operation script from finally block...")
             self._execute_post_operation_script(
                 "update",
-                {"previous_commit": previous_state["commit"], "current_commit": current_commit, "successful": update_success}
+                {"previous_commit": previous_state["commit"], "current_commit": current_commit, "successful": update_successful}
             )
-            # Re-apply stashed changes if they were stashed AND there are actual stashes to pop
+            # Re-apply stashed changes if they were stashed
             if stashed_anything: 
-                self.pop_stash()
-
+                self.pop_stash()    
 
     def rollback_to_commit(self, commit_hash: str, force: bool = False) -> bool:
         """

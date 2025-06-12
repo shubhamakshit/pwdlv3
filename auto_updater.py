@@ -1,14 +1,15 @@
 # auto_updater.py
 import sys
 from pathlib import Path
+from datetime import datetime # Keep this import at the top
 
 # Adjust this import based on your actual file structure
-# If git_updater.py is in the same directory as auto_updater.py:
+# If updater.py is in the same directory as auto_updater.py:
 from updater import GitUpdater 
 
-# If git_updater.py is in a subdirectory like 'utils' and auto_updater.py is in parent:
+# If updater.py is in a subdirectory like 'utils' and auto_updater.py is in parent:
 # sys.path.append(str(Path(__file__).parent / 'utils')) 
-# from git_updater import GitUpdater
+# from updater import GitUpdater
 
 # --- Configuration ---
 REPO_PATH = "."  # Or specify your repository path: "/path/to/your/git/repo"
@@ -25,24 +26,23 @@ def run_auto_update():
             post_op_script_name=POST_OP_SCRIPT_NAME
         )
         
-        # Check if there are updates first
-        has_updates, commits_behind = updater.check_for_updates()
-
-        if has_updates:
-            print(f"Found {commits_behind} new commit(s). Initiating update...")
-            success = updater.update(
-                remote="origin",      # Or your desired remote
-                branch=None,          # Uses current branch, or specify "main", "dev"
-                force=False,          # Set to True for hard reset (DANGEROUS if you have uncommitted changes!)
-                stash_changes=True    # Recommended: automatically stash local changes
-            )
-            
-            if success:
-                print("Repository updated successfully!")
-            else:
-                print("Repository update failed.")
+        # --- THE CRUCIAL CHANGE IS HERE ---
+        # ALWAYS call updater.update(). 
+        # The update method itself handles checking for updates (fetch, rev-list)
+        # and running the post-op script in its internal 'finally' block,
+        # whether an actual merge occurs or not.
+        success = updater.update(
+            remote="origin",      # Or your desired remote
+            branch=None,          # Uses current branch, or specify "main", "dev"
+            force=False,          # Set to True for hard reset (DANGEROUS if you have uncommitted changes!)
+            stash_changes=True    # Recommended: automatically stash local changes
+        )
+        # --- END OF CRUCIAL CHANGE ---
+        
+        if success:
+            print("Auto update process completed successfully!")
         else:
-            print("Repository is already up to date. No update needed.")
+            print("Auto update process failed.")
             
         print("--- Auto Git Update Check Finished ---")
 
@@ -53,10 +53,8 @@ def run_auto_update():
         print(f"An unexpected error occurred during update: {e}", file=sys.stderr)
     
     finally:
-        # This block ensures any cleanup or final reporting happens
-        # The post-operation script in GitUpdater itself is handled by its finally block
-        pass
+        # This finally block is for run_auto_update(), not GitUpdater.update()
+        pass 
 
 if __name__ == "__main__":
-    from datetime import datetime # Import here if only used in this file's main execution
     run_auto_update()
