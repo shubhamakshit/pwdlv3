@@ -21,6 +21,13 @@ if operation == "update":
         # Run pip install from the repository directory
         subprocess.run([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"],
                        cwd=repo_path, check=True)
+        try:
+            subprocess.run(["cp", "prefrences.json", "preferences.json"],
+                       cwd=repo_path, check=True)
+            subprocess.run(["copy", "prefrences.json", "preferences.json"],
+                       cwd=repo_path, check=True)
+        except:
+            pass
         print("Dependencies updated successfully.")
     except subprocess.CalledProcessError as e:
         print(f"Error updating dependencies: {e}", file=sys.stderr)
