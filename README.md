@@ -6,6 +6,8 @@
 ## History 
 This project started way back in 2023 as [pwdl](https://github.com/shubhamakshit/pwdl). It was then merely a script for downloading segments using a loophole in pw's api. When it got pached we moved on to [pwdlv2](https://github.com/shubhamakshit/pwdlv2) in March, 2024. It was mostly haphazard code. pwdlv3 started in April, 2024 as is proudly growing ever since.
 
+## UPDATE: RE-INSTALL PWDL POST 12th JUN 2025
+
 ## Installing guide 
 
 ### Windows (64bit)
