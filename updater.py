@@ -2,6 +2,7 @@
 """
 Git Repository Updater
 A comprehensive utility for managing Git repository updates, rollbacks, and version control.
+Includes capabilities for running post-operation scripts for granular, OS-specific control.
 """
 
 import os
@@ -33,21 +34,33 @@ except ImportError:
 
 class GitUpdater:
     """
-    A comprehensive Git repository updater with logging and version management.
+    A comprehensive Git repository updater with logging, version management, and
+    the ability to run post-operation scripts for custom actions (e.g., dependency updates).
     """
     
-    def __init__(self, repo_path: str = "."):
+    def __init__(self, repo_path: str = ".", allow_remote_scripts: bool = False,
+                 post_op_script_name: str = "post-update.py"):
         """
         Initialize the GitUpdater.
         
         Args:
-            repo_path (str): Path to the Git repository (defaults to current directory)
+            repo_path (str): Path to the Git repository (defaults to current directory).
+            allow_remote_scripts (bool): If True, allows executing a script from the repo
+                                         after certain operations. SECURITY RISK: Only enable
+                                         if you trust the repository's contents.
+            post_op_script_name (str): The name of the script to execute after operations.
         """
         self.repo_path = Path(repo_path).resolve()
         self.backup_file = self.repo_path / ".git_updater_backup.json"
+        self.allow_remote_scripts = allow_remote_scripts
+        self.post_op_script_name = post_op_script_name
         
         debugger.info(f"Initializing GitUpdater for repository: {self.repo_path}")
         
+        if self.allow_remote_scripts:
+            debugger.warning("SECURITY WARNING: Remote script execution is enabled.")
+            debugger.warning(f"Will attempt to run '{self.post_op_script_name}' after updates.")
+
         if not self._is_git_repo():
             debugger.error(f"Directory {self.repo_path} is not a Git repository")
             raise ValueError(f"Directory {self.repo_path} is not a Git repository")
@@ -100,6 +113,63 @@ class GitUpdater:
                 debugger.error(f"Stderr: {e.stderr}")
             raise
     
+    def _execute_post_operation_script(self, operation: str, context: Dict) -> None:
+        """
+        Execute a post-operation script if enabled and the script exists.
+        This allows running OS-specific commands (e.g., updating dependencies).
+
+        Args:
+            operation (str): The name of the operation that was just performed (e.g., 'update').
+            context (Dict): Contextual information about the operation, like commit hashes.
+        """
+        if not self.allow_remote_scripts:
+            return
+
+        script_path = self.repo_path / self.post_op_script_name
+        if not script_path.exists():
+            debugger.debug(f"Post-operation script '{self.post_op_script_name}' not found. Skipping.")
+            return
+
+        debugger.info(f"Executing post-operation script: {script_path}")
+        
+        # Prepare environment variables for the script
+        script_env = os.environ.copy()
+        script_env["GIT_UPDATER_OPERATION"] = operation
+        script_env["GIT_UPDATER_PREV_COMMIT"] = context.get("previous_commit", "")
+        script_env["GIT_UPDATER_CURR_COMMIT"] = context.get("current_commit", "")
+        script_env["GIT_UPDATER_REPO_PATH"] = str(self.repo_path)
+        
+        # Determine how to run the script
+        command_to_run = []
+        if script_path.suffix == '.py':
+            command_to_run = [sys.executable, str(script_path)]
+        else: # For .sh, .bat, or other executable files
+            command_to_run = [str(script_path)]
+
+        try:
+            result = subprocess.run(
+                command_to_run,
+                cwd=self.repo_path,
+                capture_output=True,
+                text=True,
+                env=script_env,
+                check=False # Do not raise exception on non-zero exit code
+            )
+
+            debugger.info(f"Post-operation script finished with exit code {result.returncode}.")
+            if result.stdout:
+                debugger.info(f"Script stdout:\n{result.stdout.strip()}")
+            if result.stderr:
+                debugger.warning(f"Script stderr:\n{result.stderr.strip()}")
+            
+            if result.returncode != 0:
+                 debugger.error("Post-operation script failed.")
+            else:
+                 debugger.success("Post-operation script executed successfully.")
+
+        except Exception as e:
+            debugger.error(f"Failed to execute post-operation script '{script_path}': {e}")
+
     def get_current_commit(self) -> str:
         """Get the current commit hash."""
         result = self._run_git_command(["rev-parse", "HEAD"])
@@ -255,7 +325,8 @@ class GitUpdater:
     def update(self, remote: str = "origin", branch: str = None, 
                force: bool = False, stash_changes: bool = True) -> bool:
         """
-        Update the repository to the latest version.
+        Update the repository to the latest version. After a successful update,
+        it may run a post-operation script if configured.
         
         Args:
             remote (str): Remote name
@@ -272,8 +343,8 @@ class GitUpdater:
         debugger.info(f"Starting update process for {remote}/{branch}")
         debugger.var("Update parameters", remote=remote, branch=branch, force=force, stash_changes=stash_changes)
         
-        # Save current state for potential rollback
-        self.save_current_state()
+        # Save current state for potential rollback and script context
+        previous_state = self.save_current_state()
         
         # Check if we have local changes
         if not self.is_clean():
@@ -315,6 +386,13 @@ class GitUpdater:
             # Show what changed
             self.show_recent_commits(5)
             
+            # Execute post-update script
+            current_commit = self.get_current_commit()
+            self._execute_post_operation_script(
+                "update",
+                {"previous_commit": previous_state["commit"], "current_commit": current_commit}
+            )
+            
             return True
             
         except subprocess.CalledProcessError as e:
@@ -323,7 +401,8 @@ class GitUpdater:
     
     def rollback_to_commit(self, commit_hash: str, force: bool = False) -> bool:
         """
-        Rollback to a specific commit.
+        Rollback to a specific commit. After a successful rollback,
+        it may run a post-operation script if configured.
         
         Args:
             commit_hash (str): The commit hash to rollback to
@@ -335,7 +414,7 @@ class GitUpdater:
         debugger.info(f"Rolling back to commit: {commit_hash}")
         
         # Save current state
-        self.save_current_state()
+        previous_state = self.save_current_state()
         
         # Check for local changes
         if not self.is_clean() and not force:
@@ -353,6 +432,13 @@ class GitUpdater:
                 self._run_git_command(["reset", "--soft", commit_hash])
             
             debugger.success(f"Successfully rolled back to {commit_hash}")
+            
+            # Execute post-rollback script
+            self._execute_post_operation_script(
+                "rollback",
+                {"previous_commit": previous_state["commit"], "current_commit": commit_hash}
+            )
+
             return True
             
         except subprocess.CalledProcessError as e:
@@ -361,7 +447,8 @@ class GitUpdater:
     
     def go_to_version(self, version_ref: str, force: bool = False) -> bool:
         """
-        Go to a specific version (tag, branch, or commit).
+        Go to a specific version (tag, branch, or commit). After a successful
+        checkout, it may run a post-operation script if configured.
         
         Args:
             version_ref (str): Version reference (tag, branch, or commit hash)
@@ -373,7 +460,7 @@ class GitUpdater:
         debugger.info(f"Going to version: {version_ref}")
         
         # Save current state
-        self.save_current_state()
+        previous_state = self.save_current_state()
         
         # Check for local changes
         if not self.is_clean():
@@ -397,6 +484,12 @@ class GitUpdater:
             current_commit = self.get_current_commit()
             current_branch = self.get_current_branch()
             debugger.info(f"Now on: {current_branch} ({current_commit[:8]})")
+            
+            # Execute post-goto script
+            self._execute_post_operation_script(
+                "goto",
+                {"previous_commit": previous_state["commit"], "current_commit": current_commit}
+            )
             
             return True
             
@@ -506,28 +599,36 @@ def main():
     """Main function for command-line usage."""
     import argparse
     
-    parser = argparse.ArgumentParser(description="Git Repository Updater")
+    parser = argparse.ArgumentParser(
+        description="Git Repository Updater. Can execute a post-operation script (e.g., 'post-update.py') if found in the repo root. Use --allow-remote-scripts to enable this. SECURITY: Only enable this for trusted repositories.",
+        formatter_class=argparse.RawTextHelpFormatter
+    )
     parser.add_argument("--repo", default=".", help="Repository path (default: current directory)")
     parser.add_argument("--remote", default="origin", help="Remote name (default: origin)")
     parser.add_argument("--branch", help="Branch name (default: current branch)")
-    parser.add_argument("--force", action="store_true", help="Force operation")
+    parser.add_argument("--force", action="store_true", help="Force operation (e.g., hard reset)")
     
-    subparsers = parser.add_subparsers(dest="command", help="Available commands")
+    # Arguments for remote script execution
+    script_group = parser.add_argument_group('Post-Operation Script Execution')
+    script_group.add_argument("--allow-remote-scripts", action="store_true", help="Enable execution of post-operation scripts. SECURITY RISK!")
+    script_group.add_argument("--post-op-script", default="post-update.py", help="Name of the script to run (default: post-update.py)")
+    
+    subparsers = parser.add_subparsers(dest="command", help="Available commands", required=True)
     
     # Update command
-    update_parser = subparsers.add_parser("update", help="Update repository")
-    update_parser.add_argument("--no-stash", action="store_true", help="Don't stash changes")
+    update_parser = subparsers.add_parser("update", help="Update repository to the latest version")
+    update_parser.add_argument("--no-stash", action="store_true", help="Don't stash local changes (will fail if not clean)")
     
     # Rollback command
-    rollback_parser = subparsers.add_parser("rollback", help="Rollback to commit")
+    rollback_parser = subparsers.add_parser("rollback", help="Rollback to a specific commit")
     rollback_parser.add_argument("commit", help="Commit hash to rollback to")
     
     # Go to version command
-    version_parser = subparsers.add_parser("goto", help="Go to specific version")
-    version_parser.add_argument("version", help="Version reference (tag, branch, or commit)")
+    version_parser = subparsers.add_parser("goto", help="Go to a specific version (tag, branch, commit)")
+    version_parser.add_argument("version", help="Version reference")
     
     # Status command
-    subparsers.add_parser("status", help="Show repository status")
+    subparsers.add_parser("status", help="Show detailed repository status")
     
     # History command
     history_parser = subparsers.add_parser("history", help="Show commit history")
@@ -538,12 +639,12 @@ def main():
     
     args = parser.parse_args()
     
-    if not args.command:
-        parser.print_help()
-        return
-    
     try:
-        updater = GitUpdater(args.repo)
+        updater = GitUpdater(
+            args.repo,
+            allow_remote_scripts=args.allow_remote_scripts,
+            post_op_script_name=args.post_op_script
+        )
         
         if args.command == "update":
             success = updater.update(
@@ -567,8 +668,11 @@ def main():
             print(f"Current branch: {updater.get_current_branch()}")
             print(f"Current commit: {updater.get_current_commit()}")
             print(f"Working directory clean: {updater.is_clean()}")
+            if not updater.is_clean():
+                print("Uncommitted changes:\n" + updater.get_status())
             has_updates, commits_behind = updater.check_for_updates(args.remote, args.branch)
-            print(f"Updates available: {has_updates} ({commits_behind} commits behind)")
+            print(f"Updates available: {has_updates} ({commits_behind} commits behind {args.remote}/{args.branch or 'current'})")
+            updater.get_remote_info()
             
         elif args.command == "history":
             updater.show_recent_commits(args.count)
@@ -577,7 +681,7 @@ def main():
             updater.list_tags()
             
     except Exception as e:
-        debugger.critical(f"Command failed: {e}")
+        debugger.critical(f"An unexpected error occurred: {e}")
         sys.exit(1)
 
 
