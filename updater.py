@@ -123,12 +123,19 @@ class GitUpdater:
             context (Dict): Contextual information about the operation, like commit hashes.
         """
         if not self.allow_remote_scripts:
+<<<<<<< Updated upstream
             debugger.debug("Remote script execution is disabled. Skipping post-operation script.")
+=======
+>>>>>>> Stashed changes
             return
 
         script_path = self.repo_path / self.post_op_script_name
         if not script_path.exists():
+<<<<<<< Updated upstream
             debugger.debug(f"Post-operation script '{self.post_op_script_name}' not found at {script_path}. Skipping.")
+=======
+            debugger.debug(f"Post-operation script '{self.post_op_script_name}' not found. Skipping.")
+>>>>>>> Stashed changes
             return
 
         debugger.info(f"Executing post-operation script: {script_path}")
@@ -144,6 +151,7 @@ class GitUpdater:
         command_to_run = []
         if script_path.suffix == '.py':
             command_to_run = [sys.executable, str(script_path)]
+<<<<<<< Updated upstream
         # Add common shell interpreters for other script types
         elif script_path.suffix == '.sh' and sys.platform != 'win32':
             command_to_run = ["bash", str(script_path)]
@@ -154,6 +162,12 @@ class GitUpdater:
 
         try:
             debugger.debug(f"Running script command: {' '.join(command_to_run)}")
+=======
+        else: # For .sh, .bat, or other executable files
+            command_to_run = [str(script_path)]
+
+        try:
+>>>>>>> Stashed changes
             result = subprocess.run(
                 command_to_run,
                 cwd=self.repo_path,
@@ -168,7 +182,11 @@ class GitUpdater:
                 debugger.info(f"Script stdout:\n{result.stdout.strip()}")
             if result.stderr:
                 debugger.warning(f"Script stderr:\n{result.stderr.strip()}")
+<<<<<<< Updated upstream
                 
+=======
+            
+>>>>>>> Stashed changes
             if result.returncode != 0:
                  debugger.error("Post-operation script failed.")
             else:
@@ -332,8 +350,13 @@ class GitUpdater:
     def update(self, remote: str = "origin", branch: str = None, 
                force: bool = False, stash_changes: bool = True) -> bool:
         """
+<<<<<<< Updated upstream
         Update the repository to the latest version. After the operation (success or failure),
         it will run a post-operation script if configured.
+=======
+        Update the repository to the latest version. After a successful update,
+        it may run a post-operation script if configured.
+>>>>>>> Stashed changes
         
         Args:
             remote (str): Remote name
@@ -352,8 +375,26 @@ class GitUpdater:
         
         # Save current state for potential rollback and script context
         previous_state = self.save_current_state()
+<<<<<<< Updated upstream
         update_success = False # Flag to track overall success for return value
 
+=======
+        
+        # Check if we have local changes
+        if not self.is_clean():
+            if stash_changes:
+                debugger.warning("Local changes detected, stashing them...")
+                if not self.stash_changes():
+                    debugger.error("Failed to stash changes")
+                    if not force:
+                        return False
+            elif not force:
+                debugger.error("Local changes detected. Use force=True or stash_changes=True")
+                return False
+            else:
+                debugger.warning("Force update enabled, proceeding despite local changes")
+        
+>>>>>>> Stashed changes
         try:
             # Check if we have local changes
             if not self.is_clean():
@@ -394,7 +435,18 @@ class GitUpdater:
             
             # Show what changed
             self.show_recent_commits(5)
+<<<<<<< Updated upstream
             update_success = True
+=======
+            
+            # Execute post-update script
+            current_commit = self.get_current_commit()
+            self._execute_post_operation_script(
+                "update",
+                {"previous_commit": previous_state["commit"], "current_commit": current_commit}
+            )
+            
+>>>>>>> Stashed changes
             return True
             
         except subprocess.CalledProcessError as e:
@@ -414,8 +466,13 @@ class GitUpdater:
 
     def rollback_to_commit(self, commit_hash: str, force: bool = False) -> bool:
         """
+<<<<<<< Updated upstream
         Rollback to a specific commit. After the operation (success or failure),
         it will run a post-operation script if configured.
+=======
+        Rollback to a specific commit. After a successful rollback,
+        it may run a post-operation script if configured.
+>>>>>>> Stashed changes
         
         Args:
             commit_hash (str): The commit hash to rollback to
@@ -428,8 +485,17 @@ class GitUpdater:
         
         # Save current state
         previous_state = self.save_current_state()
+<<<<<<< Updated upstream
         rollback_success = False
 
+=======
+        
+        # Check for local changes
+        if not self.is_clean() and not force:
+            debugger.error("Local changes detected. Use force=True to proceed")
+            return False
+        
+>>>>>>> Stashed changes
         try:
             # Check for local changes
             if not self.is_clean() and not force:
@@ -446,7 +512,17 @@ class GitUpdater:
                 self._run_git_command(["reset", "--soft", commit_hash])
             
             debugger.success(f"Successfully rolled back to {commit_hash}")
+<<<<<<< Updated upstream
             rollback_success = True
+=======
+            
+            # Execute post-rollback script
+            self._execute_post_operation_script(
+                "rollback",
+                {"previous_commit": previous_state["commit"], "current_commit": commit_hash}
+            )
+
+>>>>>>> Stashed changes
             return True
             
         except subprocess.CalledProcessError as e:
@@ -462,8 +538,13 @@ class GitUpdater:
     
     def go_to_version(self, version_ref: str, force: bool = False) -> bool:
         """
+<<<<<<< Updated upstream
         Go to a specific version (tag, branch, or commit). After the operation (success or failure),
         it will run a post-operation script if configured.
+=======
+        Go to a specific version (tag, branch, or commit). After a successful
+        checkout, it may run a post-operation script if configured.
+>>>>>>> Stashed changes
         
         Args:
             version_ref (str): Version reference (tag, branch, or commit hash)
@@ -476,8 +557,20 @@ class GitUpdater:
         
         # Save current state
         previous_state = self.save_current_state()
+<<<<<<< Updated upstream
         goto_success = False
 
+=======
+        
+        # Check for local changes
+        if not self.is_clean():
+            if force:
+                debugger.warning("Force checkout enabled, discarding local changes")
+            else:
+                debugger.error("Local changes detected. Use force=True to discard them")
+                return False
+        
+>>>>>>> Stashed changes
         try:
             # Check for local changes
             if not self.is_clean():
@@ -500,7 +593,17 @@ class GitUpdater:
             current_commit = self.get_current_commit()
             current_branch = self.get_current_branch()
             debugger.info(f"Now on: {current_branch} ({current_commit[:8]})")
+<<<<<<< Updated upstream
             goto_success = True
+=======
+            
+            # Execute post-goto script
+            self._execute_post_operation_script(
+                "goto",
+                {"previous_commit": previous_state["commit"], "current_commit": current_commit}
+            )
+            
+>>>>>>> Stashed changes
             return True
             
         except subprocess.CalledProcessError as e:
@@ -629,6 +732,11 @@ def main():
     script_group = parser.add_argument_group('Post-Operation Script Execution')
     script_group.add_argument("--allow-remote-scripts", action="store_true", help="Enable execution of post-operation scripts. SECURITY RISK!")
     script_group.add_argument("--post-op-script", default="post-update.py", help="Name of the script to run (default: post-update.py)")
+<<<<<<< Updated upstream
+=======
+    
+    subparsers = parser.add_subparsers(dest="command", help="Available commands", required=True)
+>>>>>>> Stashed changes
     
     subparsers = parser.add_subparsers(dest="command", help="Available commands", required=False) # Changed to required=False
 
