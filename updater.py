@@ -139,12 +139,12 @@ class GitUpdater:
         script_env["GIT_UPDATER_PREV_COMMIT"] = context.get("previous_commit", "")
         script_env["GIT_UPDATER_CURR_COMMIT"] = context.get("current_commit", "")
         script_env["GIT_UPDATER_REPO_PATH"] = str(self.repo_path)
+        script_env["GIT_UPDATER_SUCCESSFUL"] = str(context.get("successful", False)) # Pass general success flag
         
         # Determine how to run the script
         command_to_run = []
         if script_path.suffix == '.py':
             command_to_run = [sys.executable, str(script_path)]
-        # Add common shell interpreters for other script types
         elif script_path.suffix == '.sh' and sys.platform != 'win32':
             command_to_run = ["bash", str(script_path)]
         elif script_path.suffix == '.bat' and sys.platform == 'win32':
@@ -353,25 +353,28 @@ class GitUpdater:
         # Save current state for potential rollback and script context
         previous_state = self.save_current_state()
         update_success = False # Flag to track overall success for return value
+        stashed_anything = False # Track if we actually stashed changes
 
         try:
             # Check if we have local changes
             if not self.is_clean():
                 if stash_changes:
                     debugger.warning("Local changes detected, stashing them...")
-                    if not self.stash_changes():
+                    if self.stash_changes(): # Call stash_changes and check its return
+                        stashed_anything = True
+                    else:
                         debugger.error("Failed to stash changes")
                         if not force:
                             return False # Cannot proceed without stashing or force
                 elif not force:
+                    debugger.warning("Force update enabled, proceeding despite local changes")
+                else:
                     debugger.error("Local changes detected. Use force=True or stash_changes=True")
                     return False
-                else:
-                    debugger.warning("Force update enabled, proceeding despite local changes")
             
             # Fetch updates
             if not self.fetch_updates(remote):
-                return False
+                return False # Fetch failed, subsequent update commands would likely fail too
             
             # Check for updates
             has_updates, commits_behind = self.check_for_updates(remote, branch)
@@ -379,36 +382,36 @@ class GitUpdater:
             if not has_updates:
                 debugger.info("Repository is already up to date")
                 update_success = True # Consider 'already up to date' a success
-                return True # Exit early if no updates
-            
-            debugger.info(f"Updating repository ({commits_behind} commits behind)...")
-            
-            # Perform the update
-            if force:
-                debugger.warning("Performing force update...")
-                self._run_git_command(["reset", "--hard", f"{remote}/{branch}"])
             else:
-                self._run_git_command(["merge", f"{remote}/{branch}"])
+                debugger.info(f"Updating repository ({commits_behind} commits behind)...")
+                
+                # Perform the update
+                if force:
+                    debugger.warning("Performing force update...")
+                    self._run_git_command(["reset", "--hard", f"{remote}/{branch}"])
+                else:
+                    self._run_git_command(["merge", f"{remote}/{branch}"])
+                
+                debugger.success(f"Successfully updated to latest {remote}/{branch}")
+                
+                # Show what changed
+                self.show_recent_commits(5)
             
-            debugger.success(f"Successfully updated to latest {remote}/{branch}")
-            
-            # Show what changed
-            self.show_recent_commits(5)
-            update_success = True
+            update_success = True # Mark success if we reached here (either updated or already up-to-date)
             return True
             
         except subprocess.CalledProcessError as e:
             debugger.error(f"Update failed: {e}")
             return False
         finally:
-            # Execute post-update script regardless of success/failure
+            # Execute post-update script regardless of success/failure of the Git command itself
             current_commit = self.get_current_commit() # Get current commit for context
             self._execute_post_operation_script(
                 "update",
-                {"previous_commit": previous_state["commit"], "current_commit": current_commit, "update_successful": update_success}
+                {"previous_commit": previous_state["commit"], "current_commit": current_commit, "successful": update_success}
             )
-            # Re-apply stashed changes if they were stashed
-            if stash_changes and not self.is_clean(): # Only pop if something was stashed and changes were applied
+            # Re-apply stashed changes if they were stashed AND there are actual stashes to pop
+            if stashed_anything: 
                 self.pop_stash()
 
 
@@ -457,7 +460,7 @@ class GitUpdater:
             current_commit = self.get_current_commit()
             self._execute_post_operation_script(
                 "rollback",
-                {"previous_commit": previous_state["commit"], "current_commit": current_commit, "rollback_successful": rollback_success}
+                {"previous_commit": previous_state["commit"], "current_commit": current_commit, "successful": rollback_success}
             )
     
     def go_to_version(self, version_ref: str, force: bool = False) -> bool:
@@ -511,7 +514,7 @@ class GitUpdater:
             current_commit = self.get_current_commit()
             self._execute_post_operation_script(
                 "goto",
-                {"previous_commit": previous_state["commit"], "current_commit": current_commit, "goto_successful": goto_success}
+                {"previous_commit": previous_state["commit"], "current_commit": current_commit, "successful": goto_success}
             )
             
     def show_recent_commits(self, count: int = 10) -> List[Dict]:
@@ -630,7 +633,7 @@ def main():
     script_group.add_argument("--allow-remote-scripts", action="store_true", help="Enable execution of post-operation scripts. SECURITY RISK!")
     script_group.add_argument("--post-op-script", default="post-update.py", help="Name of the script to run (default: post-update.py)")
     
-    subparsers = parser.add_subparsers(dest="command", help="Available commands", required=False) # Changed to required=False
+    subparsers = parser.add_subparsers(dest="command", help="Available commands", required=False) 
 
     # Update command
     update_parser = subparsers.add_parser("update", help="Update repository to the latest version")
@@ -654,7 +657,7 @@ def main():
     # Tags command
     subparsers.add_parser("tags", help="List available tags")
     
-    # Check if any arguments were provided
+    # Check if any arguments were provided to show help if run without commands
     if len(sys.argv) == 1:
         parser.print_help(sys.stderr)
         sys.exit(1)
