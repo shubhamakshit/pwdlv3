@@ -43,9 +43,15 @@ jobs:
               exit 1
           }
 
-          # --- Step 2: Modify script content to make it non-interactive ---
+          # --- Step 2: Modify script content to make it non-interactive and fix syntax ---
+          # Remove 'Read-Host "Press Enter to exit..."' lines to prevent hanging
           $modifiedScriptContent = $scriptContent -replace 'Read-Host "Press Enter to exit..."', ''
-          Write-Host "Script modified for non-interactive execution."
+          
+          # Fix potential syntax error in the original script: [string]$Title = Script Automation
+          # This specifically targets the line to ensure it has quotes, common issue if the URL content differs slightly
+          $modifiedScriptContent = $modifiedScriptContent -replace '(?<=\[string\]\$Title = )Script Automation', '"Script Automation"'
+          
+          Write-Host "Script modified for non-interactive execution and syntax corrected."
 
           # --- Step 3: Prepare the inputs to be piped to the script ---
           $inputData = @(
@@ -56,22 +62,32 @@ jobs:
           )
 
           Write-Host "Piping inputs to script (order matters):"
-          $inputData | ForEach-Object { Write-Host "  - $_" } # Log the inputs being sent
+          $inputData | ForEach-Object { Write-Host "  - $_" }
 
-          # --- FIX: Write inputs to a temporary file and redirect that file ---
+          # --- Step 4: Write inputs to a temporary file ---
           $tempInputFile = New-TemporaryFile
-          $inputData | Set-Content $tempInputFile.FullName -Encoding UTF8 # Ensure encoding matches
+          $inputData | Set-Content $tempInputFile.FullName -Encoding UTF8
 
           Write-Host "Inputs written to temporary file: $($tempInputFile.FullName)"
 
-          # --- Step 4: Execute the modified script with piped inputs from the temporary file ---
+          # --- Step 5: Write the modified script to another temporary file ---
+          $tempScriptFile = New-TemporaryFile
+          $modifiedScriptContent | Set-Content $tempScriptFile.FullName -Encoding UTF8
+
+          Write-Host "Modified script written to temporary file: $($tempScriptFile.FullName)"
+
+          # --- Step 6: Execute the temporary script file, redirecting input from the input file ---
+          # We execute the temporary script file using `pwsh.exe -File`,
+          # and then use `Start-Process` with `-RedirectStandardInput` to feed the inputs.
+          # This clearly separates script execution from input redirection.
           $process = Start-Process -FilePath "pwsh.exe" `
-              -ArgumentList "-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", "$modifiedScriptContent" `
-              -RedirectStandardInput $tempInputFile.FullName ` # Provide the file path here
+              -ArgumentList "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "$($tempScriptFile.FullName)" `
+              -RedirectStandardInput $tempInputFile.FullName `
               -PassThru -NoNewWindow -Wait
 
-          # Clean up the temporary file (good practice, though runner environments are ephemeral)
+          # Clean up temporary files
           Remove-Item $tempInputFile.FullName -ErrorAction SilentlyContinue
+          Remove-Item $tempScriptFile.FullName -ErrorAction SilentlyContinue
 
           # Check the exit code of the PowerShell process
           if ($process.ExitCode -ne 0) {
