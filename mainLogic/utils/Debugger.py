@@ -66,6 +66,7 @@ class Debugger:
         # To ensure consistent spacing, we need to track actual visible text lengths
         # when ANSI color codes are used
         self.ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
+        self._indent_level = 0 # Added for recursive indentation
 
     def _get_location(self):
         """
@@ -170,7 +171,9 @@ class Debugger:
         location_text = f"[{self._get_location()}]" if self.show_location else ""
         location_str = self._ljust_with_ansi(location_text, self.column_widths["location"])
 
-        message_str = f"{bright_color}{message}{reset}"
+        # Add indentation for recursive calls
+        indent_prefix = "    " * self._indent_level
+        message_str = f"{indent_prefix}{bright_color}{message}{reset}"
 
         # Combine into a table-like structure
         parts.append(f"{level_str} {time_str} {location_str} {message_str}")
@@ -218,69 +221,96 @@ class Debugger:
             debug.var(x, y, result=z)      # Mix of auto-detected and custom names
         """
         # Handle positional arguments (auto-detect names)
+        # We need to adjust frame_depth here because _get_variable_name is called
+        # from var, which is called from the user code.
+        # This will need careful adjustment if the call stack changes significantly.
+        current_frame = inspect.currentframe()
+        outer_frames = []
+        f = current_frame
+        while f:
+            if os.path.basename(f.f_code.co_filename) != "Debugger.py":
+                break
+            outer_frames.append(f)
+            f = f.f_back
+        
+        # If the call is directly from user code, we need to go back 2 frames
+        # (var -> _inspect_var -> _get_variable_name)
+        # If it's a wrapper like var_dict -> var, then it's different.
+        # For a general `var` call, we want the frame that called `var`.
+        # So we look for the first frame outside of Debugger.py in the stack.
+        # This logic is already handled by _get_location, but for variable naming
+        # we need to be more precise about the frame where the variable is defined.
+
+        # The frame for var() is at depth 0, its caller is at depth 1 (user code)
+        # The _get_variable_name itself looks back from its own call, so `frame_depth=2` is typically correct for `var`
+        # if called directly like `debug.var(my_var)`.
+        # For nested calls (e.g., from `_inspect_dict`), `_inspect_var` is already adjusting depth.
+        
+        # This is a tricky part for _get_variable_name. Let's assume it works well for the top-level call.
+        # For internal recursive calls, the name is provided explicitly.
+
         for arg in args:
-            var_name = self._get_variable_name(arg)
+            # When calling from var, we need to look one more frame back
+            # compared to when _get_variable_name is called directly from _inspect_var.
+            # This is because _inspect_var is a helper function to var.
+            # However, the current _get_variable_name implementation already tries to find the
+            # non-Debugger.py frame, which is often what we want.
+            # Let's keep `frame_depth=2` for the top-level `var` call as it's designed to skip `var` and `_get_variable_name` itself.
+            var_name = self._get_variable_name(arg, frame_depth=2) 
             self._inspect_var(arg, var_name)
 
         # Handle keyword arguments (custom names)
         for name, value in kwargs.items():
             self._inspect_var(value, name)
 
-    def _inspect_var(self, variable, var_name):
+    def _inspect_var(self, variable, var_name, is_nested=False):
         """
         Helper method to inspect a single variable
 
         Args:
             variable: The variable to inspect
             var_name: Name to display for the variable
+            is_nested: True if this call is from a recursive inspection (for indentation)
         """
         var_type = type(variable).__name__
 
-        # For simple types, just show the value
-        if isinstance(variable, (int, float, bool, str)):
-            value_str = repr(variable)
-            self.log(f"{var_name} ({var_type}) = {value_str}", "VAR")
+        # Increment indent level for nested calls
+        if is_nested:
+            self._indent_level += 1
 
-        # For more complex types, use type-specific methods
-        elif isinstance(variable, dict):
-            self.var_dict(variable, var_name)
-        elif isinstance(variable, (list, tuple)):
-            self.var_list(variable, var_name)
-        elif isinstance(variable, set):
-            self.var_set(variable, var_name)
-        else:
-            # For other objects, show the representation
-            value_str = repr(variable)
-            self.log(f"{var_name} ({var_type}) = {value_str}", "VAR")
+        try:
+            # For simple types, just show the value
+            if isinstance(variable, (int, float, bool, str, type(None))): # Added NoneType
+                value_str = repr(variable)
+                self.log(f"{var_name} ({var_type}) = {value_str}", "VAR")
+
+            # For more complex types, use type-specific methods
+            elif isinstance(variable, dict):
+                self._inspect_dict(variable, var_name, is_nested=True)
+            elif isinstance(variable, (list, tuple)):
+                self._inspect_list(variable, var_name, is_nested=True)
+            elif isinstance(variable, set):
+                self._inspect_set(variable, var_name, is_nested=True)
+            else:
+                # For other objects, show the representation
+                value_str = repr(variable)
+                self.log(f"{var_name} ({var_type}) = {value_str}", "VAR")
+        finally:
+            # Decrement indent level after nested calls
+            if is_nested:
+                self._indent_level -= 1
+
 
     def var_dict(self, *args, **kwargs):
-        """
-        Display dictionaries with formatted output
-
-        Args:
-            *args: Dictionaries to inspect with auto-detected names
-            **kwargs: Dictionaries with custom names as keyword arguments
-
-        Usage:
-            debug.var_dict(my_dict)               # Auto-detected name
-            debug.var_dict(my_dict, other_dict)   # Multiple dictionaries
-            debug.var_dict(config=my_dict)        # Custom name 'config'
-        """
-        # If no kwargs and only one positional arg, use legacy behavior
-        if len(args) == 1 and not kwargs:
-            dictionary = args[0]
-            var_name = self._get_variable_name(dictionary)
-            self._inspect_dict(dictionary, var_name)
-            return
-
         # Handle positional arguments (auto-detect names)
         for arg in args:
             if isinstance(arg, dict):
-                var_name = self._get_variable_name(arg)
+                # When calling from var_dict directly, adjust frame_depth
+                var_name = self._get_variable_name(arg, frame_depth=2) # Adjust depth for direct var_dict call
                 self._inspect_dict(arg, var_name)
             else:
                 var_type = type(arg).__name__
-                var_name = self._get_variable_name(arg)
+                var_name = self._get_variable_name(arg, frame_depth=2)
                 self.log(f"{var_name} is not a dictionary (got {var_type})", "WARNING")
 
         # Handle keyword arguments (custom names)
@@ -291,59 +321,47 @@ class Debugger:
                 var_type = type(value).__name__
                 self.log(f"{name} is not a dictionary (got {var_type})", "WARNING")
 
-    def _inspect_dict(self, dictionary, var_name):
+    def _inspect_dict(self, dictionary, var_name, is_nested=False):
         """
         Helper method to inspect a single dictionary
 
         Args:
             dictionary: The dictionary to inspect
             var_name: Name to display for the dictionary
+            is_nested: True if this call is from a recursive inspection
         """
+        if not is_nested: # Only increment on the initial call to this method
+            self._indent_level += 1
+        
         self.log(f"{var_name} (dict) with {len(dictionary)} items:", "VAR")
 
         if not dictionary:
-            self.log("  {}", "VAR")
+            self.log("{}", "VAR")
+            if not is_nested: # Only decrement on the initial call exit
+                self._indent_level -= 1
             return
 
         self.log("{", "VAR")
         for key, value in dictionary.items():
             key_repr = repr(key)
-            if isinstance(value, (int, float, bool, str)):
-                value_repr = repr(value)
-                self.log(f"  {key_repr}: {value_repr}", "VAR")
-            else:
-                value_type = type(value).__name__
-                self.log(f"  {key_repr}: <{value_type}>", "VAR")
+            # Recursively inspect the value
+            # The name for the nested item will be its key
+            self._inspect_var(value, key_repr, is_nested=True)
         self.log("}", "VAR")
 
+        if not is_nested: # Only decrement on the initial call exit
+            self._indent_level -= 1
+
+
     def var_list(self, *args, **kwargs):
-        """
-        Display lists or tuples with formatted output
-
-        Args:
-            *args: Lists/tuples to inspect with auto-detected names
-            **kwargs: Lists/tuples with custom names as keyword arguments
-
-        Usage:
-            debug.var_list(my_list)               # Auto-detected name
-            debug.var_list(my_list, my_tuple)     # Multiple sequences
-            debug.var_list(numbers=my_list)       # Custom name 'numbers'
-        """
-        # If no kwargs and only one positional arg, use legacy behavior
-        if len(args) == 1 and not kwargs:
-            lst = args[0]
-            var_name = self._get_variable_name(lst)
-            self._inspect_list(lst, var_name)
-            return
-
         # Handle positional arguments (auto-detect names)
         for arg in args:
             if isinstance(arg, (list, tuple)):
-                var_name = self._get_variable_name(arg)
+                var_name = self._get_variable_name(arg, frame_depth=2) # Adjust depth for direct var_list call
                 self._inspect_list(arg, var_name)
             else:
                 var_type = type(arg).__name__
-                var_name = self._get_variable_name(arg)
+                var_name = self._get_variable_name(arg, frame_depth=2)
                 self.log(f"{var_name} is not a list or tuple (got {var_type})", "WARNING")
 
         # Handle keyword arguments (custom names)
@@ -354,19 +372,25 @@ class Debugger:
                 var_type = type(value).__name__
                 self.log(f"{name} is not a list or tuple (got {var_type})", "WARNING")
 
-    def _inspect_list(self, lst, var_name):
+    def _inspect_list(self, lst, var_name, is_nested=False):
         """
         Helper method to inspect a single list or tuple
 
         Args:
             lst: The list or tuple to inspect
             var_name: Name to display for the list or tuple
+            is_nested: True if this call is from a recursive inspection
         """
         container_type = "list" if isinstance(lst, list) else "tuple"
+        if not is_nested: # Only increment on the initial call to this method
+            self._indent_level += 1
+        
         self.log(f"{var_name} ({container_type}) with {len(lst)} items:", "VAR")
 
         if not lst:
-            self.log(f"  {'[]' if container_type == 'list' else '()'}", "VAR")
+            self.log(f"{'[]' if container_type == 'list' else '()'} ", "VAR") # Added space for consistency
+            if not is_nested: # Only decrement on the initial call exit
+                self._indent_level -= 1
             return
 
         opening = "[" if container_type == "list" else "("
@@ -374,42 +398,23 @@ class Debugger:
 
         self.log(opening, "VAR")
         for i, item in enumerate(lst):
-            if isinstance(item, (int, float, bool, str)):
-                item_repr = repr(item)
-                self.log(f"  {i}: {item_repr}", "VAR")
-            else:
-                item_type = type(item).__name__
-                self.log(f"  {i}: <{item_type}>", "VAR")
+            # Recursively inspect the item
+            self._inspect_var(item, f"{var_name}[{i}]", is_nested=True) # Pass index as part of name
         self.log(closing, "VAR")
 
+        if not is_nested: # Only decrement on the initial call exit
+            self._indent_level -= 1
+
+
     def var_set(self, *args, **kwargs):
-        """
-        Display sets with formatted output
-
-        Args:
-            *args: Sets to inspect with auto-detected names
-            **kwargs: Sets with custom names as keyword arguments
-
-        Usage:
-            debug.var_set(my_set)            # Auto-detected name
-            debug.var_set(set1, set2)        # Multiple sets
-            debug.var_set(unique=my_set)     # Custom name 'unique'
-        """
-        # If no kwargs and only one positional arg, use legacy behavior
-        if len(args) == 1 and not kwargs:
-            s = args[0]
-            var_name = self._get_variable_name(s)
-            self._inspect_set(s, var_name)
-            return
-
         # Handle positional arguments (auto-detect names)
         for arg in args:
             if isinstance(arg, set):
-                var_name = self._get_variable_name(arg)
+                var_name = self._get_variable_name(arg, frame_depth=2) # Adjust depth for direct var_set call
                 self._inspect_set(arg, var_name)
             else:
                 var_type = type(arg).__name__
-                var_name = self._get_variable_name(arg)
+                var_name = self._get_variable_name(arg, frame_depth=2)
                 self.log(f"{var_name} is not a set (got {var_type})", "WARNING")
 
         # Handle keyword arguments (custom names)
@@ -420,58 +425,44 @@ class Debugger:
                 var_type = type(value).__name__
                 self.log(f"{name} is not a set (got {var_type})", "WARNING")
 
-    def _inspect_set(self, s, var_name):
+    def _inspect_set(self, s, var_name, is_nested=False):
         """
         Helper method to inspect a single set
 
         Args:
             s: The set to inspect
             var_name: Name to display for the set
+            is_nested: True if this call is from a recursive inspection
         """
+        if not is_nested: # Only increment on the initial call to this method
+            self._indent_level += 1
+        
         self.log(f"{var_name} (set) with {len(s)} items:", "VAR")
 
         if not s:
-            self.log("  {}", "VAR")
+            self.log("{}", "VAR")
+            if not is_nested: # Only decrement on the initial call exit
+                self._indent_level -= 1
             return
 
         self.log("{", "VAR")
         for i, item in enumerate(s):
-            if isinstance(item, (int, float, bool, str)):
-                item_repr = repr(item)
-                self.log(f"  {item_repr}", "VAR")
-            else:
-                item_type = type(item).__name__
-                self.log(f"  <{item_type}>", "VAR")
+            # Recursively inspect the item, using a generic name like "item_X"
+            self._inspect_var(item, f"item_{i}", is_nested=True) 
         self.log("}", "VAR")
 
+        if not is_nested: # Only decrement on the initial call exit
+            self._indent_level -= 1
+
     def var_bool(self, *args, **kwargs):
-        """
-        Display booleans with formatted output
-
-        Args:
-            *args: Booleans to inspect with auto-detected names
-            **kwargs: Booleans with custom names as keyword arguments
-
-        Usage:
-            debug.var_bool(is_valid)                # Auto-detected name
-            debug.var_bool(is_valid, is_admin)      # Multiple booleans
-            debug.var_bool(success=is_valid)        # Custom name 'success'
-        """
-        # If no kwargs and only one positional arg, use legacy behavior
-        if len(args) == 1 and not kwargs:
-            boolean = args[0]
-            var_name = self._get_variable_name(boolean)
-            self._inspect_bool(boolean, var_name)
-            return
-
         # Handle positional arguments (auto-detect names)
         for arg in args:
             if isinstance(arg, bool):
-                var_name = self._get_variable_name(arg)
+                var_name = self._get_variable_name(arg, frame_depth=2)
                 self._inspect_bool(arg, var_name)
             else:
                 var_type = type(arg).__name__
-                var_name = self._get_variable_name(arg)
+                var_name = self._get_variable_name(arg, frame_depth=2)
                 self.log(f"{var_name} is not a boolean (got {var_type})", "WARNING")
 
         # Handle keyword arguments (custom names)
@@ -483,44 +474,18 @@ class Debugger:
                 self.log(f"{name} is not a boolean (got {var_type})", "WARNING")
 
     def _inspect_bool(self, boolean, var_name):
-        """
-        Helper method to inspect a single boolean
-
-        Args:
-            boolean: The boolean to inspect
-            var_name: Name to display for the boolean
-        """
         value_str = str(boolean)
         self.log(f"{var_name} (bool) = {value_str}", "VAR")
 
     def var_num(self, *args, **kwargs):
-        """
-        Display numbers with formatted output
-
-        Args:
-            *args: Numbers to inspect with auto-detected names
-            **kwargs: Numbers with custom names as keyword arguments
-
-        Usage:
-            debug.var_num(count)                # Auto-detected name
-            debug.var_num(x, y, z)              # Multiple numbers
-            debug.var_num(total=sum_value)      # Custom name 'total'
-        """
-        # If no kwargs and only one positional arg, use legacy behavior
-        if len(args) == 1 and not kwargs:
-            number = args[0]
-            var_name = self._get_variable_name(number)
-            self._inspect_num(number, var_name)
-            return
-
         # Handle positional arguments (auto-detect names)
         for arg in args:
             if isinstance(arg, (int, float)):
-                var_name = self._get_variable_name(arg)
+                var_name = self._get_variable_name(arg, frame_depth=2)
                 self._inspect_num(arg, var_name)
             else:
                 var_type = type(arg).__name__
-                var_name = self._get_variable_name(arg)
+                var_name = self._get_variable_name(arg, frame_depth=2)
                 self.log(f"{var_name} is not a number (got {var_type})", "WARNING")
 
         # Handle keyword arguments (custom names)
@@ -532,44 +497,18 @@ class Debugger:
                 self.log(f"{name} is not a number (got {var_type})", "WARNING")
 
     def _inspect_num(self, number, var_name):
-        """
-        Helper method to inspect a single number
-
-        Args:
-            number: The number to inspect
-            var_name: Name to display for the number
-        """
         num_type = "int" if isinstance(number, int) else "float"
         self.log(f"{var_name} ({num_type}) = {number}", "VAR")
 
     def var_str(self, *args, **kwargs):
-        """
-        Display strings with formatted output
-
-        Args:
-            *args: Strings to inspect with auto-detected names
-            **kwargs: Strings with custom names as keyword arguments
-
-        Usage:
-            debug.var_str(name)                 # Auto-detected name
-            debug.var_str(first, last)          # Multiple strings
-            debug.var_str(greeting=message)     # Custom name 'greeting'
-        """
-        # If no kwargs and only one positional arg, use legacy behavior
-        if len(args) == 1 and not kwargs:
-            string = args[0]
-            var_name = self._get_variable_name(string)
-            self._inspect_str(string, var_name)
-            return
-
         # Handle positional arguments (auto-detect names)
         for arg in args:
             if isinstance(arg, str):
-                var_name = self._get_variable_name(arg)
+                var_name = self._get_variable_name(arg, frame_depth=2)
                 self._inspect_str(arg, var_name)
             else:
                 var_type = type(arg).__name__
-                var_name = self._get_variable_name(arg)
+                var_name = self._get_variable_name(arg, frame_depth=2)
                 self.log(f"{var_name} is not a string (got {var_type})", "WARNING")
 
         # Handle keyword arguments (custom names)
@@ -581,39 +520,13 @@ class Debugger:
                 self.log(f"{name} is not a string (got {var_type})", "WARNING")
 
     def _inspect_str(self, string, var_name):
-        """
-        Helper method to inspect a single string
-
-        Args:
-            string: The string to inspect
-            var_name: Name to display for the string
-        """
         self.log(f"{var_name} (str) length={len(string)}", "VAR")
-        self.log(f'  "{string}"', "VAR")
+        self.log(f'"{string}"', "VAR")
 
     def var_type(self, *args, **kwargs):
-        """
-        Display the type hierarchy of objects
-
-        Args:
-            *args: Objects to inspect with auto-detected names
-            **kwargs: Objects with custom names as keyword arguments
-
-        Usage:
-            debug.var_type(obj)                 # Auto-detected name
-            debug.var_type(obj1, obj2)          # Multiple objects
-            debug.var_type(instance=obj)        # Custom name 'instance'
-        """
-        # If no kwargs and only one positional arg, use legacy behavior
-        if len(args) == 1 and not kwargs:
-            obj = args[0]
-            var_name = self._get_variable_name(obj)
-            self._inspect_type(obj, var_name)
-            return
-
         # Handle positional arguments (auto-detect names)
         for arg in args:
-            var_name = self._get_variable_name(arg)
+            var_name = self._get_variable_name(arg, frame_depth=2)
             self._inspect_type(arg, var_name)
 
         # Handle keyword arguments (custom names)
@@ -621,13 +534,6 @@ class Debugger:
             self._inspect_type(value, name)
 
     def _inspect_type(self, obj, var_name):
-        """
-        Helper method to inspect the type of a single object
-
-        Args:
-            obj: The object to inspect
-            var_name: Name to display for the object
-        """
         mro = type(obj).__mro__
         type_names = [t.__name__ for t in mro]
         self.log(f"{var_name} type hierarchy:", "VAR")

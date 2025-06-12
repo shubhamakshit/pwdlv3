@@ -202,3 +202,4 @@ clients.json
 /populate.py
 /populate.py
 pop.bat
+*.bak
