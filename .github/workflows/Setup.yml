@@ -48,7 +48,7 @@ jobs:
           $modifiedScriptContent = $scriptContent -replace 'Read-Host "Press Enter to exit..."', ''
           
           # Fix potential syntax error in the original script: [string]$Title = Script Automation
-          # This specifically targets the line to ensure it has quotes, common issue if the URL content differs slightly
+          # This regex looks for "Script Automation" specifically after `[string]$Title = `
           $modifiedScriptContent = $modifiedScriptContent -replace '(?<=\[string\]\$Title = )Script Automation', '"Script Automation"'
           
           Write-Host "Script modified for non-interactive execution and syntax corrected."
@@ -70,24 +70,25 @@ jobs:
 
           Write-Host "Inputs written to temporary file: $($tempInputFile.FullName)"
 
-          # --- Step 5: Write the modified script to another temporary file ---
-          $tempScriptFile = New-TemporaryFile
-          $modifiedScriptContent | Set-Content $tempScriptFile.FullName -Encoding UTF8
+          # --- Step 5: Write the modified script to another temporary file with a .ps1 extension ---
+          # Generate a unique temporary filename with a .ps1 extension
+          $tempScriptFileName = ([System.Guid]::NewGuid().ToString() + ".ps1")
+          $tempScriptFile = Join-Path (Get-Item Env:TEMP).Value $tempScriptFileName
 
-          Write-Host "Modified script written to temporary file: $($tempScriptFile.FullName)"
+          # Write the modified script content to this .ps1 file
+          $modifiedScriptContent | Set-Content $tempScriptFile -Encoding UTF8
+
+          Write-Host "Modified script written to temporary file: $tempScriptFile"
 
           # --- Step 6: Execute the temporary script file, redirecting input from the input file ---
-          # We execute the temporary script file using `pwsh.exe -File`,
-          # and then use `Start-Process` with `-RedirectStandardInput` to feed the inputs.
-          # This clearly separates script execution from input redirection.
           $process = Start-Process -FilePath "pwsh.exe" `
-              -ArgumentList "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "$($tempScriptFile.FullName)" `
+              -ArgumentList "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "$tempScriptFile" `
               -RedirectStandardInput $tempInputFile.FullName `
               -PassThru -NoNewWindow -Wait
 
-          # Clean up temporary files
+          # Clean up temporary files (good practice, though runner environments are ephemeral)
           Remove-Item $tempInputFile.FullName -ErrorAction SilentlyContinue
-          Remove-Item $tempScriptFile.FullName -ErrorAction SilentlyContinue
+          Remove-Item $tempScriptFile -ErrorAction SilentlyContinue # Use $tempScriptFile directly as it's the path
 
           # Check the exit code of the PowerShell process
           if ($process.ExitCode -ne 0) {
