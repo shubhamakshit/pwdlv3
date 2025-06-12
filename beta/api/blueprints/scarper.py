@@ -32,10 +32,15 @@ except Exception as e:
             debugger.error(f"Error getting access token: {e}")
     
     random_id = token.get("random_id",None)
-    if random_id is None:
-        batch_api = Endpoints().set_token(access_token)
-    else:
-        batch_api = Endpoints().set_token(access_token,random_id=random_id)
+    try:
+        if random_id is None:
+            batch_api = Endpoints().set_token(access_token)
+        else:
+            batch_api = Endpoints().set_token(access_token,random_id=random_id)
+    except Exception as e :
+        debugger.error("Failed to create batch_api instance, maybe the access_token is not available")
+        debugger.error("Scraper may not work as intended")
+        debugger.error(e)
 
 def create_response(data=None, error=None):
     response = {"data": data}

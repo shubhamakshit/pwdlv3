@@ -11,7 +11,6 @@ from mainLogic.utils.dependency_checker import re_check_dependencies
 from mainLogic.utils.glv import Global
 from mainLogic.utils.glv_var import PREFS_FILE, debugger
 from mainLogic.utils.os2 import SysFunc
-from updater import check_for_updates, pull_latest_changes as pull
 
 client_manager = Boss.client_manager
 task_manager = Boss.task_manager
@@ -73,7 +72,7 @@ def get_usages_for_all_client():
 
     return jsonify(usages), 200
 
-
+"""
 @admin.route('/api/server/update', methods=['GET', 'POST'])
 @admin.route('/server/update', methods=['GET', 'POST'])
 def update_server():
@@ -96,14 +95,15 @@ def update_server():
     except Exception as e:
         error_message = f"Unexpected error: {str(e)}"
         return jsonify({'error': error_message}), 500
+"""
 
-
+"""
 @admin.route('/api/server/update/latest')
 @admin.route('/server/update/latest')
 def get_latest_origin_hash():
     from updater import get_latest_origin_hash, get_info_by_commit_hash
     return jsonify(get_info_by_commit_hash(get_latest_origin_hash())), 200
-
+"""
 
 @admin.route('/api/check_token')
 @admin.route('/check_token')

@@ -4,6 +4,8 @@
   "user_id": "temp",
   "user_update_index": -1,
   "os-info": "linux",
+  "batch_name":"",
+  "video_id":"",
   "tmpDir": "/tmp",
   "verbose": false,
   "vsd": "$script/bin/vsd",

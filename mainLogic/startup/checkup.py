@@ -108,6 +108,10 @@ class CheckState:
 
     def check_token(self, token, random_id, id="680c85b0c9d776d19b869d3f",batch_name="65d75d320531c20018ade9bb", verbose=False):
         """Checks the validity of a token using LicenseKeyFetcher."""
+
+        if not id: id="680c85b0c9d776d19b869d3f"
+        if not batch_name: batch_name="65d75d320531c20018ade9bb"
+
         if verbose:
             Global.hr()
             debugger.debug("Checking Token...")
@@ -162,7 +166,18 @@ class CheckState:
                     prefs['random_id'] = random_id
 
                     try:
-                        key = self.check_token(token, random_id, verbose=verbose)
+                        try:
+                            video_id = prefs.get("video_id",None)
+                            debugger.var(prefs)
+                            batch_name = prefs.get("batch_name",None)
+                            debugger.debug(f"Got video_id as '{video_id}' and batch_name as '{batch_name}'")
+                        except Exception as e:
+                            debugger.error("Failed to extract video_id or batch name")
+                            debugger.error(e)
+                        if id and batch_name:
+                            key = self.check_token(token, random_id, verbose=verbose,id = video_id, batch_name = batch_name)
+                        else:
+                            key = self.check_token(token, random_id, verbose=verbose)
                         if key:
                             if verbose:
                                 debugger.success("Token Valid")

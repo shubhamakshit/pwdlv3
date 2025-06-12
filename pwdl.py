@@ -31,7 +31,7 @@ def parse_arguments():
 
 
     parser.add_argument('--ignore-token', action='store_true', help='Ignore the token.')
-    parser.add_argument('--sync', action='store_true', help='Sync the token.')
+    parser.add_argument('--no-sync', action='store_true', help='Do not sync the token.')
     parser.add_argument("--new-dl","-L",action='store_true',help="New Downloader")
     parser.add_argument("--batch-name","-B",type=str,help="Batch Id")
     parser.add_argument("--topic-name","-T",type=str,help="Topic name ")
@@ -67,7 +67,8 @@ if __name__ == "__main__":
 
     try:
         from beta.Syncer.main import Syncer
-        sync = Syncer()
+        if not args.no_sync:
+            sync = Syncer()
     except Exception as e:
         debugger.error(f"Error in Syncer: {e}")
         pass
