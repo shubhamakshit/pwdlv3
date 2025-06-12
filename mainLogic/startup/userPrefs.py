@@ -3,7 +3,7 @@ from mainLogic import error
 import os
 
 from mainLogic.error import CantLoadFile
-from mainLogic.utils.glv_var import vars, PREFS_FILE as pf
+from mainLogic.utils.glv_var import vars, PREFS_FILE as pf,debugger
 
 PREFS_FILE = pf
 
@@ -55,5 +55,5 @@ class PreferencesLoader:
 
     # print the preferences (internal function)
     def print_preferences(self):
-        for key in self.prefs:
-            print(f'{key} : {self.prefs[key]}')
+        debugger.var(self.prefs)
+

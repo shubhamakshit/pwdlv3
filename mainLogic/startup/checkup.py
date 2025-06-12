@@ -168,7 +168,7 @@ class CheckState:
                     try:
                         try:
                             video_id = prefs.get("video_id",None)
-                            debugger.var(prefs)
+                            ##debugger.var(prefs)
                             batch_name = prefs.get("batch_name",None)
                             debugger.debug(f"Got video_id as '{video_id}' and batch_name as '{batch_name}'")
                         except Exception as e:
