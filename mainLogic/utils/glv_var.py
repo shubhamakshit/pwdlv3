@@ -23,8 +23,8 @@ if env_file and os.path.exists(env_file):
     if sys_verbose: print(f"Using preferences file: {env_file}")
     PREFS_FILE = env_file
 else:
-    if sys_verbose: print(f"Using default preferences file: {os.path.join(vars['$script'], 'defaults.json')}")
-    PREFS_FILE = os.path.join(vars["$script"], 'defaults.json')
+    if sys_verbose: print(f"Using default preferences file: {os.path.join(vars['$script'], 'prefrences.json')}")
+    PREFS_FILE = os.path.join(vars["$script"], 'prefrences.json')
 
 api_webdl_directory = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../webdl'))
 EXECUTABLES = ['ffmpeg', 'mp4decrypt']
