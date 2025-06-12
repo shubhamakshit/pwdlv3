@@ -73,6 +73,17 @@ if __name__ == "__main__":
         debugger.error(f"Error in Syncer: {e}")
         pass
 
+    try:
+        from auto_updater import run_auto_update
+        run_auto_update(
+            run_post_install_script_force=False,
+            force_update=False
+        )
+    except Exception as e:
+        debugger.error("Faild to update ")
+        debugger.error(e)
+    excpet:
+
     downloader.main(
         csv_file=args.csv_file,
         id=args.id,
