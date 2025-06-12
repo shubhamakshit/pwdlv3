@@ -1,7 +1,7 @@
 # auto_updater.py
 import sys
 from pathlib import Path
-from datetime import datetime
+
 # Adjust this import based on your actual file structure
 # If git_updater.py is in the same directory as auto_updater.py:
 from updater import GitUpdater 
