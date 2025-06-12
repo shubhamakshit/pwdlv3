@@ -40,7 +40,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 mkdir -p $SCRIPT_DIR/bin
 
 # Download defaults.json
-curl -o prefrences.json https://raw.githubusercontent.com/shubhamakshit/pwdlv3/main/defaults.linux.json
+curl -o preferences.json https://raw.githubusercontent.com/shubhamakshit/pwdlv3/main/defaults.linux.json
 
 # Install Python requirements
 install_requirements
