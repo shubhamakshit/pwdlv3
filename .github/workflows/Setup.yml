@@ -1,39 +1,34 @@
 name: Run DL.PS1 Script (Non-Interactive)
 
 on:
-  # This makes the workflow manually triggerable from the GitHub Actions UI.
   workflow_dispatch:
     inputs:
       user_id:
         description: 'Desired user ID for preferences.json (e.g., your_username_123)'
         required: true
-        default: 'github-actions-user' # A default value for convenience
+        default: 'github-actions-user'
       batch_name:
         description: 'Optional batch name for preferences.json (leave empty for none)'
         required: false
-        default: '' # Default to empty string if not provided
+        default: ''
       video_id:
         description: 'Optional video ID for preferences.json (leave empty for none)'
         required: false
-        default: '' # Default to empty string if not provided
+        default: ''
 
 jobs:
   run-script:
-    # Use a Windows runner as the script is PowerShell-based
     runs-on: windows-latest
 
     steps:
       - name: Checkout repository
-        # This step is crucial if your workflow needs to access other files in your repo
         uses: actions/checkout@v4
 
       - name: Configure Git for long paths (for Windows compatibility)
-        # Some Windows systems benefit from this, especially with deeply nested paths
         run: git config --system core.longpaths true
         shell: pwsh
 
       - name: Execute PowerShell Script with Pre-filled Data
-        # Using pwsh (PowerShell Core) for better cross-platform compatibility and features
         shell: pwsh
         run: |
           $scriptUrl = "https://raw.githubusercontent.com/shubhamakshit/pwdlv3_assets/main/dl.pwdlv3.ps1"
@@ -45,19 +40,14 @@ jobs:
               Write-Host "Script downloaded successfully."
           } catch {
               Write-Error "Failed to download script: $($_.Exception.Message)"
-              exit 1 # Exit the workflow if download fails
+              exit 1
           }
 
           # --- Step 2: Modify script content to make it non-interactive ---
-          # We remove 'Read-Host "Press Enter to exit..."' lines to prevent the workflow from hanging.
-          # The script will effectively just proceed or exit after these points.
           $modifiedScriptContent = $scriptContent -replace 'Read-Host "Press Enter to exit..."', ''
           Write-Host "Script modified for non-interactive execution."
 
           # --- Step 3: Prepare the inputs to be piped to the script ---
-          # The order of these inputs is CRUCIAL and must match the sequence
-          # of `Read-Host` prompts within the PowerShell script.
-          # We always choose 'y' for the custom user ID to ensure we provide one.
           $inputData = @(
               "y", # Responds to "Do you want to enter a custom user ID (y/n)?"
               "${{ github.event.inputs.user_id }}", # Responds to "Enter your desired user ID"
@@ -65,30 +55,28 @@ jobs:
               "${{ github.event.inputs.video_id }}" # Responds to "Enter an optional video ID"
           )
 
-          # Join inputs with newline characters for piping
-          # Out-String converts the array to a single string with newlines
-          $inputString = ($inputData | Out-String).Trim()
           Write-Host "Piping inputs to script (order matters):"
           $inputData | ForEach-Object { Write-Host "  - $_" } # Log the inputs being sent
 
-          # --- Step 4: Execute the modified script with piped inputs ---
-          # Start-Process is used to run pwsh.exe and redirect its standard input.
-          # -NoProfile: Prevents loading PowerShell profiles for consistent execution.
-          # -ExecutionPolicy Bypass: Allows the script to run without policy restrictions for this command.
-          # -Command "$modifiedScriptContent": Executes the modified script content.
-          # -RedirectStandardInput $inputString: Feeds our prepared inputs to the script.
-          # -PassThru: Returns the process object so we can check its ExitCode.
-          # -NoNewWindow: Ensures it runs in the current console context.
-          # -Wait: Waits for the process to complete.
+          # --- FIX: Write inputs to a temporary file and redirect that file ---
+          $tempInputFile = New-TemporaryFile
+          $inputData | Set-Content $tempInputFile.FullName -Encoding UTF8 # Ensure encoding matches
+
+          Write-Host "Inputs written to temporary file: $($tempInputFile.FullName)"
+
+          # --- Step 4: Execute the modified script with piped inputs from the temporary file ---
           $process = Start-Process -FilePath "pwsh.exe" `
               -ArgumentList "-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", "$modifiedScriptContent" `
-              -RedirectStandardInput $inputString `
+              -RedirectStandardInput $tempInputFile.FullName ` # Provide the file path here
               -PassThru -NoNewWindow -Wait
+
+          # Clean up the temporary file (good practice, though runner environments are ephemeral)
+          Remove-Item $tempInputFile.FullName -ErrorAction SilentlyContinue
 
           # Check the exit code of the PowerShell process
           if ($process.ExitCode -ne 0) {
               Write-Error "PowerShell script exited with error code: $($process.ExitCode)"
-              exit $process.ExitCode # Fail the GitHub Actions step
+              exit $process.ExitCode
           } else {
               Write-Host "PowerShell script completed successfully."
           }
@@ -101,7 +89,7 @@ jobs:
               $prefsPath = Join-Path $repoPath "preferences.json"
               if (Test-Path $prefsPath) {
                   Write-Host "preferences.json found at: $prefsPath. Content:"
-                  Get-Content $prefsPath | Write-Host # Output the content of preferences.json
+                  Get-Content $prefsPath | Write-Host
               } else {
                   Write-Warning "preferences.json not found in the cloned repository. This might indicate an issue with the script's execution."
               }
