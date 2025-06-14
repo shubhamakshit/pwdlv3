@@ -217,6 +217,7 @@ def get_notes(batch_name, subject_name, chapter_name):
         # subjects = batch_api.GET_BATCH(batch_name)
         notes = batch_api.process("notes",batch_name=batch_name,subject_name=subject_name,chapter_name=chapter_name)
         return create_response(data=renamer(notes,'topic','name'))
+        
     except Exception as e:
 
         debugger.error(f"Error: {e}")

@@ -194,6 +194,7 @@ pwdlv3.lnk
 
 # ignore all *.test.py files
 *.test.py
+*.pdf
 *.json
 clients.json
 clients.json
@@ -203,3 +204,4 @@ clients.json
 /populate.py
 pop.bat
 *.bak
+myenv/

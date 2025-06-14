@@ -9,7 +9,7 @@
   "tmpDir": "/tmp",
   "verbose": false,
   "vsd": "$script/bin/vsd",
-  "ffmpeg": "",
+  "ffmpeg": "$script/bin/ffmpeg",
   "mp4decrypt": "$script/bin/mp4decrypt",
   "webui-del-time": 45,
   "webui": true,
