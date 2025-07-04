@@ -222,6 +222,35 @@ def get_notes(batch_name, subject_name, chapter_name):
 
         debugger.error(f"Error: {e}")
         return create_response(error=str(e)), 500
+
+@scraper_blueprint.route('/api/lecture/<batch_name>/<id>', methods=['GET'])
+def get_lecture_info(batch_name,id):
+
+    try:
+        args = request.args
+        debugger.success(f"batch_name: {batch_name}")
+        url = args.get("url","")
+        topic_name = args.get("topic_name","")
+        debugger.success(f"batch_api.token: {batch_api.token}")
+        debugger.success(f"batch_api.random_id: {batch_api.random_id}")
+
+        # batch_api.batch_name = batch_name
+        # subjects = batch_api.GET_BATCH(batch_name)
+        #notes = batch_api.process("notes",batch_name=batch_name,subject_name=subject_name,chapter_name=chapter_name)
+        from mainLogic.big4.Ravenclaw_decrypt.key import LicenseKeyFetcher as Lf
+        lf = Lf(batch_api.token, batch_api.random_id)
+        keys = lf.get_key(id,batch_name)
+
+        return create_response(data={
+            "url":keys[2],
+            "key":keys[1],
+            "kid":keys[0]
+            })
+        
+    except Exception as e:
+
+        debugger.error(f"Error: {e}")
+        return create_response(error=str(e)), 500
     
 @scraper_blueprint.route('/api/batches/<batch_name>/<subject_name>/<chapter_name>/dpp_pdf', methods=['GET'])
 def get_dpp_pdf(batch_name, subject_name, chapter_name):
