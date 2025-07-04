@@ -157,7 +157,7 @@ class LicenseKeyFetcher:
                     if verbose: debugger.success(f"Key: {key}")
 
                     if verbose:Global.hr()
-                    return (kid,key)
+                    return (kid,key,url)
             else:
                 debugger.error("Could not get the key from the server. Exiting...")
                 return None
