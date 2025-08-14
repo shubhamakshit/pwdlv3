@@ -25,7 +25,7 @@ def start_shell():
     shell.main()
 
 
-def start_webui(port, verbose):
+def start_webui(port, verbose, no_reloader=False):
     """Start the WebUI if requested."""
     from run import app
 
@@ -39,7 +39,9 @@ def start_webui(port, verbose):
         Global.hr()
         debugger.debug(f"Starting WebUI on port {port}")
 
-    app.run(host="0.0.0.0", port=port,debug=True if verbose else False)
+    debug_mode = True if verbose else False
+    use_reloader = not no_reloader if debug_mode else False
+    app.run(host="0.0.0.0", port=port, debug=debug_mode, use_reloader=use_reloader)
 
 
 def download_process(
@@ -194,7 +196,7 @@ def handle_csv_file(csv_file, state, batch_name_param, verbose, simulate=False):
 
 def main(csv_file=None,
          id=None, name=None,batch_name=None,topic_name=None,lecture_url=None,
-         directory=None, verbose=False, shell=False, webui_port=None,tmp_dir=None,
+         directory=None, verbose=False, shell=False, webui_port=None, no_reloader=False, tmp_dir=None,
          new_downloader=False,
          simulate=False):
     global prefs  # Use global keyword to modify global prefs
@@ -211,7 +213,7 @@ def main(csv_file=None,
     glv_var.vars['prefs'] = prefs
 
     if webui_port is not None:
-        start_webui(webui_port, glv.vout)
+        start_webui(webui_port, glv.vout, no_reloader=no_reloader)
 
     if simulate:
         if csv_file:

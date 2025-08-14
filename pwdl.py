@@ -22,6 +22,7 @@ def parse_arguments():
     parser.add_argument('--shell-i','-i',action='store_true', help='Start the interactive shell (v2)')
     parser.add_argument('--tmp-dir', type=str, help='Temporary Directory')
     parser.add_argument('--webui', nargs='?', const=-1, type=int, help='Start the Webui')
+    parser.add_argument('--no-reloader', action='store_true', help='Disable the Flask reloader in debug mode')
     parser.add_argument('--simulate', action='store_true',
                         help='Simulate the download process. No files will be downloaded. Incompatible wit h '
                              '--csv-file. Must be used with --id and --name')
@@ -95,5 +96,6 @@ if __name__ == "__main__":
         verbose=args.verbose,
         shell=args.shell,
         webui_port=args.webui,
+        no_reloader=args.no_reloader,
         simulate=args.simulate
     )
