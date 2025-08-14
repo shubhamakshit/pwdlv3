@@ -13,6 +13,10 @@ from beta.api.blueprints.scarper import scraper_blueprint
 from beta.api.blueprints.session_lodge import session_lodge
 from beta.api.blueprints.template_routes import template_blueprint
 from beta.api.blueprints.while_dl_and_post_dl import dl_and_post_dl
+
+
+from beta.api.blueprints.custom import custom_blueprints 
+
 from beta.api.mr_manager.boss_manager import Boss
 from mainLogic.utils.glv import Global
 from mainLogic.utils.glv_var import debugger
@@ -45,5 +49,7 @@ app.register_blueprint(admin)
 app.register_blueprint(scraper_blueprint)
 app.register_blueprint(login)
 
+for blueprint in custom_blueprints:
+    blueprint.register_blueprint(app)
 if __name__ == '__main__':
     app.run(debug=True, port=7680)

@@ -123,10 +123,6 @@ class BatchLectureDetail:
         # Process nested 'videoDetails' object using VideoDetail model
         self.videoDetails: Optional[VideoDetail] = VideoDetail.from_json(videoDetails) if videoDetails else None
 
-        self.state: Dict[str, Any] = {
-            "name": name,
-            "id": _id,
-        }
         self.whiteboardType: Optional[str] = whiteboardType
         self.ytStreamKey: Optional[str] = ytStreamKey
         self.ytStreamUrl: Optional[str] = ytStreamUrl

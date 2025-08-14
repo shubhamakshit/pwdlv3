@@ -205,3 +205,6 @@ clients.json
 pop.bat
 *.bak
 myenv/
+
+# Ignore pwdl utility scripts
+*.pwdl.py

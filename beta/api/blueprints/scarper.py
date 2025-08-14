@@ -201,6 +201,8 @@ def get_chapter(batch_name, subject_name, chapter_name):
         # batch_api.batch_name = batch_name
         # subjects = batch_api.GET_BATCH(batch_name)
         chapter = batch_api.process("chapter",batch_name=batch_name,subject_name=subject_name,chapter_name=chapter_name)
+        import json
+        debugger.debug(json.dumps(chapter))
         return create_response(data=renamer(chapter,'topic','name'))
     except Exception as e:
         debugger.error(f"Error: {e}")

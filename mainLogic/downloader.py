@@ -39,7 +39,7 @@ def start_webui(port, verbose):
         Global.hr()
         debugger.debug(f"Starting WebUI on port {port}")
 
-    app.run(host="0.0.0.0", debug=True, port=port)
+    app.run(host="0.0.0.0", port=port,debug=True if verbose else False)
 
 
 def download_process(
