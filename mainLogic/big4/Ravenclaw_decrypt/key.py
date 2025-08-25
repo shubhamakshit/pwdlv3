@@ -1,7 +1,6 @@
 import re
 import base64
 import json
-
 from beta.batch_scraper_2.Endpoints import Endpoints
 from mainLogic.big4.Ravenclaw_decrypt.heck import get_cookiees_from_url
 from mainLogic.big4.obsolete.Obsolete_Gryffindor_downloadv2 import Download
