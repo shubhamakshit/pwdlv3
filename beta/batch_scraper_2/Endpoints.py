@@ -10,6 +10,7 @@ from .models.BatchLectureDetail import BatchLectureDetail
 from .models.BatchSubjectDetails import BatchSubjectDetails
 from .models.BatchNotesDetail import BatchNotesDetail
 from .models.DppNotesDetails import DppNotesDetails
+from .models.TestDetails import TestDetails
 
 # --- Placeholder for Khazana Models (You will define these later) ---
 # from .models.KhazanaProgramDetail import KhazanaProgramDetail
@@ -58,6 +59,9 @@ class Endpoints:
 
             def url_dpp_pdf(self, batch_name: str, subject_name: str, chapter_name: str) -> str:
                 return f"{self.base}/{self.v2}/batches/{batch_name}/subject/{subject_name}/contents?page=1&contentType=DppNotes&tag={chapter_name}&limit={self.hard_limit}"
+
+            def  url_test(self,test_id:str) -> str:
+                return f"{self.base}/{self.v3}/test-service/tests/mapping/{test_id}/preview-test"
 
             def post_process(self, response: Dict[str, Any], keys_to_extract: List[str], model_class: Optional[Type[T]] = None) -> Union[List[T], T, Any]:
                 try:
@@ -139,6 +143,8 @@ class Endpoints:
             "notes"  : Lambert[BatchNotesDetail](self.API.url_notes, ["data"], ["batch_name", "subject_name", "chapter_name"], model=BatchNotesDetail, raw_return_type=List[Dict[str, Any]]),
             "lecture": Lambert[BatchLectureDetail](self.API.url_lecture, ["data"], ["batch_name","lecture_id"],model=BatchLectureDetail ,raw_return_type=Dict[str, Any]),
             "dpp_pdf": Lambert[DppNotesDetails](self.API.url_dpp_pdf, ["data"], ["batch_name", "subject_name", "chapter_name"],model=DppNotesDetails, raw_return_type=List[Dict[str, Any]]),
+            "test" : Lambert[TestDetails](self.API.url_test,[],["test_id"],model=TestDetails,raw_return_type=Dict[str, Any])
+
         }
 
         # --- Khazana API Logs (add models as you define them) ---
@@ -261,6 +267,12 @@ class Endpoints:
             chapter_name=chapter_name
         ) # type: ignore
 
+    def get_test(self,test_id:str) -> TestDetails:
+        return self.process(
+            type="test",
+            use_model=True,
+            test_id=test_id
+        )
     # --- New specific methods for Khazana API (placeholders for your future models) ---
 
     # Example: If you create a KhazanaProgramDetail model
