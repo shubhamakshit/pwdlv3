@@ -4,8 +4,11 @@ import shutil
 import argparse
 from PIL import Image, ImageDraw, ImageFont
 
+from beta.batch_scraper_2.models.AllTestDetails import AllTestDetails
+
 # Assuming your existing modules are in the correct path
 from beta.batch_scraper_2.module import ScraperModule
+from mainLogic.utils.Endpoint import Endpoint
 from mainLogic.utils.glv_var import debugger
 
 
@@ -112,8 +115,9 @@ def create_a4_pdf_from_images(image_info, base_folder, output_filename, images_p
 def main():
     # --- 1. Add argparse to handle command-line arguments ---
     parser = argparse.ArgumentParser(description="Downloads and creates PDFs for wrong and unattempted questions from a test.")
-    parser.add_argument("test_id", type=str, help="The ID of the test to process.")
+    parser.add_argument("--test_id", type=str, help="The ID of the test to process.")
     args = parser.parse_args()
+
 
     # --- Configuration ---
     IMAGES_PER_PAGE = 9
@@ -124,10 +128,21 @@ def main():
     os.makedirs(WRONG_Q_DIR, exist_ok=True)
     os.makedirs(UNATTEMPTED_Q_DIR, exist_ok=True)
 
+    test_id = args.test_id
+
+    if not test_id:
+        all_test = AllTestDetails.from_json(Endpoint(
+            url="https://api.penpencil.co/v3/test-service/tests?testType=All&testStatus=All&attemptStatus=All&batchId=678b4cf5a3a368218a2b16e7&isSubjective=false&isPurchased=true&testCategoryIds=6814be5e9467bd0a54703a94",
+            headers=ScraperModule.batch_api.DEFAULT_HEADERS
+        ).fetch()[0])
+        for test in all_test.data:
+            print(test.name,"\t",test.testStudentMappingId)
+        test_id = input("Enter the test ID: ")
+
     try:
         # --- 2. Fetch Data using the provided test_id ---
-        print("Fetching test data...")
-        test = ScraperModule.batch_api.get_test(args.test_id).data
+        print("Fetching test data. for ..")
+        test = ScraperModule.batch_api.get_test(test_id).data
         questions = test.questions
         print(f"Found {len(questions)} total questions.")
 
