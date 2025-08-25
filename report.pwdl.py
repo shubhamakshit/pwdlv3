@@ -299,16 +299,23 @@ def main():
 
         for i, q in enumerate(questions):
             option = q.yourResult.markedSolutions[0] if q.yourResult.markedSolutions else None
+            actual_option = q.topperResult.markedSolutions[0] if q.topperResult.markedSolutions else None
             if option:
                 options = [op._id for op in q.question.options]
                 index = options.index(option)
                 option = q.question.options[index].texts.en if index < len(q.question.options) else None
+            if actual_option:
+                options = [op._id for op in q.question.options]
+                index = options.index(actual_option)
+                actual_option = q.question.options[index].texts.en if index < len(q.question.options) else None
+
             info_dict = {
                 "link": q.question.imageIds.link,
                 "question_number": str(q.question.questionNumber),
                 "time_taken": getattr(q.yourResult, 'timeTaken', 'N/A'),
                 "subject": str(q.question.topicId.name),
                 "marked_solution":str(option if option else 'X'),
+                "actual_solution":str(actual_option if actual_option else 'X'),
                 # Prepend question number to filename for sorting
                 "filename": f"q{q.question.questionNumber:03d}_{q.question.imageIds.name}-{i}.png"
             }

@@ -96,6 +96,7 @@ class Endpoints:
                             debugger.success(f"Successfully extracted raw data using keys {keys_to_extract}")
                         return data
                 except Exception as e:
+                    raise e
                     debugger.error(f"Failed to extract or model data: {e}")
                     return []
 
@@ -268,11 +269,13 @@ class Endpoints:
         ) # type: ignore
 
     def get_test(self,test_id:str) -> TestDetails:
-        return self.process(
+        data =  self.process(
             type="test",
             use_model=True,
             test_id=test_id
         )
+        debugger.info(data)
+        return data
     # --- New specific methods for Khazana API (placeholders for your future models) ---
 
     # Example: If you create a KhazanaProgramDetail model

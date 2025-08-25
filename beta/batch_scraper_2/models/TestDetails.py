@@ -60,17 +60,18 @@ class SolutionVideoDetails:
     @staticmethod
     def from_json(json_data: Dict[str, Any]) -> 'SolutionVideoDetails':
         return SolutionVideoDetails(
-            _id=json_data['_id'],
-            id=json_data['id'],
-            name=json_data['name'],
-            image=json_data['image'],
-            videoUrl=json_data['videoUrl'],
-            duration=json_data['duration'],
-            status=json_data['status'],
-            types=json_data['types'],
-            createdAt=json_data['createdAt'],
-            drmProtected=json_data['drmProtected']
+            _id=json_data.get('_id', ""),
+            id=json_data.get('id', ""),
+            name=json_data.get('name', ""),
+            image=json_data.get('image', ""),
+            videoUrl=json_data.get('videoUrl', ""),
+            duration=json_data.get('duration', ""),
+            status=json_data.get('status', ""),
+            types=json_data.get('types', ""),
+            createdAt=json_data.get('createdAt', ""),
+            drmProtected=json_data.get('drmProtected', False)
         )
+
 
 class SolutionDescriptionItem:
     def __init__(self, _id: str, imageIds: Dict[str, Any], videoType: str, videoDetails: Dict[str, Any]):
