@@ -29,6 +29,15 @@ else:
 api_webdl_directory = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../webdl'))
 EXECUTABLES = ['ffmpeg', 'mp4decrypt']
 
+
 MINIMUM_PORT = 1024
+
+class ENDPOINTS_NAME:
+
+    base = 'api'
+
+    @staticmethod
+    def GET_PVT_FILE_FOR_A_CLIENT(client_id="<client_id>",name="<name>"):
+        return f"/{ENDPOINTS_NAME.base}/get-private-file/{client_id}/{name}"
 
 
