@@ -1,5 +1,7 @@
 import os.path
+import urllib
 
+import urllib3
 from flask import Blueprint, request, jsonify, send_file
 
 from beta.api.mr_manager.boss_manager import Boss
@@ -18,7 +20,7 @@ task_manager = Boss.task_manager
 admin = Blueprint('admin', __name__)
 
 
-@admin.route('/api/webdl')
+@admin.route('/api/webdl/')
 @admin.route('/webdl')
 def webdl():
     return jsonify(SysFunc.list_files_and_folders(Boss.OUT_DIR)), 200
@@ -54,11 +56,12 @@ def delete_subpath(subpath):
 @admin.route('/api/get/<path:subpath>')
 @admin.route('/get/<path:subpath>')
 def get_subpath(subpath):
-    path_to_file = os.path.join(Boss.OUT_DIR, subpath)
+    from urllib.parse import unquote
+    path_to_file = SysFunc.modify_path(os.path.join(Boss.OUT_DIR, unquote(subpath)))
     if os.path.exists(path_to_file):
         return send_file(path_to_file, as_attachment=True, download_name=os.path.basename(path_to_file))
     else:
-        return jsonify({'error': 'file not found'}), 404
+        return jsonify({'error': f'file at {path_to_file} not found'}), 404
 
 
 @admin.route('/api/server/usages')

@@ -1,4 +1,4 @@
-from mainLogic.error import CouldNotDecryptAudio, CouldNotDecryptVideo, CouldNotDownloadAudio
+from mainLogic.error import CouldNotDecryptAudio, CouldNotDecryptVideo, CouldNotDownloadAudio, DependencyNotFound
 from mainLogic.utils.glv import Global
 from mainLogic.utils.glv_var import debugger
 from mainLogic.utils.process import shell
@@ -38,15 +38,28 @@ class Decrypt:
             file
         )
 
+        _ = shell(mp4d)
+        if  _ > 1 :
+            debugger.error(f"{mp4d} failed with exit code {_}")
+            debugger.error(DependencyNotFound("Mp4decrypt"))
+            debugger.error(f'The code supplied {mp4d} does not exist. Please check your spelling and try again.')
 
-        decrypt_command = f'{mp4d} --key 1:{key} {path}/{name}.{extension} {file}'
+        #decrypt_command = f'{mp4d} --key 1:{key} {path}/{name}.{extension} {file}'
+        decrypt_command = [
+            mp4d,
+            "--key",
+            "1:"+key,
+            f"{path}/{name}.{extension}",
+            file
+        ]
 
         if verbose: debugger.debug(f"{out} Decryption Started..."); debugger.debug(f'{decrypt_command}')
 
         
 
         # the main part where the decryption happens
-        code = shell(f'{decrypt_command}',stderr="",stdout="")
+
+        code = shell(decrypt_command,verbose=True)
 
         # simple check to see if the decryption was successful or not
         if code == 0:
@@ -54,6 +67,8 @@ class Decrypt:
             return os.path.abspath(file)
         else:
 
+            if os.path.exists(file):
+                debugger.debug(f"Removing {file}...")
             # if decryption failed then print error message and exit
             if out == "Audio":
                 debugger.error(CouldNotDecryptAudio())

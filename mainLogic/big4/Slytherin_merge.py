@@ -12,7 +12,15 @@ class Merge:
 
     def mergeCommandBuilder(self,ffmpeg_path,input1,input2,output,overwrite=False):
 
-        return f'{ffmpeg_path} {"-y" if overwrite else ""} -i {input1} -i {input2} -c copy {output}'
+    #    return f'{ffmpeg_path} {"-y" if overwrite else ""} -i {input1} -i {input2} -c copy {output}'
+        return [
+            ffmpeg_path,
+            "-y" if overwrite else "",
+            "-i", input1,
+            "-i", input2,
+            "-c", "copy",
+            output
+        ]
 
 
     def ffmpegMerge(self,input1,input2,output,ffmpeg_path="ffmpeg",verbose=False):

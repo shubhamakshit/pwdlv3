@@ -149,7 +149,7 @@ class CheckState:
         # Check for executables
         state.update(self.check_executables(executable, prefs, verbose, do_raise))
 
-        if not glv_var.vars.get('ig_token'):
+        if not glv_var.vars.get('ig_token') :
             # Validate token
 
             token = prefs.get('token')
@@ -174,17 +174,22 @@ class CheckState:
                         except Exception as e:
                             debugger.error("Failed to extract video_id or batch name")
                             debugger.error(e)
-                        if id and batch_name:
-                            key = self.check_token(token, random_id, verbose=verbose,id = video_id, batch_name = batch_name)
+
+                        if  os.getenv('PWDL_PREVENT_CHECK'):
+                            #skip
+                            pass
                         else:
-                            key = self.check_token(token, random_id, verbose=verbose)
-                        if key:
-                            if verbose:
-                                debugger.success("Token Valid")
-                            prefs['key'] = key
-                        else:
-                            if verbose:
-                                debugger.error("Token Invalid! Please run pwdl --login")
+                            if id and batch_name:
+                                key = self.check_token(token, random_id, verbose=verbose,id = video_id, batch_name = batch_name)
+                            else:
+                                key = self.check_token(token, random_id, verbose=verbose)
+                            if key:
+                                if verbose:
+                                    debugger.success("Token Valid")
+                                prefs['key'] = key
+                            else:
+                                if verbose:
+                                    debugger.error("Token Invalid! Please run pwdl --login")
 
 
                     except TokenInvalid:

@@ -1,8 +1,10 @@
 import platform
 import os
 import re
+import shutil
 from re import Pattern
 
+from Models.Files import Files
 from mainLogic import error
 from mainLogic.error import CouldNotMakeDir, DependencyNotFound
 from mainLogic.utils.glv_var import debugger
@@ -41,23 +43,26 @@ class SysFunc:
 
     def which(self, program):
 
-        if self.os == 0:
-            if shell('which', stderr="", stdout="") != 1 and shell('which', stderr="", stdout="") != 255:
-                DependencyNotFound("which").exit()
-            else:
-                self.whichPresent = True
+        if shutil.which(program):
+            return shutil.which(program)
 
-            return shell(f"which {program}", stderr="", stdout="")
-
-        elif self.os == 1:
-
-            if shell('where', stderr="", stdout="") != 2:
-                DependencyNotFound("where").exit()
-            else:
-                self.whichPresent = True
-            return shell(f"where {program}", stderr="", stdout="")
-        else:
-            raise Exception("UnsupportedOS")
+        # if self.os == 0:
+        #     if shell('which', stderr="", stdout="") != 1 and shell('which', stderr="", stdout="") != 255:
+        #         DependencyNotFound("which").exit()
+        #     else:
+        #         self.whichPresent = True
+        #
+        #     return shell(f"which {program}", stderr="", stdout="")
+        #
+        # elif self.os == 1:
+        #
+        #     if shell('where', stderr="", stdout="") != 2:
+        #         DependencyNotFound("where").exit()
+        #     else:
+        #         self.whichPresent = True
+        #     return shell(f"where {program}", stderr="", stdout="")
+        # else:
+        #     raise Exception("UnsupportedOS")
 
     @staticmethod
     def modify_path(path):
@@ -74,17 +79,14 @@ class SysFunc:
 
         try:
             # Dictionaries to store the files and folders
-            result = {
-                "folders": [],
-                "files": []
-            }
+            result = Files.WebdlFolderData()
 
             # Walk through the directory
             for entry in os.scandir(directory):
                 if entry.is_dir():
-                    result["folders"].append(entry.name)
+                    result.folders.append(entry.name)
                 elif entry.is_file():
-                    result["files"].append(entry.name)
+                    result.files.append(entry.name)
 
             return result
 
