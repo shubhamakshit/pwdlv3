@@ -16,10 +16,10 @@ class ConfigDetail:
     @staticmethod
     def from_json(json_data: Dict[str, Any]) -> 'ConfigDetail':
         return ConfigDetail(
-            isScientificCalculatorEnabled=json_data.get('isScientificCalculatorEnabled'),
-            proctoring=json_data.get('proctoring'),
+            isScientificCalculatorEnabled=json_data.get('isScientificCalculatorEnabled', False),
+            proctoring=json_data.get('proctoring', False),
             enableCatPercentile=json_data.get('enableCatPercentile', False),
-            enableBasicCalculator=json_data.get('enableBasicCalculator')
+            enableBasicCalculator=json_data.get('enableBasicCalculator', False)
         )
 
 
@@ -101,44 +101,45 @@ class TestDetail:
 
     @staticmethod
     def from_json(json_data: Dict[str, Any]) -> 'TestDetail':
-        config = ConfigDetail.from_json(json_data.get('config', {}))
+        config_data = json_data.get('config')
+        config = ConfigDetail.from_json(config_data) if config_data else None
         return TestDetail(
-            _id=json_data.get('_id'),
-            type=json_data.get('type'),
-            currentType=json_data.get('currentType'),
-            name=json_data.get('name'),
-            slug=json_data.get('slug'),
-            totalQuestions=json_data.get('totalQuestions'),
-            totalMarks=json_data.get('totalMarks'),
-            startTime=json_data.get('startTime'),
-            maxStartTime=json_data.get('maxStartTime'),
-            endTime=json_data.get('endTime'),
-            resultScheduleAt=json_data.get('resultScheduleAt'),
-            maxDuration=json_data.get('maxDuration'),
+            _id=json_data.get('_id', ''),
+            type=json_data.get('type', ''),
+            currentType=json_data.get('currentType', ''),
+            name=json_data.get('name', ''),
+            slug=json_data.get('slug', ''),
+            totalQuestions=json_data.get('totalQuestions', 0),
+            totalMarks=json_data.get('totalMarks', 0.0),
+            startTime=json_data.get('startTime', ''),
+            maxStartTime=json_data.get('maxStartTime', ''),
+            endTime=json_data.get('endTime', ''),
+            resultScheduleAt=json_data.get('resultScheduleAt', ''),
+            maxDuration=json_data.get('maxDuration', 0.0),
             availableFor=json_data.get('availableFor', []),
-            isSubjective=json_data.get('isSubjective'),
-            isPurchased=json_data.get('isPurchased'),
-            isFree=json_data.get('isFree'),
-            attempts=json_data.get('attempts'),
-            testStudentMappingId=json_data.get('testStudentMappingId'),
-            testActivityStatus=json_data.get('testActivityStatus'),
-            testSource=json_data.get('testSource'),
-            fomoIntent=json_data.get('fomoIntent'),
-            modeType=json_data.get('modeType'),
-            toastMessage=json_data.get('toastMessage'),
-            infoMessage=json_data.get('infoMessage'),
-            tag1=json_data.get('tag1'),
-            tag2=json_data.get('tag2'),
-            isResultAwaiting=json_data.get('isResultAwaiting'),
-            toastImage=json_data.get('toastImage'),
+            isSubjective=json_data.get('isSubjective', False),
+            isPurchased=json_data.get('isPurchased', False),
+            isFree=json_data.get('isFree', False),
+            attempts=json_data.get('attempts', 0),
+            testStudentMappingId=json_data.get('testStudentMappingId', ''),
+            testActivityStatus=json_data.get('testActivityStatus', ''),
+            testSource=json_data.get('testSource', ''),
+            fomoIntent=json_data.get('fomoIntent', None),
+            modeType=json_data.get('modeType', ''),
+            toastMessage=json_data.get('toastMessage', None),
+            infoMessage=json_data.get('infoMessage', None),
+            tag1=json_data.get('tag1', ''),
+            tag2=json_data.get('tag2', ''),
+            isResultAwaiting=json_data.get('isResultAwaiting', False),
+            toastImage=json_data.get('toastImage', None),
             config=config,
-            isDelivered=json_data.get('isDelivered'),
-            categoryId=json_data.get('categoryId'),
-            template=json_data.get('template'),
-            enableInstructions=json_data.get('enableInstructions'),
-            enableSyllabus=json_data.get('enableSyllabus'),
-            smartDPP=json_data.get('smartDPP'),
-            difficultyLevel=json_data.get('difficultyLevel')
+            isDelivered=json_data.get('isDelivered', False),
+            categoryId=json_data.get('categoryId', ''),
+            template=json_data.get('template', ''),
+            enableInstructions=json_data.get('enableInstructions', False),
+            enableSyllabus=json_data.get('enableSyllabus', False),
+            smartDPP=json_data.get('smartDPP', False),
+            difficultyLevel=json_data.get('difficultyLevel', '')
         )
 
 

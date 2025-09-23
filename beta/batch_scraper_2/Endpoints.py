@@ -190,6 +190,12 @@ class Endpoints:
 
         endpoint = Endpoint(url, headers=self.DEFAULT_HEADERS)
         fetched_response = endpoint.fetch()[0]
+
+        import os 
+        if os.getenv('PWDL_REQUEST_LOG'):
+            import json
+            with open(f'{type}.log.txt','w') as file: file.write(json.dumps(fetched_response)) 
+            debugger.debug(fetched_response)
         
         model_to_use = lambert.model if use_model else None
         processed_data = self.API.post_process(fetched_response, lambert.post_process_args, model_to_use)

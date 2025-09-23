@@ -302,7 +302,7 @@ def get_lecture_info(batch_name,id):
         encoded_original_url = urllib.parse.quote(original_url, safe='')
         proxied_url = f"http://{request.host}/proxy/lecture/{encoded_original_url}"
         
-        return create_response(data={"url": proxied_url, "key":keys[1], "kid":keys[0]})
+        return create_response(data={"url": original_url, "key":keys[1], "kid":keys[0]})
     except Exception as e:
         debugger.error(f"Error: {e}")
         return create_response(error=str(e)), 500

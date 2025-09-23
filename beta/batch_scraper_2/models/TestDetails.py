@@ -14,10 +14,10 @@ class EnImage:
     @staticmethod
     def from_json(json_data: Dict[str, Any]) -> 'EnImage':
         return EnImage(
-            _id=json_data['_id'],
-            name=json_data['name'],
-            baseUrl=json_data['baseUrl'],
-            key=json_data['key']
+            _id=json_data.get('_id', ''),
+            name=json_data.get('name', ''),
+            baseUrl=json_data.get('baseUrl', ''),
+            key=json_data.get('key', '')
         )
 
 class OptionTexts:
@@ -27,19 +27,19 @@ class OptionTexts:
     @staticmethod
     def from_json(json_data: Dict[str, Any]) -> 'OptionTexts':
         return OptionTexts(
-            en=json_data['en']
+            en=json_data.get('en', '')
         )
 
 class Option:
     def __init__(self, _id: str, texts: Dict[str, Any]):
         self._id = _id
-        self.texts = OptionTexts.from_json(texts)
+        self.texts = OptionTexts.from_json(texts) if texts else None
 
     @staticmethod
     def from_json(json_data: Dict[str, Any]) -> 'Option':
         return Option(
-            _id=json_data['_id'],
-            texts=json_data['texts']
+            _id=json_data.get('_id', ''),
+            texts=json_data.get('texts', {})
         )
 
 class SolutionVideoDetails:
@@ -60,15 +60,15 @@ class SolutionVideoDetails:
     @staticmethod
     def from_json(json_data: Dict[str, Any]) -> 'SolutionVideoDetails':
         return SolutionVideoDetails(
-            _id=json_data.get('_id', ""),
-            id=json_data.get('id', ""),
-            name=json_data.get('name', ""),
-            image=json_data.get('image', ""),
-            videoUrl=json_data.get('videoUrl', ""),
-            duration=json_data.get('duration', ""),
-            status=json_data.get('status', ""),
-            types=json_data.get('types', ""),
-            createdAt=json_data.get('createdAt', ""),
+            _id=json_data.get('_id', ''),
+            id=json_data.get('id', ''),
+            name=json_data.get('name', ''),
+            image=json_data.get('image', ''),
+            videoUrl=json_data.get('videoUrl', ''),
+            duration=json_data.get('duration', ''),
+            status=json_data.get('status', ''),
+            types=json_data.get('types', []),
+            createdAt=json_data.get('createdAt', ''),
             drmProtected=json_data.get('drmProtected', False)
         )
 
@@ -76,17 +76,17 @@ class SolutionVideoDetails:
 class SolutionDescriptionItem:
     def __init__(self, _id: str, imageIds: Dict[str, Any], videoType: str, videoDetails: Dict[str, Any]):
         self._id = _id
-        self.imageIds = EnImage.from_json(imageIds['en']) if 'en' in imageIds else None
+        self.imageIds = EnImage.from_json(imageIds.get('en', {})) if imageIds and 'en' in imageIds else None
         self.videoType = videoType
-        self.videoDetails = SolutionVideoDetails.from_json(videoDetails)
+        self.videoDetails = SolutionVideoDetails.from_json(videoDetails) if videoDetails else None
 
     @staticmethod
     def from_json(json_data: Dict[str, Any]) -> 'SolutionDescriptionItem':
         return SolutionDescriptionItem(
-            _id=json_data['_id'],
-            imageIds=json_data['imageIds'],
-            videoType=json_data['videoType'],
-            videoDetails=json_data['videoDetails']
+            _id=json_data.get('_id', ''),
+            imageIds=json_data.get('imageIds', {}),
+            videoType=json_data.get('videoType', ''),
+            videoDetails=json_data.get('videoDetails', {})
         )
 
 class QuestionTopicId:
@@ -97,8 +97,8 @@ class QuestionTopicId:
     @staticmethod
     def from_json(json_data: Dict[str, Any]) -> 'QuestionTopicId':
         return QuestionTopicId(
-            name=json_data['name'],
-            _id=json_data['_id']
+            name=json_data.get('name', ''),
+            _id=json_data.get('_id', '')
         )
 
 # Core data models
@@ -111,8 +111,8 @@ class SubTopicId:
     @staticmethod
     def from_json(json_data: Dict[str, Any]) -> 'SubTopicId':
         return SubTopicId(
-            name=json_data['name'],
-            _id=json_data['_id']
+            name=json_data.get('name', ''),
+            _id=json_data.get('_id', '')
         )
 
 class SubTopic:
@@ -123,17 +123,17 @@ class SubTopic:
         self.correctQuestions = correctQuestions
         self.inCorrectQuestions = inCorrectQuestions
         self.questionsUnderReview = questionsUnderReview
-        self.subTopicId = SubTopicId.from_json(subTopicId)
+        self.subTopicId = SubTopicId.from_json(subTopicId) if subTopicId else None
 
     @staticmethod
     def from_json(json_data: Dict[str, Any]) -> 'SubTopic':
         return SubTopic(
-            totalQuestions=json_data['totalQuestions'],
-            unAttemptedQuestions=json_data['unAttemptedQuestions'],
-            correctQuestions=json_data['correctQuestions'],
-            inCorrectQuestions=json_data['inCorrectQuestions'],
-            questionsUnderReview=json_data['questionsUnderReview'],
-            subTopicId=json_data['subTopicId']
+            totalQuestions=json_data.get('totalQuestions', 0),
+            unAttemptedQuestions=json_data.get('unAttemptedQuestions', 0),
+            correctQuestions=json_data.get('correctQuestions', 0),
+            inCorrectQuestions=json_data.get('inCorrectQuestions', 0),
+            questionsUnderReview=json_data.get('questionsUnderReview', 0),
+            subTopicId=json_data.get('subTopicId', {})
         )
 
 class TopicId:
@@ -144,8 +144,8 @@ class TopicId:
     @staticmethod
     def from_json(json_data: Dict[str, Any]) -> 'TopicId':
         return TopicId(
-            name=json_data['name'],
-            _id=json_data['_id']
+            name=json_data.get('name', ''),
+            _id=json_data.get('_id', '')
         )
 
 class Topic:
@@ -157,19 +157,19 @@ class Topic:
         self.correctQuestions = correctQuestions
         self.inCorrectQuestions = inCorrectQuestions
         self.questionsUnderReview = questionsUnderReview
-        self.topicId = TopicId.from_json(topicId)
-        self.subTopics = [SubTopic.from_json(st) for st in subTopics]
+        self.topicId = TopicId.from_json(topicId) if topicId else None
+        self.subTopics = [SubTopic.from_json(st) for st in subTopics if st] if subTopics else []
 
     @staticmethod
     def from_json(json_data: Dict[str, Any]) -> 'Topic':
         return Topic(
-            totalQuestions=json_data['totalQuestions'],
-            unAttemptedQuestions=json_data['unAttemptedQuestions'],
-            correctQuestions=json_data['correctQuestions'],
-            inCorrectQuestions=json_data['inCorrectQuestions'],
-            questionsUnderReview=json_data['questionsUnderReview'],
-            topicId=json_data['topicId'],
-            subTopics=json_data['subTopics']
+            totalQuestions=json_data.get('totalQuestions', 0),
+            unAttemptedQuestions=json_data.get('unAttemptedQuestions', 0),
+            correctQuestions=json_data.get('correctQuestions', 0),
+            inCorrectQuestions=json_data.get('inCorrectQuestions', 0),
+            questionsUnderReview=json_data.get('questionsUnderReview', 0),
+            topicId=json_data.get('topicId', {}),
+            subTopics=json_data.get('subTopics', [])
         )
 
 class ChapterId:
@@ -180,8 +180,8 @@ class ChapterId:
     @staticmethod
     def from_json(json_data: Dict[str, Any]) -> 'ChapterId':
         return ChapterId(
-            name=json_data['name'],
-            _id=json_data['_id']
+            name=json_data.get('name', ''),
+            _id=json_data.get('_id', '')
         )
 
 class Chapter:
@@ -193,19 +193,19 @@ class Chapter:
         self.correctQuestions = correctQuestions
         self.inCorrectQuestions = inCorrectQuestions
         self.questionsUnderReview = questionsUnderReview
-        self.chapterId = ChapterId.from_json(chapterId)
-        self.topics = [Topic.from_json(t) for t in topics]
+        self.chapterId = ChapterId.from_json(chapterId) if chapterId else None
+        self.topics = [Topic.from_json(t) for t in topics if t] if topics else []
 
     @staticmethod
     def from_json(json_data: Dict[str, Any]) -> 'Chapter':
         return Chapter(
-            totalQuestions=json_data['totalQuestions'],
-            unAttemptedQuestions=json_data['unAttemptedQuestions'],
-            correctQuestions=json_data['correctQuestions'],
-            inCorrectQuestions=json_data['inCorrectQuestions'],
-            questionsUnderReview=json_data['questionsUnderReview'],
-            chapterId=json_data['chapterId'],
-            topics=json_data['topics']
+            totalQuestions=json_data.get('totalQuestions', 0),
+            unAttemptedQuestions=json_data.get('unAttemptedQuestions', 0),
+            correctQuestions=json_data.get('correctQuestions', 0),
+            inCorrectQuestions=json_data.get('inCorrectQuestions', 0),
+            questionsUnderReview=json_data.get('questionsUnderReview', 0),
+            chapterId=json_data.get('chapterId', {}),
+            topics=json_data.get('topics', [])
         )
 
 class SubjectId:
@@ -216,8 +216,8 @@ class SubjectId:
     @staticmethod
     def from_json(json_data: Dict[str, Any]) -> 'SubjectId':
         return SubjectId(
-            name=json_data['name'],
-            _id=json_data['_id']
+            name=json_data.get('name', ''),
+            _id=json_data.get('_id', '')
         )
 
 class Subject:
@@ -229,19 +229,19 @@ class Subject:
         self.correctQuestions = correctQuestions
         self.inCorrectQuestions = inCorrectQuestions
         self.questionsUnderReview = questionsUnderReview
-        self.subjectId = SubjectId.from_json(subjectId)
-        self.chapters = [Chapter.from_json(c) for c in chapters]
+        self.subjectId = SubjectId.from_json(subjectId) if subjectId else None
+        self.chapters = [Chapter.from_json(c) for c in chapters if c] if chapters else []
 
     @staticmethod
     def from_json(json_data: Dict[str, Any]) -> 'Subject':
         return Subject(
-            totalQuestions=json_data['totalQuestions'],
-            unAttemptedQuestions=json_data['unAttemptedQuestions'],
-            correctQuestions=json_data['correctQuestions'],
-            inCorrectQuestions=json_data['inCorrectQuestions'],
-            questionsUnderReview=json_data['questionsUnderReview'],
-            subjectId=json_data['subjectId'],
-            chapters=json_data['chapters']
+            totalQuestions=json_data.get('totalQuestions', 0),
+            unAttemptedQuestions=json_data.get('unAttemptedQuestions', 0),
+            correctQuestions=json_data.get('correctQuestions', 0),
+            inCorrectQuestions=json_data.get('inCorrectQuestions', 0),
+            questionsUnderReview=json_data.get('questionsUnderReview', 0),
+            subjectId=json_data.get('subjectId', {}),
+            chapters=json_data.get('chapters', [])
         )
 
 class SectionId:
@@ -253,9 +253,9 @@ class SectionId:
     @staticmethod
     def from_json(json_data: Dict[str, Any]) -> 'SectionId':
         return SectionId(
-            name=json_data['name'],
-            _id=json_data['_id'],
-            isOptional=json_data['isOptional']
+            name=json_data.get('name', ''),
+            _id=json_data.get('_id', ''),
+            isOptional=json_data.get('isOptional', False)
         )
 
 class Section:
@@ -267,23 +267,23 @@ class Section:
         self.correctQuestions = correctQuestions
         self.inCorrectQuestions = inCorrectQuestions
         self.questionsUnderReview = questionsUnderReview
-        self.sectionId = SectionId.from_json(sectionId)
-        self.subjects = [Subject.from_json(s) for s in subjects]
+        self.sectionId = SectionId.from_json(sectionId) if sectionId else None
+        self.subjects = [Subject.from_json(s) for s in subjects if s] if subjects else []
         self.isExtra = isExtra
         self.selectedOptionalSection = selectedOptionalSection
 
     @staticmethod
     def from_json(json_data: Dict[str, Any]) -> 'Section':
         return Section(
-            totalQuestions=json_data['totalQuestions'],
-            unAttemptedQuestions=json_data['unAttemptedQuestions'],
-            correctQuestions=json_data['correctQuestions'],
-            inCorrectQuestions=json_data['inCorrectQuestions'],
-            questionsUnderReview=json_data['questionsUnderReview'],
-            sectionId=json_data['sectionId'],
-            subjects=json_data['subjects'],
-            isExtra=json_data['isExtra'],
-            selectedOptionalSection=json_data['selectedOptionalSection']
+            totalQuestions=json_data.get('totalQuestions', 0),
+            unAttemptedQuestions=json_data.get('unAttemptedQuestions', 0),
+            correctQuestions=json_data.get('correctQuestions', 0),
+            inCorrectQuestions=json_data.get('inCorrectQuestions', 0),
+            questionsUnderReview=json_data.get('questionsUnderReview', 0),
+            sectionId=json_data.get('sectionId', {}),
+            subjects=json_data.get('subjects', []),
+            isExtra=json_data.get('isExtra', False),
+            selectedOptionalSection=json_data.get('selectedOptionalSection', False)
         )
 
 class DifficultyLevel:
@@ -294,8 +294,8 @@ class DifficultyLevel:
     @staticmethod
     def from_json(json_data: Dict[str, Any]) -> 'DifficultyLevel':
         return DifficultyLevel(
-            level=json_data.get('level'), # Level might be optional based on schema 'properties' but not 'required' list
-            title=json_data['title']
+            level=json_data.get('level', 0),
+            title=json_data.get('title', '')
         )
 
 class Question:
@@ -312,16 +312,16 @@ class Question:
         self.positiveMarksStr = positiveMarksStr
         self.negativeMarks = negativeMarks
         self.negativeMarksStr = negativeMarksStr
-        self.imageIds = EnImage.from_json(imageIds['en']) if 'en' in imageIds else None
-        self.options = [Option.from_json(opt) for opt in options]
+        self.imageIds = EnImage.from_json(imageIds.get('en', {})) if imageIds and 'en' in imageIds else None
+        self.options = [Option.from_json(opt) for opt in options if opt] if options else []
         self.difficultyLevel = difficultyLevel
         self.pyqYears = pyqYears
-        self.topicId = QuestionTopicId.from_json(topicId)
+        self.topicId = QuestionTopicId.from_json(topicId) if topicId else None
         self.sectionId = sectionId
         self.subjectId = subjectId
         self.chapterId = chapterId
         self.solutions = solutions
-        self.solutionDescription = [SolutionDescriptionItem.from_json(sd) for sd in solutionDescription]
+        self.solutionDescription = [SolutionDescriptionItem.from_json(sd) for sd in solutionDescription if sd] if solutionDescription else []
         self.qbgSubjectId = qbgSubjectId
         self.qbgChapterId = qbgChapterId
         self.qbgTopicId = qbgTopicId
@@ -332,29 +332,29 @@ class Question:
     @staticmethod
     def from_json(json_data: Dict[str, Any]) -> 'Question':
         return Question(
-            _id=json_data['_id'],
-            type=json_data['type'],
-            questionNumber=json_data['questionNumber'],
-            positiveMarks=json_data['positiveMarks'],
-            positiveMarksStr=json_data['positiveMarksStr'],
-            negativeMarks=json_data['negativeMarks'],
-            negativeMarksStr=json_data['negativeMarksStr'],
-            imageIds=json_data['imageIds'],
-            options=json_data['options'],
-            difficultyLevel=json_data['difficultyLevel'],
-            pyqYears=json_data['pyqYears'],
-            topicId=json_data['topicId'],
-            sectionId=json_data['sectionId'],
-            subjectId=json_data['subjectId'],
-            chapterId=json_data['chapterId'],
-            solutions=json_data['solutions'],
-            solutionDescription=json_data['solutionDescription'],
-            qbgSubjectId=json_data['qbgSubjectId'],
-            qbgChapterId=json_data['qbgChapterId'],
-            qbgTopicId=json_data['qbgTopicId'],
-            qbgId=json_data['qbgId'],
-            exam=json_data['exam'],
-            subTopicId=json_data.get('subTopicId')
+            _id=json_data.get('_id', ''),
+            type=json_data.get('type', ''),
+            questionNumber=json_data.get('questionNumber', 0),
+            positiveMarks=json_data.get('positiveMarks', 0),
+            positiveMarksStr=json_data.get('positiveMarksStr', ''),
+            negativeMarks=json_data.get('negativeMarks', 0),
+            negativeMarksStr=json_data.get('negativeMarksStr', ''),
+            imageIds=json_data.get('imageIds', {}),
+            options=json_data.get('options', []),
+            difficultyLevel=json_data.get('difficultyLevel', 0),
+            pyqYears=json_data.get('pyqYears', []),
+            topicId=json_data.get('topicId', {}),
+            sectionId=json_data.get('sectionId', ''),
+            subjectId=json_data.get('subjectId', ''),
+            chapterId=json_data.get('chapterId', ''),
+            solutions=json_data.get('solutions', []),
+            solutionDescription=json_data.get('solutionDescription', []),
+            qbgSubjectId=json_data.get('qbgSubjectId', ''),
+            qbgChapterId=json_data.get('qbgChapterId', ''),
+            qbgTopicId=json_data.get('qbgTopicId', ''),
+            qbgId=json_data.get('qbgId', ''),
+            exam=json_data.get('exam', ''),
+            subTopicId=json_data.get('subTopicId', '')
         )
 
 class YourResult:
@@ -371,13 +371,13 @@ class YourResult:
     @staticmethod
     def from_json(json_data: Dict[str, Any]) -> 'YourResult':
         return YourResult(
-            isUnderReview=json_data['isUnderReview'],
-            status=json_data['status'],
-            markedSolutions=json_data['markedSolutions'],
-            markedSolutionText=json_data['markedSolutionText'],
-            score=json_data['score'],
-            scoreStr=json_data['scoreStr'],
-            timeTaken=json_data['timeTaken']
+            isUnderReview=json_data.get('isUnderReview', False),
+            status=json_data.get('status', ''),
+            markedSolutions=json_data.get('markedSolutions', []),
+            markedSolutionText=json_data.get('markedSolutionText', ''),
+            score=json_data.get('score', 0),
+            scoreStr=json_data.get('scoreStr', ''),
+            timeTaken=json_data.get('timeTaken', 0)
         )
 
 class TopperResult:
@@ -392,11 +392,11 @@ class TopperResult:
     @staticmethod
     def from_json(json_data: Dict[str, Any]) -> 'TopperResult':
         return TopperResult(
-            status=json_data['status'],
-            markedSolutions=json_data['markedSolutions'],
-            markedSolutionText=json_data['markedSolutionText'],
-            score=json_data['score'],
-            timeTaken=json_data['timeTaken']
+            status=json_data.get('status', ''),
+            markedSolutions=json_data.get('markedSolutions', []),
+            markedSolutionText=json_data.get('markedSolutionText', ''),
+            score=json_data.get('score', 0),
+            timeTaken=json_data.get('timeTaken', 0)
         )
 
 class AverageResult:
@@ -412,18 +412,18 @@ class AverageResult:
 class QuestionItem:
     def __init__(self, question: Dict[str, Any], yourResult: Dict[str, Any],
                  topperResult: Dict[str, Any], averageResult: Dict[str, Any]):
-        self.question = Question.from_json(question)
-        self.yourResult = YourResult.from_json(yourResult)
-        self.topperResult = TopperResult.from_json(topperResult)
-        self.averageResult = AverageResult.from_json(averageResult)
+        self.question = Question.from_json(question) if question else None
+        self.yourResult = YourResult.from_json(yourResult) if yourResult else None
+        self.topperResult = TopperResult.from_json(topperResult) if topperResult else None
+        self.averageResult = AverageResult.from_json(averageResult) if averageResult else None
 
     @staticmethod
     def from_json(json_data: Dict[str, Any]) -> 'QuestionItem':
         return QuestionItem(
-            question=json_data['question'],
-            yourResult=json_data['yourResult'],
-            topperResult=json_data['topperResult'],
-            averageResult=json_data['averageResult']
+            question=json_data.get('question', {}),
+            yourResult=json_data.get('yourResult', {}),
+            topperResult=json_data.get('topperResult', {}),
+            averageResult=json_data.get('averageResult', {})
         )
 
 class LanguageCode:
@@ -435,9 +435,9 @@ class LanguageCode:
     @staticmethod
     def from_json(json_data: Dict[str, Any]) -> 'LanguageCode':
         return LanguageCode(
-            language=json_data['language'],
-            isSelected=json_data['isSelected'],
-            code=json_data['code']
+            language=json_data.get('language', ''),
+            isSelected=json_data.get('isSelected', False),
+            code=json_data.get('code', '')
         )
 
 class Test:
@@ -450,10 +450,10 @@ class Test:
     @staticmethod
     def from_json(json_data: Dict[str, Any]) -> 'Test':
         return Test(
-            _id=json_data['_id'],
-            name=json_data['name'],
-            type=json_data['type'],
-            template=json_data['template']
+            _id=json_data.get('_id', ''),
+            name=json_data.get('name', ''),
+            type=json_data.get('type', ''),
+            template=json_data.get('template', '')
         )
 
 class ComprehensionData:
@@ -465,8 +465,8 @@ class ComprehensionData:
     @staticmethod
     def from_json(json_data: Dict[str, Any]) -> 'ComprehensionData':
         return ComprehensionData(
-            comprehensions=json_data['comprehensions'],
-            comprehensionRanges=json_data['comprehensionRanges']
+            comprehensions=json_data.get('comprehensions', []),
+            comprehensionRanges=json_data.get('comprehensionRanges', [])
         )
 
 class Data:
@@ -474,38 +474,38 @@ class Data:
                  questions: List[Dict[str, Any]], languageCodes: List[Dict[str, Any]],
                  test: Dict[str, Any], isLiveAttempt: bool, comprehensionData: Dict[str, Any],
                  bookmarkEnabled: bool):
-        self.sections = [Section.from_json(s) for s in sections]
-        self.difficultyLevels = [DifficultyLevel.from_json(dl) for dl in difficultyLevels]
-        self.questions = [QuestionItem.from_json(q) for q in questions]
-        self.languageCodes = [LanguageCode.from_json(lc) for lc in languageCodes]
-        self.test = Test.from_json(test)
+        self.sections = [Section.from_json(s) for s in sections if s] if sections else []
+        self.difficultyLevels = [DifficultyLevel.from_json(dl) for dl in difficultyLevels if dl] if difficultyLevels else []
+        self.questions = [QuestionItem.from_json(q) for q in questions if q] if questions else []
+        self.languageCodes = [LanguageCode.from_json(lc) for lc in languageCodes if lc] if languageCodes else []
+        self.test = Test.from_json(test) if test else None
         self.isLiveAttempt = isLiveAttempt
-        self.comprehensionData = ComprehensionData.from_json(comprehensionData)
+        self.comprehensionData = ComprehensionData.from_json(comprehensionData) if comprehensionData else None
         self.bookmarkEnabled = bookmarkEnabled
 
     @staticmethod
     def from_json(json_data: Dict[str, Any]) -> 'Data':
         return Data(
-            sections=json_data['sections'],
-            difficultyLevels=json_data['difficultyLevels'],
-            questions=json_data['questions'],
-            languageCodes=json_data['languageCodes'],
-            test=json_data['test'],
-            isLiveAttempt=json_data['isLiveAttempt'],
-            comprehensionData=json_data['comprehensionData'],
-            bookmarkEnabled=json_data['bookmarkEnabled']
+            sections=json_data.get('sections', []),
+            difficultyLevels=json_data.get('difficultyLevels', []),
+            questions=json_data.get('questions', []),
+            languageCodes=json_data.get('languageCodes', []),
+            test=json_data.get('test', {}),
+            isLiveAttempt=json_data.get('isLiveAttempt', False),
+            comprehensionData=json_data.get('comprehensionData', {}),
+            bookmarkEnabled=json_data.get('bookmarkEnabled', False)
         )
 
 class TestDetails:
     def __init__(self, success: bool, statusCode: int, data: Dict[str, Any]):
         self.success = success
         self.statusCode = statusCode
-        self.data = Data.from_json(data)
+        self.data = Data.from_json(data) if data else None
 
     @staticmethod
-    def from_json(json_data: Dict[str, Any]) -> 'Root':
+    def from_json(json_data: Dict[str, Any]) -> 'TestDetails':
         return TestDetails(
-            success=json_data['success'],
-            statusCode=json_data['statusCode'],
-            data=json_data['data']
+            success=json_data.get('success', False),
+            statusCode=json_data.get('statusCode', 0),
+            data=json_data.get('data', {})
         )
