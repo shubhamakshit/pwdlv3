@@ -194,7 +194,7 @@ class Endpoints:
         import os 
         if os.getenv('PWDL_REQUEST_LOG'):
             import json
-            with open(f'{type}.log.txt','w') as file: file.write(json.dumps(fetched_response)) 
+            with open(f'{type}.log.json','w') as file: file.write(json.dumps(fetched_response))
             debugger.debug(fetched_response)
         
         model_to_use = lambert.model if use_model else None

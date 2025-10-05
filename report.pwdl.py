@@ -74,35 +74,41 @@ def add_to_report_generator(pdf_path, subject, tags, notes):
         print(f"An unexpected error occurred: {e}")
 
 def _process_question_info(q, i):
-    option = None
-    if q.yourResult and q.yourResult.markedSolutions:
-        option = q.yourResult.markedSolutions[0]
+
+
 
     actual_option = None
-    if q.topperResult and q.topperResult.markedSolutions:
-        actual_option = q.topperResult.markedSolutions[0]
+    actual_option_id  = q.question.solutions[0]
+    for _option in q.question.options:
+        if _option._id == actual_option_id:
+            actual_option = _option.texts.en
+            #debugger.var(actual_option)
 
-    if option and q.question and q.question.options:
-        try:
-            options = [op._id for op in q.question.options]
-            index = options.index(option)
-            option = q.question.options[index].texts.en if index < len(q.question.options) else None
-        except (ValueError, IndexError):
-            option = None
-    if actual_option and q.question and q.question.options:
-        try:
-            options = [op._id for op in q.question.options]
-            index = options.index(actual_option)
-            actual_option = q.question.options[index].texts.en if index < len(q.question.options) else None
-        except (ValueError, IndexError):
-            actual_option = None
+
+    marked_option = None
+    marked_bool = len(q.yourResult.markedSolutions) >= 1
+    marked_option_id = q.yourResult.markedSolutions[0] if marked_bool else None
+
+    for _option in q.question.options:
+        if _option._id == marked_option_id:
+            marked_option = _option.texts.en
+
+    # if actual_option and q.question and q.question.options:
+    #     try:
+    #         options = [op._id for op in q.question.options]
+    #         index = options.index(actual_option)
+    #         #actual_option = q.question.options[index].texts.en if index < len(q.question.options) else None
+    #     except (ValueError, IndexError) as e :
+    #         debugger.error("Error processing actual option")
+    #         debugger.var(e)
+    #         actual_option = None
 
     return {
         "link": q.question.imageIds.link if q.question and q.question.imageIds else "",
         "question_number": str(q.question.questionNumber) if q.question else "",
         "time_taken": getattr(q.yourResult, 'timeTaken', 'N/A') if q.yourResult else 'N/A',
         "subject": str(q.question.topicId.name) if q.question and q.question.topicId else "",
-        "marked_solution": str(option if option else 'X'),
+        "marked_solution": str(marked_option if marked_option else 'X'),
         "actual_solution": str(actual_option if actual_option else 'X'),
         "status": q.yourResult.status if q.yourResult else "",
         "filename": f"q{q.question.questionNumber:03d}_{q.question.imageIds.name}-{i}.png" if q.question and q.question.imageIds else f"q{i:03d}_unknown.png"
@@ -192,6 +198,13 @@ def main():
     parser.add_argument('--force', action='store_true', help='Force processing even if report already exists (used with --all).')
     args = parser.parse_args()
 
+    all_test_data = Endpoint(
+        url="https://api.penpencil.co/v3/test-service/tests?testType=All&testStatus=All&attemptStatus=All&batchId=678b4cf5a3a368218a2b16e7&isSubjective=false&isPurchased=true&testCategoryIds=6814be5e9467bd0a54703a94",
+        headers=ScraperModule.batch_api.DEFAULT_HEADERS
+    ).fetch()
+    debugger.var([[data.get('name',""),data.get('testStudentMappingId',"")] for data in all_test_data[0]['data']])
+
+
     if args.all:
         print("--- Processing all available tests ---")
         try:
@@ -199,6 +212,7 @@ def main():
                 url="https://api.penpencil.co/v3/test-service/tests?testType=All&testStatus=All&attemptStatus=All&batchId=678b4cf5a3a368218a2b16e7&isSubjective=false&isPurchased=true&testCategoryIds=6814be5e9467bd0a54703a94",
                 headers=ScraperModule.batch_api.DEFAULT_HEADERS
             ).fetch()
+            debugger.varr(all_test_data[0])
             if all_test_data:
                 all_tests = AllTestDetails.from_json(all_test_data[0])
                 for test in all_tests.data:

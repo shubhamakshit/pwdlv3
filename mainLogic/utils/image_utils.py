@@ -1,3 +1,5 @@
+import base64
+import io
 import math
 import os
 import shutil
@@ -44,7 +46,7 @@ def get_or_download_font(font_path="arial.ttf", font_size=50):
 def create_a4_pdf_from_images(image_info, base_folder, output_filename, images_per_page, orientation='portrait', grid_rows=None, grid_cols=None):
     if not image_info: return False
     A4_WIDTH_PX, A4_HEIGHT_PX = 4960, 7016
-    font_large, font_small = get_or_download_font(font_size=60), get_or_download_font(font_size=45)
+    font_large, font_small = get_or_download_font(font_size=60), get_or_download_font(font_size=50)
     pages, info_chunks = [], [image_info[i:i + images_per_page] for i in range(0, len(image_info), images_per_page)]
     for chunk in info_chunks:
         page_width, page_height = (A4_HEIGHT_PX, A4_WIDTH_PX) if orientation == 'landscape' else (A4_WIDTH_PX, A4_HEIGHT_PX)
@@ -109,7 +111,7 @@ def create_a4_pdf_from_images(image_info, base_folder, output_filename, images_p
 
                 draw.text((cell_x + 20, cell_y + 20), f"Q: {info['question_number']}", fill="black", font=font_large)
                 info_text = f"Status: {info['status']} | Marked: {info['marked_solution']} | Correct: {info['actual_solution']}"
-                draw.text((cell_x + 20, cell_y + 90), info_text, fill="darkgray", font=font_small)
+                draw.text((cell_x + 20, cell_y + 90), info_text, fill="black", font=font_large)
             except Exception as e:
                 print(f"Error processing image for PDF: {e}")
         pages.append(page)
