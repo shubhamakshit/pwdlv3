@@ -19,6 +19,9 @@ debugger = glv_var.debugger # Assuming debugger is always available through glv_
 try:
     # Ensure dependencies are checked and tokens are retrieved
     re_check_dependencies()
+    prefs = glv_var.vars["prefs"]
+
+
     token = glv_var.vars["prefs"].get("token_config", {})
     
     access_token = None
