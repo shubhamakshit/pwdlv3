@@ -212,7 +212,7 @@ def main():
                 url="https://api.penpencil.co/v3/test-service/tests?testType=All&testStatus=All&attemptStatus=All&batchId=678b4cf5a3a368218a2b16e7&isSubjective=false&isPurchased=true&testCategoryIds=6814be5e9467bd0a54703a94",
                 headers=ScraperModule.batch_api.DEFAULT_HEADERS
             ).fetch()
-            debugger.varr(all_test_data[0])
+            debugger.var(all_test_data[0])
             if all_test_data:
                 all_tests = AllTestDetails.from_json(all_test_data[0])
                 for test in all_tests.data:
