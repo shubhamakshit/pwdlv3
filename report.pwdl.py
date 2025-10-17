@@ -82,11 +82,11 @@ def _process_question_info(q, i):
     for _option in q.question.options:
         if _option._id == actual_option_id:
             actual_option = _option.texts.en
-            #debugger.var(actual_option)
+#            debugger.var(actual_option)
 
 
     marked_option = None
-    marked_bool = len(q.yourResult.markedSolutions) >= 1
+    marked_bool = len(q.yourResult.markedSolutions) > 0
     marked_option_id = q.yourResult.markedSolutions[0] if marked_bool else None
 
     for _option in q.question.options:
@@ -109,7 +109,7 @@ def _process_question_info(q, i):
         "time_taken": getattr(q.yourResult, 'timeTaken', 'N/A') if q.yourResult else 'N/A',
         "subject": str(q.question.topicId.name) if q.question and q.question.topicId else "",
         "marked_solution": str(marked_option if marked_option else 'X'),
-        "actual_solution": str(actual_option if actual_option else 'X'),
+        "actual_solution": str(actual_option),
         "status": q.yourResult.status if q.yourResult else "",
         "filename": f"q{q.question.questionNumber:03d}_{q.question.imageIds.name}-{i}.png" if q.question and q.question.imageIds else f"q{i:03d}_unknown.png"
     }
