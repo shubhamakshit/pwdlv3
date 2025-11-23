@@ -41,7 +41,7 @@ def start_webui(port, verbose, no_reloader=False):
 
     debug_mode = True if verbose else False
     use_reloader = not no_reloader if debug_mode else False
-    app.run(host="0.0.0.0", port=port, debug=debug_mode, use_reloader=use_reloader)
+    app.run(host="0.0.0.0", port=port, debug=debug_mode, use_reloader=use_reloader,threaded=True)
 
 
 def download_process(
