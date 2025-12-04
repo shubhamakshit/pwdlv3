@@ -22,7 +22,7 @@ from mainLogic.utils.glv import Global
 from mainLogic.utils.glv_var import debugger
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, supports_credentials=True, origins=['*'])
 
 # Initialize ClientManager and TaskManager
 client_manager = Boss.client_manager

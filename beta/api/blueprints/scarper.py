@@ -169,10 +169,27 @@ def get_rewritten_manifest(batch_name, id):
             return Response(f"Failed to fetch upstream manifest: {resp.status_code}", status=502)
         
         content = resp.text
+        debugger.info(f"[SCARPER] Original manifest content preview: {content[:200]}...")
 
-        # Strip DRM Tags
-        content = re.sub(r'<ContentProtection.*?>.*?</ContentProtection>', '', content, flags=re.DOTALL)
-        content = re.sub(r'<ContentProtection.*?/>', '', content)
+        # Strip DRM Tags - More comprehensive removal
+        original_content = content
+        
+        # Remove multi-line ContentProtection tags
+        content = re.sub(r'<ContentProtection[^>]*>.*?</ContentProtection>', '', content, flags=re.DOTALL | re.IGNORECASE)
+        
+        # Remove self-closing ContentProtection tags
+        content = re.sub(r'<ContentProtection[^>]*/?>', '', content, flags=re.IGNORECASE)
+        
+        # Also remove any pssh boxes or DRM-related elements
+        content = re.sub(r'<cenc:pssh[^>]*>.*?</cenc:pssh>', '', content, flags=re.DOTALL | re.IGNORECASE)
+        content = re.sub(r'<ms:pro[^>]*>.*?</ms:pro>', '', content, flags=re.DOTALL | re.IGNORECASE)
+        
+        if original_content != content:
+            debugger.info(f"[SCARPER] DRM content removed from manifest")
+        else:
+            debugger.warning(f"[SCARPER] No DRM content found to remove in manifest")
+            
+        debugger.info(f"[SCARPER] Cleaned manifest content preview: {content[:200]}...")
 
         # Rewrite Paths to point to Proxy
         def rewrite_path(match):
@@ -185,7 +202,14 @@ def get_rewritten_manifest(batch_name, id):
         pattern = r'(initialization|media)="([^"]+)"'
         content = re.sub(pattern, rewrite_path, content)
 
-        return Response(content, mimetype='application/dash+xml')
+        # Create response with proper CORS headers
+        response = Response(content, mimetype='application/dash+xml')
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        response.headers['Access-Control-Allow-Credentials'] = 'true'
+        response.headers['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
+        response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
+        
+        return response
 
     except Exception as e:
         debugger.error(f"Manifest rewrite error: {e}")
@@ -306,8 +330,16 @@ def get_media_m3u8(batch_name, id, rep_id):
 
 # --- ROUTE 4: SEGMENT PROXY (DECRYPTION) ---
 
-@scraper_blueprint.route('/api/proxy/<batch_name>/<id>/<path:filepath>', methods=['GET'])
+@scraper_blueprint.route('/api/proxy/<batch_name>/<id>/<path:filepath>', methods=['GET', 'OPTIONS'])
 def proxy_segment_decrypt(batch_name, id, filepath):
+    # Handle OPTIONS request for CORS preflight
+    if request.method == 'OPTIONS':
+        response = Response()
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        response.headers['Access-Control-Allow-Credentials'] = 'true'
+        response.headers['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
+        response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
+        return response
     try:
         # 1. Get Context
         try:
@@ -322,7 +354,10 @@ def proxy_segment_decrypt(batch_name, id, filepath):
 
         # Return cached if ready
         if os.path.exists(local_dec_path) and os.path.getsize(local_dec_path) > 0:
-            return send_file(local_dec_path, mimetype='video/mp4')
+            response = send_file(local_dec_path, mimetype='video/mp4')
+            response.headers['Access-Control-Allow-Origin'] = '*'
+            response.headers['Access-Control-Allow-Credentials'] = 'true'
+            return response
 
         # 3. Handle Init Segments
         if filepath.endswith("init.mp4"):
@@ -333,8 +368,11 @@ def proxy_segment_decrypt(batch_name, id, filepath):
             
             if not run_mp4decrypt(local_enc_path, local_dec_path, ctx['kid'], ctx['key']):
                 return Response("Decrypt Failed", 500)
-                
-            return send_file(local_dec_path, mimetype='video/mp4')
+            
+            response = send_file(local_dec_path, mimetype='video/mp4')
+            response.headers['Access-Control-Allow-Origin'] = '*'
+            response.headers['Access-Control-Allow-Credentials'] = 'true'
+            return response
 
         # 4. Handle Media Segments (Stitch & Split)
         else:
@@ -382,7 +420,11 @@ def proxy_segment_decrypt(batch_name, id, filepath):
                         fin.seek(offset)
                         with open(local_dec_path, 'wb') as fout:
                             shutil.copyfileobj(fin, fout)
-                    return send_file(local_dec_path, mimetype='video/mp4')
+                    
+                    response = send_file(local_dec_path, mimetype='video/mp4')
+                    response.headers['Access-Control-Allow-Origin'] = '*'
+                    response.headers['Access-Control-Allow-Credentials'] = 'true'
+                    return response
                 else:
                     return Response("Split Failed: Output missing", 500)
 
@@ -502,13 +544,29 @@ def get_notes(batch_name, subject_name, chapter_name):
 def get_lecture_info(batch_name,id):
     try:
         from mainLogic.big4.Ravenclaw_decrypt.key import LicenseKeyFetcher as Lf
-        lf = Lf(batch_api.token, batch_api.random_id)
-        keys = lf.get_key(id,batch_name)
-
-        original_url = keys[2]
-        return create_response(data={"url": original_url, "key":keys[1], "kid":keys[0]})
+        
+        # Check if cors_fix parameter is enabled
+        cors_fix = request.args.get('cors_fix', 'false').lower() == 'true'
+        debugger.info(f"[SCARPER] get_lecture_info called - batch_name: {batch_name}, id: {id}, cors_fix: {cors_fix}")
+        
+        if cors_fix:
+            # Return backend proxy URL instead of CloudFront URL
+            base_url = request.host_url.rstrip('/')
+            proxy_url = f"{base_url}/api/lecture/{batch_name}/{id}/master.mpd"
+            debugger.info(f"[SCARPER] CORS fix enabled - returning proxy URL: {proxy_url}")
+            # No DRM keys needed for proxy URL
+            return create_response(data={"url": proxy_url, "key": None, "kid": None})
+        else:
+            # Original behavior - fetch keys and return CloudFront URL
+            debugger.info(f"[SCARPER] CORS fix disabled - fetching CloudFront URL and keys")
+            lf = Lf(batch_api.token, batch_api.random_id)
+            keys = lf.get_key(id, batch_name)
+            original_url = keys[2]
+            debugger.info(f"[SCARPER] Returning CloudFront URL: {original_url[:50]}... with keys")
+            return create_response(data={"url": original_url, "key": keys[1], "kid": keys[0]})
+            
     except Exception as e:
-        debugger.error(f"Error: {e}")
+        debugger.error(f"[SCARPER] Error: {e}")
         return create_response(error=str(e)), 500
 
 @scraper_blueprint.route('/api/batches/<batch_name>/<subject_name>/<chapter_name>/dpp_pdf', methods=['GET'])
