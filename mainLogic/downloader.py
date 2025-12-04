@@ -25,7 +25,7 @@ def start_shell():
     shell.main()
 
 
-def start_webui(port, verbose, no_reloader=False):
+def start_webui(port, verbose, no_reloader=False, ssl=False, ssl_cert=None, ssl_key=None, ssl_password=None):
     """Start the WebUI if requested."""
     from run import app
 
@@ -35,13 +35,64 @@ def start_webui(port, verbose, no_reloader=False):
     if port == -1:
         port = 5000
 
+    # SSL Configuration
+    ssl_context = None
+    if ssl:
+        try:
+            import ssl as ssl_module
+            
+            # Default cert and key paths
+            if not ssl_cert:
+                ssl_cert = 'cert.pem'
+            if not ssl_key:
+                ssl_key = 'key.pem'
+            
+            # Check if cert files exist
+            if not os.path.exists(ssl_cert):
+                debugger.error(f"SSL certificate file not found: {ssl_cert}")
+                debugger.info("You can generate a self-signed certificate with:")
+                debugger.info(f"openssl req -x509 -newkey rsa:4096 -nodes -out {ssl_cert} -keyout {ssl_key} -days 365")
+                sys.exit(1)
+            
+            if not os.path.exists(ssl_key):
+                debugger.error(f"SSL private key file not found: {ssl_key}")
+                sys.exit(1)
+            
+            # Create SSL context
+            if ssl_password:
+                # Load encrypted key with password
+                ssl_context = ssl_module.SSLContext(ssl_module.PROTOCOL_TLS_SERVER)
+                ssl_context.load_cert_chain(ssl_cert, ssl_key, ssl_password)
+            else:
+                # Simple context for unencrypted keys
+                ssl_context = (ssl_cert, ssl_key)
+            
+            if verbose:
+                debugger.success(f"SSL enabled with cert: {ssl_cert}, key: {ssl_key}")
+                
+        except ImportError:
+            debugger.error("SSL module not available. Cannot enable HTTPS.")
+            sys.exit(1)
+        except Exception as e:
+            debugger.error(f"SSL configuration error: {e}")
+            sys.exit(1)
+
+    protocol = "HTTPS" if ssl else "HTTP"
     if verbose:
         Global.hr()
-        debugger.debug(f"Starting WebUI on port {port}")
+        debugger.debug(f"Starting WebUI on {protocol}://0.0.0.0:{port}")
 
     debug_mode = True if verbose else False
     use_reloader = not no_reloader if debug_mode else False
-    app.run(host="0.0.0.0", port=port, debug=debug_mode, use_reloader=use_reloader,threaded=True)
+    
+    app.run(
+        host="0.0.0.0", 
+        port=port, 
+        debug=debug_mode, 
+        use_reloader=use_reloader,
+        threaded=True,
+        ssl_context=ssl_context
+    )
 
 
 def download_process(
@@ -198,7 +249,7 @@ def main(csv_file=None,
          id=None, name=None,batch_name=None,topic_name=None,lecture_url=None,
          directory=None, verbose=False, shell=False, webui_port=None, no_reloader=False, tmp_dir=None,
          new_downloader=False,
-         simulate=False):
+         simulate=False, ssl=False, ssl_cert=None, ssl_key=None, ssl_password=None):
     global prefs  # Use global keyword to modify global prefs
 
     if shell:
@@ -213,7 +264,7 @@ def main(csv_file=None,
     glv_var.vars['prefs'] = prefs
 
     if webui_port is not None:
-        start_webui(webui_port, glv.vout, no_reloader=no_reloader)
+        start_webui(webui_port, glv.vout, no_reloader=no_reloader, ssl=ssl, ssl_cert=ssl_cert, ssl_key=ssl_key, ssl_password=ssl_password)
 
     if simulate:
         if csv_file:

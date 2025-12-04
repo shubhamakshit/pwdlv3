@@ -23,6 +23,10 @@ def parse_arguments():
     parser.add_argument('--tmp-dir', type=str, help='Temporary Directory')
     parser.add_argument('--webui', nargs='?', const=-1, type=int, help='Start the Webui')
     parser.add_argument('--no-reloader', action='store_true', help='Disable the Flask reloader in debug mode')
+    parser.add_argument('--ssl', action='store_true', help='Enable HTTPS/SSL for the webui')
+    parser.add_argument('--ssl-cert', type=str, help='Path to SSL certificate file (cert.pem)')
+    parser.add_argument('--ssl-key', type=str, help='Path to SSL private key file (key.pem)')
+    parser.add_argument('--ssl-password', type=str, help='Password for SSL private key (if encrypted)')
     parser.add_argument('--simulate', action='store_true',
                         help='Simulate the download process. No files will be downloaded. Incompatible wit h '
                              '--csv-file. Must be used with --id and --name')
@@ -97,5 +101,9 @@ if __name__ == "__main__":
         shell=args.shell,
         webui_port=args.webui,
         no_reloader=args.no_reloader,
-        simulate=args.simulate
+        simulate=args.simulate,
+        ssl=args.ssl,
+        ssl_cert=args.ssl_cert,
+        ssl_key=args.ssl_key,
+        ssl_password=args.ssl_password
     )
