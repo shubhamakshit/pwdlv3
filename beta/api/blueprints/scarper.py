@@ -9,6 +9,9 @@ import html
 import time
 import xml.etree.ElementTree as ET
 from urllib.parse import urlparse
+import threading
+import concurrent.futures
+from functools import wraps
 
 import requests
 import urllib3
@@ -36,6 +39,15 @@ DEC_DIR = os.path.join(TMP_DIR, "dec")
 
 # Global Dictionary to store context (Keys, URLs) for active lectures
 LECTURE_CONTEXT = {}
+
+# Threading configuration
+MAX_WORKER_THREADS = int(os.environ.get('PWDL_DECRYPT_THREADS', '4'))  # Configurable via environment variable
+DECRYPT_EXECUTOR = concurrent.futures.ThreadPoolExecutor(max_workers=MAX_WORKER_THREADS, thread_name_prefix='decrypt-worker')
+debugger.info(f"[THREADING] Initialized decrypt thread pool with {MAX_WORKER_THREADS} workers")
+
+# Thread-safe locks for file operations
+file_locks = {}
+file_locks_lock = threading.Lock()
 
 # Initialize BatchAPI
 try:
@@ -74,6 +86,27 @@ def renamer(data,old_key,new_key):
 
 # --- HELPER FUNCTIONS FOR DECRYPTION ---
 
+def get_file_lock(file_path):
+    """Get or create a thread-safe lock for a specific file"""
+    with file_locks_lock:
+        if file_path not in file_locks:
+            file_locks[file_path] = threading.Lock()
+        return file_locks[file_path]
+
+def thread_safe_file_operation(func):
+    """Decorator to ensure file operations are thread-safe"""
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        # Extract file path from args (usually the output path)
+        file_path = args[1] if len(args) > 1 else kwargs.get('output_path')
+        if file_path:
+            lock = get_file_lock(file_path)
+            with lock:
+                return func(*args, **kwargs)
+        else:
+            return func(*args, **kwargs)
+    return wrapper
+
 def ensure_dirs(lecture_id):
     """Creates specific temp folders for a lecture ID"""
     l_enc = os.path.join(ENC_DIR, lecture_id)
@@ -82,36 +115,49 @@ def ensure_dirs(lecture_id):
     os.makedirs(l_dec, exist_ok=True)
     return l_enc, l_dec
 
+@thread_safe_file_operation
 def run_mp4decrypt(input_path, output_path, kid, key):
-    """Runs mp4decrypt subprocess, ensuring output dir exists"""
+    """Runs mp4decrypt subprocess, ensuring output dir exists (Thread-safe)"""
     try:
+        # Check if already decrypted by another thread
+        if os.path.exists(output_path) and os.path.getsize(output_path) > 0:
+            debugger.info(f"[DECRYPT] File already exists: {os.path.basename(output_path)}")
+            return True
+        
         # Ensure output dir exists
         os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
+        debugger.info(f"[DECRYPT] Starting decryption: {os.path.basename(input_path)} -> {os.path.basename(output_path)}")
+        
         key_arg = f"{kid}:{key}"
         cmd = ['mp4decrypt', '--key', key_arg, input_path, output_path]
         
         # Run and capture output
+        start_time = time.time()
         result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        decrypt_time = time.time() - start_time
         
         if result.returncode != 0:
-            debugger.error(f"mp4decrypt failed: {result.stderr}")
+            debugger.error(f"[DECRYPT] mp4decrypt failed for {os.path.basename(output_path)}: {result.stderr}")
             return False
             
         # Verify file creation
         if not os.path.exists(output_path):
-            debugger.error(f"mp4decrypt returned 0 but file missing: {output_path}")
+            debugger.error(f"[DECRYPT] mp4decrypt returned 0 but file missing: {output_path}")
             return False
             
+        debugger.success(f"[DECRYPT] Completed {os.path.basename(output_path)} in {decrypt_time:.2f}s")
         return True
     except Exception as e:
-        debugger.error(f"Exception in run_mp4decrypt: {e}")
+        debugger.error(f"[DECRYPT] Exception in run_mp4decrypt: {e}")
         return False
 
+@thread_safe_file_operation
 def fetch_upstream_file(url, dest_path):
-    """Downloads file from CloudFront with headers"""
-    # Check if file exists and has size
+    """Downloads file from CloudFront with headers (Thread-safe)"""
+    # Check if file exists and has size (another thread might have downloaded it)
     if os.path.exists(dest_path) and os.path.getsize(dest_path) > 0:
+        debugger.info(f"[DOWNLOAD] File already exists: {os.path.basename(dest_path)}")
         return True
         
     os.makedirs(os.path.dirname(dest_path), exist_ok=True)
@@ -120,19 +166,67 @@ def fetch_upstream_file(url, dest_path):
         'Referer': 'https://pw.live/'
     }
     try:
+        debugger.info(f"[DOWNLOAD] Starting download: {os.path.basename(dest_path)}")
+        start_time = time.time()
+        
         with requests.get(url, headers=headers, stream=True) as r:
             r.raise_for_status()
             with open(dest_path, 'wb') as f:
                 for chunk in r.iter_content(chunk_size=65536):
                     f.write(chunk)
+        
+        download_time = time.time() - start_time
+        file_size = os.path.getsize(dest_path) / (1024 * 1024)  # MB
+        debugger.success(f"[DOWNLOAD] Completed {os.path.basename(dest_path)} ({file_size:.1f}MB) in {download_time:.2f}s")
         return True
     except Exception as e:
-        debugger.error(f"Download failed: {e}")
+        debugger.error(f"[DOWNLOAD] Failed {os.path.basename(dest_path)}: {e}")
         # Clean up partial file
         if os.path.exists(dest_path): 
             try: os.remove(dest_path)
             except: pass
         return False
+
+def download_and_decrypt_async(url, enc_path, dec_path, kid, key):
+    """Async function to download and decrypt a file"""
+    def task():
+        debugger.info(f"[ASYNC] Starting download+decrypt pipeline for {os.path.basename(enc_path)}")
+        start_time = time.time()
+        
+        # Step 1: Download
+        if not fetch_upstream_file(url, enc_path):
+            return False
+            
+        # Step 2: Decrypt
+        if not run_mp4decrypt(enc_path, dec_path, kid, key):
+            return False
+            
+        total_time = time.time() - start_time
+        debugger.success(f"[ASYNC] Pipeline completed for {os.path.basename(dec_path)} in {total_time:.2f}s")
+        return True
+    
+    return DECRYPT_EXECUTOR.submit(task)
+
+def download_multiple_async(tasks):
+    """Download and decrypt multiple files in parallel"""
+    futures = []
+    for url, enc_path, dec_path, kid, key in tasks:
+        future = download_and_decrypt_async(url, enc_path, dec_path, kid, key)
+        futures.append((future, dec_path))
+    
+    # Wait for all tasks to complete
+    results = {}
+    for future, dec_path in futures:
+        try:
+            results[dec_path] = future.result(timeout=30)  # 30 second timeout per file
+        except concurrent.futures.TimeoutError:
+            debugger.error(f"[ASYNC] Timeout for {os.path.basename(dec_path)}")
+            results[dec_path] = False
+        except Exception as e:
+            debugger.error(f"[ASYNC] Exception for {os.path.basename(dec_path)}: {e}")
+            results[dec_path] = False
+    
+    return results
 
 def get_lecture_context(batch_name, id):
     """Retrieves URL/Key from cache or API"""
@@ -359,60 +453,92 @@ def proxy_segment_decrypt(batch_name, id, filepath):
             response.headers['Access-Control-Allow-Credentials'] = 'true'
             return response
 
-        # 3. Handle Init Segments
+        # 3. Handle Init Segments (Use async for better performance)
         if filepath.endswith("init.mp4"):
             upstream_url = f"{ctx['base_url']}{filepath}?{ctx['query']}"
             
-            if not fetch_upstream_file(upstream_url, local_enc_path):
-                return Response("Download Failed", 502)
+            debugger.info(f"[PROXY] Processing init segment: {os.path.basename(filepath)}")
             
-            if not run_mp4decrypt(local_enc_path, local_dec_path, ctx['kid'], ctx['key']):
-                return Response("Decrypt Failed", 500)
+            # Use async download+decrypt
+            future = download_and_decrypt_async(upstream_url, local_enc_path, local_dec_path, ctx['kid'], ctx['key'])
+            
+            try:
+                success = future.result(timeout=20)  # 20 second timeout for init segments
+                if not success:
+                    return Response("Init Segment Processing Failed", 500)
+            except concurrent.futures.TimeoutError:
+                return Response("Init Segment Timeout", 504)
+            except Exception as e:
+                debugger.error(f"[PROXY] Init segment error: {e}")
+                return Response("Init Segment Error", 500)
             
             response = send_file(local_dec_path, mimetype='video/mp4')
             response.headers['Access-Control-Allow-Origin'] = '*'
             response.headers['Access-Control-Allow-Credentials'] = 'true'
             return response
 
-        # 4. Handle Media Segments (Stitch & Split)
+        # 4. Handle Media Segments (Enhanced with threading and batch processing)
         else:
+            debugger.info(f"[PROXY] Processing media segment: {os.path.basename(filepath)}")
+            
             dir_name = os.path.dirname(filepath)
             init_rel_path = f"{dir_name}/init.mp4"
             
             enc_init_path = os.path.join(l_enc_dir, init_rel_path)
             dec_init_path = os.path.join(l_dec_dir, init_rel_path)
 
-            # A. Ensure Decrypted Init Exists (For Offset Calculation)
+            # A. Ensure Decrypted Init Exists (Use async if needed)
             if not os.path.exists(dec_init_path):
+                debugger.info(f"[PROXY] Init segment missing, processing asynchronously")
                 upstream_init = f"{ctx['base_url']}{init_rel_path}?{ctx['query']}"
-                if not fetch_upstream_file(upstream_init, enc_init_path):
-                    return Response("Init DL Fail", 502)
-                if not run_mp4decrypt(enc_init_path, dec_init_path, ctx['kid'], ctx['key']):
-                    return Response("Init Decrypt Fail", 500)
+                
+                # Process init segment asynchronously
+                init_future = download_and_decrypt_async(upstream_init, enc_init_path, dec_init_path, ctx['kid'], ctx['key'])
+                try:
+                    if not init_future.result(timeout=15):  # 15 second timeout for init
+                        return Response("Init Processing Failed", 500)
+                except concurrent.futures.TimeoutError:
+                    return Response("Init Timeout", 504)
 
             if not os.path.exists(dec_init_path):
-                return Response("Init Missing", 500)
+                return Response("Init Missing After Processing", 500)
 
             # B. Get Offset
             offset = os.path.getsize(dec_init_path)
 
-            # C. Download Segment
+            # C. Download Media Segment (async)
             upstream_seg = f"{ctx['base_url']}{filepath}?{ctx['query']}"
-            if not fetch_upstream_file(upstream_seg, local_enc_path):
-                return Response("Seg Download Failed", 502)
+            
+            debugger.info(f"[PROXY] Starting async download for media segment")
+            download_future = DECRYPT_EXECUTOR.submit(fetch_upstream_file, upstream_seg, local_enc_path)
+            
+            try:
+                if not download_future.result(timeout=25):  # 25 second timeout for download
+                    return Response("Media Download Failed", 502)
+            except concurrent.futures.TimeoutError:
+                return Response("Media Download Timeout", 504)
 
-            # D. Stitch
+            # D. Stitch and Decrypt (optimized)
             temp_stitch_enc = local_enc_path + ".st.enc"
             temp_stitch_dec = local_enc_path + ".st.dec"
 
             try:
+                debugger.info(f"[PROXY] Stitching and decrypting media segment")
+                start_stitch = time.time()
+                
+                # Stitch files
                 with open(temp_stitch_enc, 'wb') as out:
                     with open(enc_init_path, 'rb') as f: shutil.copyfileobj(f, out)
                     with open(local_enc_path, 'rb') as f: shutil.copyfileobj(f, out)
 
-                # E. Decrypt Stitched
-                if not run_mp4decrypt(temp_stitch_enc, temp_stitch_dec, ctx['kid'], ctx['key']):
-                    return Response("Stitch Decrypt Failed", 500)
+                # Decrypt stitched file asynchronously
+                decrypt_future = DECRYPT_EXECUTOR.submit(run_mp4decrypt, temp_stitch_enc, temp_stitch_dec, ctx['kid'], ctx['key'])
+                
+                try:
+                    if not decrypt_future.result(timeout=20):  # 20 second timeout for decryption
+                        return Response("Media Decrypt Failed", 500)
+                except concurrent.futures.TimeoutError:
+                    return Response("Media Decrypt Timeout", 504)
 
                 # F. Split and Save
                 if os.path.exists(temp_stitch_dec):
@@ -420,6 +546,9 @@ def proxy_segment_decrypt(batch_name, id, filepath):
                         fin.seek(offset)
                         with open(local_dec_path, 'wb') as fout:
                             shutil.copyfileobj(fin, fout)
+                    
+                    stitch_time = time.time() - start_stitch
+                    debugger.success(f"[PROXY] Media segment processed in {stitch_time:.2f}s")
                     
                     response = send_file(local_dec_path, mimetype='video/mp4')
                     response.headers['Access-Control-Allow-Origin'] = '*'
@@ -685,3 +814,45 @@ def set_token():
         return create_response(data={"message": "Token updated successfully"})
     except Exception as e:
         return create_response(error=str(e)), 500
+
+@scraper_blueprint.route('/api/threading/status', methods=['GET'])
+def get_threading_status():
+    """Get current threading status and performance metrics"""
+    try:
+        active_threads = threading.active_count()
+        executor_stats = {
+            'max_workers': DECRYPT_EXECUTOR._max_workers,
+            'active_threads': active_threads,
+            'pending_tasks': DECRYPT_EXECUTOR._work_queue.qsize() if hasattr(DECRYPT_EXECUTOR._work_queue, 'qsize') else 'N/A'
+        }
+        return create_response(data=executor_stats)
+    except Exception as e:
+        return create_response(error=str(e)), 500
+
+# Cleanup function for graceful shutdown
+def cleanup_resources():
+    """Clean up thread pool and temporary files"""
+    try:
+        debugger.info("[CLEANUP] Shutting down decrypt thread pool...")
+        DECRYPT_EXECUTOR.shutdown(wait=True, timeout=30)
+        debugger.info("[CLEANUP] Thread pool shutdown complete")
+        
+        # Clean up old temp files
+        if os.path.exists(TMP_DIR):
+            for root, dirs, files in os.walk(TMP_DIR):
+                for file in files:
+                    file_path = os.path.join(root, file)
+                    try:
+                        # Remove files older than 1 hour
+                        if os.path.getmtime(file_path) < time.time() - 3600:
+                            os.remove(file_path)
+                    except OSError:
+                        pass
+        debugger.info("[CLEANUP] Temporary files cleaned")
+        
+    except Exception as e:
+        debugger.error(f"[CLEANUP] Error during cleanup: {e}")
+
+# Register cleanup function
+import atexit
+atexit.register(cleanup_resources)
