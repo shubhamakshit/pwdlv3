@@ -3,6 +3,9 @@ import math
 import shutil
 import argparse
 import sqlite3
+import sys
+
+from mainLogic.utils.glv import Global
 from mainLogic.utils.image_utils import create_a4_pdf_from_images
 from beta.batch_scraper_2.models.AllTestDetails import AllTestDetails
 from report_json_export import export_to_json_v3, send_to_report_generator
@@ -86,6 +89,18 @@ def process_test(test_id, test_name, test_mapping_id, args):
         # --- Fetch Data ---
         print("Fetching test data...")
         test_data = ScraperModule.batch_api.get_test(test_id)
+        result_data = Endpoint(
+            url=f"https://api.penpencil.co/v3/test-service/tests/693be340127c96838a44d21f/my-result?testId={test_id}&testMappingId={test_mapping_id}",
+            headers=ScraperModule.batch_api.DEFAULT_HEADERS,
+
+
+        ).fetch()[0]
+        Global.hr()
+        print("\n"*3)
+        debugger.info("RANK\t"+str(result_data['data']['rank']))
+        print("\n"*3)
+        Global.hr()
+        #sys.exit(0)
         if not test_data or not test_data.data:
             print("Could not fetch test data.")
             return
@@ -185,8 +200,11 @@ def main():
     parser.add_argument('--force', action='store_true', help='Force processing even if report already exists (used with --all).')
     args = parser.parse_args()
 
+    old_api_url = "https://api.penpencil.co/v3/test-service/tests?testType=All&testStatus=All&attemptStatus=All&batchId=678b4cf5a3a368218a2b16e7&isSubjective=false&isPurchased=true&testCategoryIds=6814be5e9467bd0a54703a94"
+    new_api_url = "https://api.penpencil.co/v3/test-service/tests?testType=All&testStatus=All&attemptStatus=All&batchId=68d626499dfdb652ac3ea3df&isSubjective=false&categoryId=68d654f20b83f446958276c6&categorySectionId=Other_Tests&isPurchased=true&testCategoryIds=68d654f20b83f446958276c6"
+
     all_test_data = Endpoint(
-        url="https://api.penpencil.co/v3/test-service/tests?testType=All&testStatus=All&attemptStatus=All&batchId=678b4cf5a3a368218a2b16e7&isSubjective=false&isPurchased=true&testCategoryIds=6814be5e9467bd0a54703a94&limit=50",
+        url=new_api_url,
         headers=ScraperModule.batch_api.DEFAULT_HEADERS
     ).fetch()
     debugger.var([[data.get('name',""),data.get('testStudentMappingId',"")] for data in all_test_data[0]['data']])
@@ -196,7 +214,7 @@ def main():
         print("--- Processing all available tests ---")
         try:
             all_test_data = Endpoint(
-                url="https://api.penpencil.co/v3/test-service/tests?testType=All&testStatus=All&attemptStatus=All&batchId=678b4cf5a3a368218a2b16e7&isSubjective=false&isPurchased=true&testCategoryIds=6814be5e9467bd0a54703a94",
+                url=new_api_url,
                 headers=ScraperModule.batch_api.DEFAULT_HEADERS
             ).fetch()
             debugger.var(all_test_data[0])
@@ -212,7 +230,7 @@ def main():
         # To get the test name and mapping ID, we still need to fetch the list
         try:
             all_test_data = Endpoint(
-                url="https://api.penpencil.co/v3/test-service/tests?testType=All&testStatus=All&attemptStatus=All&batchId=678b4cf5a3a368218a2b16e7&isSubjective=false&isPurchased=true&testCategoryIds=6814be5e9467bd0a54703a94",
+                url=new_api_url,
                 headers=ScraperModule.batch_api.DEFAULT_HEADERS
             ).fetch()
             if all_test_data:

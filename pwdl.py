@@ -72,7 +72,7 @@ if __name__ == "__main__":
 
     try:
         from beta.Syncer.main import Syncer
-        if not args.no_sync:
+        if not args.no_sync or not os.environ.get("PWDL_NO_SYNC"):
             sync = Syncer()
     except Exception as e:
         debugger.error(f"Error in Syncer: {e}")
