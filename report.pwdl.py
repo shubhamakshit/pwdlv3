@@ -2,14 +2,10 @@ import os
 import math
 import shutil
 import argparse
-import requests
-import subprocess
 import sqlite3
-import io
-import base64
-from PIL import Image, ImageDraw, ImageFont
-from mainLogic.utils.image_utils import get_or_download_font, create_a4_pdf_from_images
+from mainLogic.utils.image_utils import create_a4_pdf_from_images
 from beta.batch_scraper_2.models.AllTestDetails import AllTestDetails
+from report_json_export import export_to_json_v3, send_to_report_generator
 
 # Assuming your existing modules are in the correct path
 from beta.batch_scraper_2.module import ScraperModule,prefs 
@@ -18,6 +14,7 @@ from mainLogic.utils.glv_var import debugger
 
 # --- Database Configuration ---
 REPORT_GENERATOR_DB = prefs.get('db_path','')
+
 
 def check_if_tag_exists(tag):
     """Checks if a PDF with the given tag exists in the Report-Generator database."""
@@ -34,44 +31,6 @@ def check_if_tag_exists(tag):
     except sqlite3.Error as e:
         print(f"Database error while checking for tag: {e}")
         return False
-
-def add_to_report_generator(pdf_path, subject, tags, notes):
-    """
-    Adds a generated PDF to the Report-Generator database by calling its CLI.
-    """
-    cli_path = '/data/data/com.termux/files/home/Report-Generator/cli.py'
-    if not os.path.exists(cli_path):
-        print(f"Error: Report-Generator cli.py not found at {cli_path}")
-        return
-
-    command = [
-        'python',
-        cli_path,
-        pdf_path,
-        '--final',
-    ]
-    # Ensure subject is never None
-    if subject:
-        command.extend(['--subject', subject])
-    else:
-        print("Error: Subject cannot be empty.") # Should not happen with new logic
-        return
-
-    if tags:
-        command.extend(['--tags', tags])
-    if notes:
-        command.extend(['--notes', notes])
-
-    try:
-        print(f"Adding '{pdf_path}' to Report-Generator...")
-        result = subprocess.run(command, check=True, capture_output=True, text=True)
-        print(result.stdout)
-        print(f"Successfully added '{pdf_path}' to the Report-Generator database.")
-    except subprocess.CalledProcessError as e:
-        print(f"Error calling Report-Generator CLI for '{pdf_path}':")
-        print(e.stderr)
-    except Exception as e:
-        print(f"An unexpected error occurred: {e}")
 
 def _process_question_info(q, i):
 
@@ -148,6 +107,33 @@ def process_test(test_id, test_name, test_mapping_id, args):
 
         WRONG_Q_DIR = "wrong_questions"
         UNATTEMPTED_Q_DIR = "unattempted_questions"
+        
+        # NEW: JSON Export Logic
+        if args.json_export:
+            questions_json = []
+            for info in wrong_q_info + unattempted_q_info:
+                questions_json.append({
+                    "question_number": info.get('question_number', ''),
+                    "image_url": info.get('link', ''),
+                    "status": info.get('status', '').lower(),
+                    "marked_solution": info.get('marked_solution', ''),
+                    "correct_solution": info.get('actual_solution', ''),
+                    "subject": info.get('subject', ''),
+                    "time_taken": int(info['time_taken']) if str(info.get('time_taken', '')).isdigit() else 0
+                })
+            
+            json_file = export_to_json_v3(
+                test_id, test_name, test_mapping_id,
+                questions_json, args
+            )
+            
+            if args.send_to_api:
+                send_to_report_generator(json_file, args.api_url)
+            
+            # Skip PDF generation and local image cleanup if exporting to JSON
+            return
+
+        # Original PDF generation logic (only executed if not json_export)
         os.makedirs(WRONG_Q_DIR, exist_ok=True)
         os.makedirs(UNATTEMPTED_Q_DIR, exist_ok=True)
 
@@ -166,14 +152,10 @@ def process_test(test_id, test_name, test_mapping_id, args):
         if wrong_q_info:
             pdf_filename = f"{test_name}_WRONG.pdf"
             create_a4_pdf_from_images(wrong_q_info, WRONG_Q_DIR, pdf_filename, args.images_per_page, args.orientation, args.grid_rows, args.grid_cols)
-            if args.final:
-                add_to_report_generator(pdf_filename, subject, all_tags, args.notes)
 
         if unattempted_q_info:
             pdf_filename = f"{test_name}_UNATTEMPTED.pdf"
             create_a4_pdf_from_images(unattempted_q_info, UNATTEMPTED_Q_DIR, pdf_filename, args.images_per_page, args.orientation, args.grid_rows, args.grid_cols)
-            if args.final:
-                add_to_report_generator(pdf_filename, subject, all_tags, args.notes)
 
     except Exception as e:
         print(f"An error occurred while processing test {test_id}: {e}")
@@ -190,6 +172,11 @@ def main():
     parser.add_argument("--orientation", type=str, default='portrait', help="Orientation of the PDF pages (portrait or landscape).")
     parser.add_argument("--grid_rows", type=int, help="Number of rows in the grid.")
     parser.add_argument("--grid_cols", type=int, help="Number of columns in the grid.")
+    parser.add_argument("--json_export", action='store_true', help='Export as JSON v3.0 instead of generating PDF.')
+    parser.add_argument("--send_to_api", action='store_true', help='Send JSON to Report-Generator API.')
+    parser.add_argument("--api_url", type=str, default='http://localhost:1302/json_upload_v3', help='Report-Generator API endpoint.')
+    parser.add_argument("--auto_generate", action='store_true', help='Auto-generate PDF on Report-Generator (set view=true in JSON).')
+    parser.add_argument("--output_dir", type=str, help='Directory to save the JSON file when using --json_export.')
     parser.add_argument("--final", action='store_true', help="Add the generated PDF(s) to the Report-Generator database.")
     parser.add_argument('--subject', type=str, help='Subject for the PDF. Defaults to the test name.')
     parser.add_argument('--tags', type=str, help='Comma-separated tags for the PDF.')
@@ -199,7 +186,7 @@ def main():
     args = parser.parse_args()
 
     all_test_data = Endpoint(
-        url="https://api.penpencil.co/v3/test-service/tests?testType=All&testStatus=All&attemptStatus=All&batchId=678b4cf5a3a368218a2b16e7&isSubjective=false&isPurchased=true&testCategoryIds=6814be5e9467bd0a54703a94",
+        url="https://api.penpencil.co/v3/test-service/tests?testType=All&testStatus=All&attemptStatus=All&batchId=678b4cf5a3a368218a2b16e7&isSubjective=false&isPurchased=true&testCategoryIds=6814be5e9467bd0a54703a94&limit=50",
         headers=ScraperModule.batch_api.DEFAULT_HEADERS
     ).fetch()
     debugger.var([[data.get('name',""),data.get('testStudentMappingId',"")] for data in all_test_data[0]['data']])
