@@ -110,3 +110,28 @@ This script is a powerful tool for inspecting the contents of a batch. It can di
     ```bash
     python list_subjects.pwdl.py --batch <batch-slug> --latest --export csv
     ```
+
+## Web API Endpoints
+
+The Flask web UI backend exposes several RESTful API endpoints. Here are some of the key ones available.
+
+### Standalone MPD Generator (for Frontend Players)
+
+This endpoint solves the challenge of playing DRM-protected content in frontend video players by generating a backend-independent DASH manifest (`.mpd`).
+
+**Endpoint:**
+`GET /api/v2/standalone/lecture/<batch_name>/<id>/master.mpd`
+
+**Functionality:**
+
+When called, this endpoint performs the following actions on-the-fly:
+1.  Fetches the original lecture manifest and decryption keys from the source.
+2.  Generates a **ClearKey** PSSH (Protection System Specific Header) box containing the decryption KID and KEY.
+3.  Injects a W3C-standard `<ContentProtection>` element into the manifest, embedding the ClearKey data.
+4.  Rewrites all video/audio segment URLs to include the short-lived CloudFront access signatures.
+
+**Use Case:**
+
+The resulting `.mpd` file can be loaded directly into any modern web-based DASH player that supports ClearKey (such as dash.js or Shaka Player). The player can then download segments directly from CloudFront using the included signatures and decrypt them in the browser using the embedded keys.
+
+This eliminates the need for a backend proxy for video segments and resolves potential CORS issues, significantly simplifying frontend player integration.
