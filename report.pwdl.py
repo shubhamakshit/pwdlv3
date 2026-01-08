@@ -89,18 +89,21 @@ def process_test(test_id, test_name, test_mapping_id, args):
         # --- Fetch Data ---
         print("Fetching test data...")
         test_data = ScraperModule.batch_api.get_test(test_id)
-        result_data = Endpoint(
-            url=f"https://api.penpencil.co/v3/test-service/tests/693be340127c96838a44d21f/my-result?testId={test_id}&testMappingId={test_mapping_id}",
-            headers=ScraperModule.batch_api.DEFAULT_HEADERS,
+        
+        try:
+            result_data = Endpoint(
+                url=f"https://api.penpencil.co/v3/test-service/tests/{test_id}/my-result?testId={test_id}&testMappingId={test_mapping_id}",
+                headers=ScraperModule.batch_api.DEFAULT_HEADERS,
+            ).fetch()[0]
+            if result_data.get('success') and 'data' in result_data:
+                Global.hr()
+                print("\n"*3)
+                debugger.info("RANK\t"+str(result_data['data'].get('rank', 'N/A')))
+                print("\n"*3)
+                Global.hr()
+        except Exception as re:
+            debugger.error(f"Could not fetch rank/result data: {re}")
 
-
-        ).fetch()[0]
-        Global.hr()
-        print("\n"*3)
-        debugger.info("RANK\t"+str(result_data['data']['rank']))
-        print("\n"*3)
-        Global.hr()
-        #sys.exit(0)
         if not test_data or not test_data.data:
             print("Could not fetch test data.")
             return
@@ -189,7 +192,7 @@ def main():
     parser.add_argument("--grid_cols", type=int, help="Number of columns in the grid.")
     parser.add_argument("--json_export", action='store_true', help='Export as JSON v3.0 instead of generating PDF.')
     parser.add_argument("--send_to_api", action='store_true', help='Send JSON to Report-Generator API.')
-    parser.add_argument("--api_url", type=str, default='http://localhost:1302/json_upload_v3', help='Report-Generator API endpoint.')
+    parser.add_argument("--api_url", type=str, default='https://jaimodiji-report-generator.hf.space/json_upload_v3', help='Report-Generator API endpoint.')
     parser.add_argument("--auto_generate", action='store_true', help='Auto-generate PDF on Report-Generator (set view=true in JSON).')
     parser.add_argument("--output_dir", type=str, help='Directory to save the JSON file when using --json_export.')
     parser.add_argument("--final", action='store_true', help="Add the generated PDF(s) to the Report-Generator database.")
@@ -200,8 +203,11 @@ def main():
     parser.add_argument('--force', action='store_true', help='Force processing even if report already exists (used with --all).')
     args = parser.parse_args()
 
-    old_api_url = "https://api.penpencil.co/v3/test-service/tests?testType=All&testStatus=All&attemptStatus=All&batchId=678b4cf5a3a368218a2b16e7&isSubjective=false&isPurchased=true&testCategoryIds=6814be5e9467bd0a54703a94"
-    new_api_url = "https://api.penpencil.co/v3/test-service/tests?testType=All&testStatus=All&attemptStatus=All&batchId=68d626499dfdb652ac3ea3df&isSubjective=false&categoryId=68d654f20b83f446958276c6&categorySectionId=Other_Tests&isPurchased=true&testCategoryIds=68d654f20b83f446958276c6"
+    if args.send_to_api:
+        args.json_export = True
+
+    new_api_url = "https://api.penpencil.co/v3/test-service/tests?testType=All&testStatus=All&attemptStatus=All&batchId=678b4cf5a3a368218a2b16e7&isSubjective=false&isPurchased=true&testCategoryIds=6814be5e9467bd0a54703a94"
+    #new_api_url = "https://api.penpencil.co/v3/test-service/tests?testType=All&testStatus=All&attemptStatus=All&batchId=68d626499dfdb652ac3ea3df&isSubjective=false&categoryId=68d654f20b83f446958276c6&categorySectionId=Other_Tests&isPurchased=true&testCategoryIds=68d654f20b83f446958276c6"
 
     all_test_data = Endpoint(
         url=new_api_url,
