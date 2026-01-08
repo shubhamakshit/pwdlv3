@@ -42,4 +42,4 @@ if not exist "%MP4DECRYPT%" (
 @REM )
 
 REM Run the Python script with the provided arguments
-py "%~dp0pwdl.py" %*
+python "%~dp0pwdl.py" %*
